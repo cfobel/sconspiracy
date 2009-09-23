@@ -30,12 +30,13 @@ comments['.hxx'] = comments['.cpp']
 comments['.py'] = comments['.py']
 
 ignore_lines = ['vim:', 'utf8', 'UTF8']
-
+licence['begin'] = '***** BEGIN LICENSE BLOCK *****'
+licence['end']   = '****** END LICENSE BLOCK ******'
 licence['newbegin'] = '***** BEGIN LICENSE BLOCK *****'
 licence['newend']   = '****** END LICENSE BLOCK ******'
 
 licence['LGPL'] = """FW4SPL - Copyright (C) IRCAD, 2009.
-Distributed under the terms of the GNU Lesser General Public License (LGPL) as 
+Distributed under the terms of the GNU Lesser General Public License (LGPL) as
 published by the Free Software Foundation.  """
 
 licence['BSD'] = """Sconspiracy - Copyright (C) IRCAD, 2004-2009.
@@ -131,7 +132,7 @@ def licencify_dirs(dirs, content):
 
 def main():
     import sys
-    licencify_dirs(sys.argv[1:], licence['BSD'])
+    licencify_dirs(sys.argv[1:], licence['LGPL'])
 
 if __name__ == "__main__":
     main()

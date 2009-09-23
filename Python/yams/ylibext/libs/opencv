@@ -1,0 +1,25 @@
+# vim:filetype=python
+
+@register
+class OpenCV(LibExt):
+    register_names = ['opencv']
+
+    version = '1.1.0'
+
+    libs    = [
+               'cv',
+               'cxcore',
+               'highgui',
+              ]
+
+    cpppath = [
+               ('include','OpenCV'),
+               ('include','OpenCV','cxcore'),
+               ('include','OpenCV','ml'),
+               ('include','OpenCV','highgui'),
+               ('include','OpenCV','cvaux'),
+               ('include','OpenCV','cv'),
+              ]
+
+    debug_suffix   = ""
+

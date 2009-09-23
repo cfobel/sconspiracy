@@ -1,0 +1,18 @@
+# vim:filetype=python
+
+@register
+class UUID(LibExt):
+    register_names = ['uuid']
+
+    version = '1.2'
+
+    libs           = ['uuid']
+
+    debug_suffix   = ""
+
+    def windows(self):
+        self.version = '4'
+        self.libs = ['Rpcrt4']
+
+    def darwin(self):
+        self.libs = []

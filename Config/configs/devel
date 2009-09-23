@@ -1,0 +1,4 @@
+# -*- coding: UTF8 -*-
+# vim:filetype=python
+
+DEF           += ['_USE_BOOST_REGEX']

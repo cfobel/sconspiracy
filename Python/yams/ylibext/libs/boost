@@ -1,0 +1,85 @@
+# vim:filetype=python
+
+class Boost(LibExt):
+    register_names = []
+
+    cppdefines     = ['BOOST_ALL_DYN_LINK']
+
+    boost_libs = [ 
+        'date_time',
+        'filesystem',
+        'iostreams',
+        'program_options',
+        'regex',
+        'serialization',
+        'signals',
+        'system',
+        'thread',
+        'wserialization',
+#        'graph',
+#        'prg_exec_monitor',
+#        'unit_test_framework',
+#        'wave',
+        ]
+
+    prefix = 'boost_'
+    suffix = None
+
+    debug_suffix   = "-d"
+
+    @property
+    def libs(self):
+        pre = self.prefix
+        suf = self.suffix
+        libs = [pre + elem + suf for elem in self.boost_libs]
+        return libs
+
+    def init(self):
+        if self.debug:
+            self.cppdefines += ['BOOST_LIB_DIAGNOSTIC']
+
+    def windows(self):
+        self.cpppath    = []
+        self.boost_libs = []
+
+
+
+
+def getBoostVersion(vers, 
+        linux_prefix = None, darwin_prefix = None,
+        is_default = False):
+
+    class BoostGenerated(Boost):
+        register_names = ['boost'+vers]
+
+        version = vers
+
+        if is_default:
+            register_names += ['boost']
+
+        cpppath = [('include','boost-{0}'.format(vers))]
+        
+        if linux_prefix:
+            def linux(self):
+                self.suffix = linux_prefix
+
+        if darwin_prefix:
+            def darwin(self):
+                self.suffix = darwin_prefix
+
+    BoostGenerated.__name__ = 'Boost' + vers.replace('-','')
+    return BoostGenerated
+
+
+versions = (
+            ('1_38', '-gcc43-mt{debug}-1_38', '-gcc42-mt{debug}-1_38'),
+            ('1_37', None                   , '-gcc42-mt{debug}-1_37'),
+           )
+
+default = '1_38'
+
+
+for v in versions:
+    register(getBoostVersion( *v, is_default = v[0] == default ))
+
+

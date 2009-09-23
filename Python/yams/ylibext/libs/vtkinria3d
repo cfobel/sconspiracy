@@ -1,0 +1,25 @@
+# vim:filetype=python
+
+@register
+class VtkInria3D(LibExt):
+    register_names = ['vtkinria3d']
+
+    version = '1.0'
+
+    libs = [
+            'wxVtk',
+#            'vtkRenderingAddOn',
+            'vtkDataManagement',
+            'wxAddOn',
+            'vtkVisuManagement'
+            ]
+
+    cpppath        = [('include','vtkinria3d')]
+
+    debug_suffix   = "_D"
+
+    def preconfigure(self, env, opts):
+        if 'wxonly' in opts:
+            self.libs = ['wxAddOn']
+
+

@@ -1,0 +1,41 @@
+# vim:filetype=python
+
+@register
+class GDCM2(LibExt):
+    register_names = ['gdcm2']
+
+    version = '2.0'
+
+    libs = [
+            'gdcmCommon',
+            'gdcmDICT',
+            'gdcmDSED',
+            'gdcmIOD',
+            'gdcmMSFF',
+#           'gdcmexpat',
+            'gdcmjpeg12',
+            'gdcmjpeg16',
+            'gdcmjpeg8',
+            'gdcmopenjpeg',
+            'gdcmuuid',
+#           'gdcmzlib',
+            'vtkgdcm',
+            ]
+
+    cpppath = [('include','gdcm-2.0')]
+
+    debug_suffix   = ""
+
+    def windows(self):
+        self.libs=['gdcmCommon','gdcmDICT','gdcmDSED','gdcmIOD',
+        'gdcmMSFF','gdcmexpat','gdcmjpeg12','gdcmjpeg16',
+        'gdcmjpeg8','gdcmopenjpeg','gdcmzlib','vtkgdcm']
+        
+        self.cpppath = [('include','gdcm-2.1')]
+
+        self.version = '2.1'
+
+    def darwin(self):
+        self.cpppath = [('include','gdcm-2.1')]
+        self.version = '2.1'
+

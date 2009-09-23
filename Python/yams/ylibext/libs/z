@@ -1,0 +1,13 @@
+# vim:filetype=python
+
+@register
+class Z(LibExt):
+    register_names = ['z']
+    version = '1.2.3'
+    libs = ['z',]
+    cpppath = [ ('include',) ]
+
+
+
+
+

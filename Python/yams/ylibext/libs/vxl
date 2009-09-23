@@ -1,0 +1,32 @@
+# vim:filetype=python
+
+@register
+class vxl(LibExt):
+    register_names = ['vxl']
+
+    version = '1.11'
+
+    libpath = [('lib','vxl')]
+    libs    = [
+               'vnl_xio',
+               'vnl_io',
+               'vnl_algo',
+               'vnl',
+               'vgl_xio',
+               'vgl_io',
+               'vgl_algo',
+               'vgl',
+               'vcl',
+               'v3p_netlib',
+               'netlib'
+               ]
+
+    cpppath  = [
+                ('include','vxl'),
+                ('include','vxl','vcl'),
+                ('include','vxl','core'),
+               ]
+
+
+    debug_suffix   = ""
+

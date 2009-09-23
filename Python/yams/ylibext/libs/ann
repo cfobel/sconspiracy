@@ -1,0 +1,33 @@
+# vim:filetype=python
+
+@register
+class Ann(LibExt):
+    register_names = ['ann']
+
+    version = '1.1.1'
+
+#    libpath        = []
+    libs           = ['ANN']
+
+    cpppath        = [('include','ANN')]
+#    cppdefines     = []
+
+#    frameworkpath  = []
+#    frameworks     = []
+
+#    parseconfigs   = []
+
+    debug_suffix   = ""
+
+#    def init(self):
+#        pass
+
+#    def linux(self):
+#        pass
+
+#    def darwin(self):
+#        pass
+
+#    def windows(self):
+#        pass
+

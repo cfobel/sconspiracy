@@ -1,0 +1,33 @@
+# vim:filetype=python
+
+@register
+class OpenIL(LibExt):
+    register_names = ['openilu','openil']
+
+    version = '1.7.7'
+
+#    libpath        = []
+    libs           = ['ILU','IL']
+
+#    cpppath        = []
+#    cppdefines     = []
+
+#    frameworkpath  = []
+#    frameworks     = []
+
+#    parseconfigs   = []
+
+    debug_suffix   = ""
+
+#    def init(self):
+#        pass
+
+#    def linux(self):
+#        pass
+
+#    def darwin(self):
+#        pass
+
+#    def windows(self):
+#        pass
+

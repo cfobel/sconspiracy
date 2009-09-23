@@ -1,0 +1,115 @@
+# -*- coding: UTF8 -*-
+# vim:filetype=python
+
+import os
+
+import SCons
+
+import yams
+import yams.ylog as ylog
+
+EnsureSConsVersion(1, 2, 0)
+EnsurePythonVersion(2, 6)
+
+# Empty the Default tools list, avoid useless lookup into it.  
+# Speed up about a few seconds
+###############################################################################
+SCons.Defaults.DefaultEnvironment(tools = [])
+
+try:
+
+    yams.yenv.register_env()
+    yams.load_plugins()
+    yams.yenv.check_env()
+
+    env = yams.yenv.get_scons_env(tools=['default', 'packaging'])
+except yams.YamsException, e:
+    yams.print_error(e.__class__.__name__, e)
+    exit(1)
+
+
+###########################################################################
+hosts = {                                                                 #
+#        'vincent-i7' : ('192.168.3.24', '8' ), #vincent-i7               #
+#        'julien-i7'  : ('192.168.3.10', '8' ), #julien-i7                #
+#        'arnaud-i7'  : ('192.168.3.26', '8' ), #arnaud-i7                #
+#        'nicolas-i7' : ('192.168.3.23', '8' ), #nicolas-i7               #
+        }                                                                 #
+                                                                          #
+distcc_dir = '/usr/lib/distcc'                                            #
+                                                                          #
+if hosts and os.path.isdir(distcc_dir):                                   #
+    e = env['ENV']                                                        #
+    env.PrependENVPath('PATH',distcc_dir)                                 #
+    e['DISTCC_HOSTS'] = ' '.join(['/'.join(el) for el in hosts.values()]) #
+    e['DISTCC_DIR']   = os.path.expanduser('~/.distcc')                   #
+                                                                          #
+    for h in hosts.keys():                                                #
+        ylog.info.log("Use distcc hosts", h)                              #
+                                                                          #
+    num_jobs = sum(int(n) for ip,n in hosts.values())                     #
+                                                                          #
+    env.SetOption('num_jobs', num_jobs)                                   #
+                                                                          #
+###########################################################################
+
+ylog.info.log("Debug mode"  , yams.yenv.options.get_option('DEBUG'))
+ylog.info.log("Nb jobs", env.GetOption('num_jobs'))
+
+
+ylog.info.log('YAMS_CONFIG_DIR' , yams.yenv.dirs.config )
+ylog.info.log('YAMS_BUILD_DIR'  , yams.yenv.dirs.build  )
+ylog.info.log('YAMS_INSTALL_DIR', yams.yenv.dirs.install)
+ylog.info.log('YAMS_LIBEXT_DIR' , yams.yenv.dirs.libext )
+ylog.info.log('YAMS_CODE_DIRS'  , yams.yenv.dirs.code   )
+
+yams.print_msg(ylog.info)
+
+
+import atexit
+def bf_to_str(bf):
+    """Convert an element of GetBuildFailures() to a string
+    in a useful way."""
+    import SCons.Errors
+    if bf is None: # unknown targets product None in list
+        return '(unknown tgt)'
+    elif isinstance(bf, SCons.Errors.StopError):
+        return str(bf)
+    elif bf.node:
+        return str(bf.node) + ': ' + bf.errstr
+    elif bf.filename:
+        return bf.filename + ': ' + bf.errstr
+    return 'unknown failure: ' + bf.errstr
+
+def build_status():
+    """Convert the build status to a 2-tuple, (status, msg)."""
+    from SCons.Script import GetBuildFailures
+    bf = GetBuildFailures()
+    if bf:
+        # bf is normally a list of build failures; if an element is None,
+        # it's because of a target that scons doesn't know anything about.
+        status = 'failed'
+        failures_message = "\n".join(["Failed building %s" % bf_to_str(x)
+                            for x in bf if x is not None])
+    else:
+        # if bf is None, the build completed successfully.
+        if yams.errors:
+            status = 'failed'
+        else:
+            status = 'ok'
+        failures_message = ''
+    return (status, failures_message)
+
+import atexit
+@atexit.register
+def display_build_status():
+    """Display the build status.  Called by atexit.
+    Here you could do all kinds of complicated things."""
+    status, failures_message = build_status()
+    if status == 'failed':
+        print "Build failled"
+
+    print failures_message
+    if status == 'ok':
+        print 'Yams done.'
+

@@ -1,0 +1,16 @@
+# -*- coding: UTF8 -*-
+# vim:filetype=python
+
+import yams.yenv.configs.default
+
+def copy_vars(src_mod, dst):
+    match = yams.yenv.configs.default.opt_name_regex.match
+    d = dict((el,getattr(src_mod,el)) for el in dir(src_mod) if match(el))
+
+    import copy
+    dst.update(copy.deepcopy(d))
+
+copy_vars(yams.yenv.configs.default, locals())
+del copy_vars
+
+

@@ -1,0 +1,15 @@
+# -*- coding: UTF8 -*-
+# vim:filetype=python
+
+DEBUG        = 'release'
+
+# LOGLEVEL : info, warning, trace ...
+LOGLEVEL      = 'warning'
+
+USEVISIBILITY = 'no'
+
+DEF = []
+# ...
+
+ALLOW_USER_OPTIONS = False
+OVERRIDE_PROJECT_VALUE['LOGLEVEL'] = LOGLEVEL

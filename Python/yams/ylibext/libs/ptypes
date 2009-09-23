@@ -1,0 +1,16 @@
+# vim:filetype=python
+
+@register
+class ptypes(LibExt):
+    register_names = ['ptypes']
+
+    version = '2.1.1'
+
+    libs           = ['ptypes']
+
+    debug_suffix   = ""
+
+    def windows(self):
+        self.libs = ['ptypes21']
+
+

@@ -1,0 +1,112 @@
+# vim:filetype=python
+
+@register
+class Vtk(LibExt):
+    register_names = ['vtk']
+
+    version = '5.4'
+
+    libs = [
+            'vtkCommon',
+            'vtksys',
+            'vtkFiltering',
+            'vtkIO',
+            'vtkNetCDF',
+            'vtksqlite',
+            'vtkDICOMParser',
+            'vtkmetaio',
+            'vtkGraphics',
+            'vtkverdict',
+            'vtkGenericFiltering',
+            'vtkImaging',
+            'vtkRendering',
+            'vtkfreetype',
+            'vtkftgl',
+            'vtkVolumeRendering',
+            'vtkHybrid',
+            'vtkexoIIc',
+            #'vtkParallel',
+            'vtkWidgets',
+            'vtkInfovis',
+            'vtkalglib',
+            'vtkGeovis',
+            'vtkproj4',
+            'vtkViews',
+            ]
+
+    extra_libs = [
+            'dl',
+            'pthread',
+            'm',
+            ]
+
+    cxxflags = [
+            '-Wno-deprecated'
+            ]
+
+    cpppath = [ ('include','vtk'), ]
+
+    debug_suffix   = "_D"
+
+    def darwin(self):
+        self.extra_libs += ['iconv']
+
+    def windows(self):
+        self.cxxflags = []
+        self.libs = [
+            'vtkCommon',
+            'vtkFiltering',
+            'vtkIo',
+            'vtkGraphics',
+            'vtkGenericFiltering',
+            'vtkImaging',
+            'vtkRendering',
+            'vtkVolumeRendering',
+            'vtkHybrid',
+            'vtkWidgets',
+            'vtkInfovis',
+            'vtkGeovis',
+            'vtkViews',
+            
+            'vtksys',
+            'vtkproj4',
+            'vtkverdict',
+            'vtkexoIIc',
+            'vtkNetCDF',
+            'vtkmetaio',
+            'vtksqlite',
+            'vtkpng',
+            'vtkzlib',
+            'vtkjpeg',
+            'vtktiff',
+            'vtkexpat',
+            'vtklibxml2',
+            'vtkalglib',
+            'vtkftgl',
+            'vtkfreetype',
+            ]
+            
+        self.extra_libs = [
+            'wsock32',
+            'vfw32',
+            'opengl32',
+            'kernel32.lib',
+            'user32.lib',
+            'gdi32.lib',
+            'winspool.lib',
+            'comdlg32.lib',
+            'advapi32.lib',
+            'shell32.lib',
+            'ole32.lib',
+            'oleaut32.lib',
+            'uuid.lib',
+            'odbc32.lib',
+            'odbccp32.lib',
+            'ws2_32',
+            'comctl32',
+            ]
+
+
+
+
+

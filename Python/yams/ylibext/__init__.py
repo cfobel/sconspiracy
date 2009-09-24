@@ -179,12 +179,12 @@ def configure(prj, lib, opts = []):
 configure.configured = {}
 
 
-try:
-    import libs
-    load_libext(libs.__path__)
-    del libs
-except ImportError:
-    pass
+#try:
+    #import libs
+    #load_libext(libs.__path__)
+    #del libs
+#except ImportError:
+    #pass
 
 try:
     load_binpkgs(yams.yenv.dirs.binpkg)

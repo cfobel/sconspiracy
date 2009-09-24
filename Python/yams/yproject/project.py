@@ -896,11 +896,11 @@ class ConstructibleYamsProject(InstallableYamsProject):
         CPPPATH += list(prj.deps_include_path) + prj.get('INC')
         
         LIBPATH  = prj.get('STDLIBPATH')
-        #LIBPATH += [ self.env.Dir(lib.build_dir) for lib in prj.lib_rec_deps ]
-        LIBPATH += [ self.env.Dir(lib.build_dir) for lib in prj.source_libs_deps]
 
-        #LIBS = [ lib.full_name for lib in prj.lib_rec_deps ]
-        LIBS = [ lib.full_name for lib in prj.source_libs_deps ]
+        lib_dep = prj.lib_rec_deps if self.is_exec else prj.source_libs_deps
+        LIBPATH += [ self.env.Dir(lib.build_dir) for lib in lib_dep]
+
+        LIBS = [ lib.full_name for lib in lib_dep ]
 
         if yenv.system() != 'linux':
             LIBPATH += [ lib.build_dir for lib in prj.source_bundles_deps ]

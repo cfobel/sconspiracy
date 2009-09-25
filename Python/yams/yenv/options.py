@@ -246,8 +246,9 @@ class Paths(object):
             ckres = res
         for p in ckres:
             if not os.path.isdir(p):
-                msg = '{0}={1} is not a dir.'.format(vn,p)
-                raise yams.EnvError, msg
+                msg = '{0}="{1}" is not a dir.'.format(vn,p)
+                yams.print_warning('Environment warning',msg)
+                #raise yams.EnvError, msg
 
         if yutils.is_iterable(res):
             return [os.path.abspath(p) for p in res]

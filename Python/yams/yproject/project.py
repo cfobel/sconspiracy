@@ -899,7 +899,6 @@ class ConstructibleYamsProject(InstallableYamsProject):
 
         lib_dep = prj.lib_rec_deps if self.is_exec else prj.source_libs_deps
         LIBPATH += [ self.env.Dir(lib.build_dir) for lib in lib_dep]
-
         LIBS = [ lib.full_name for lib in lib_dep ]
 
         if yenv.system() != 'linux':

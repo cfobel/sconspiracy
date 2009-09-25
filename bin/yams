@@ -172,7 +172,8 @@ if __name__ == "__main__":
 
     sys.path.append(yams_python_dir)
     
-    config_dir = os.environ.get('YAMS_CONFIG_DIR','~/.Yams')
+    config_dir = os.environ.get('YAMS_CONFIG_DIR',
+                                os.path.expanduser('~/.Yams'))
     os.environ['YAMS_CONFIG_DIR'] = (config_dir 
             if os.path.isdir(config_dir) else yams_config_dir)
         

@@ -9,33 +9,20 @@ CONFIG = 'devel'
 #LOGLEVEL        = 'warning'
 
 if yams.yenv.system() == 'linux':
-#    DEBUG  = 'full'
-#    CONFIG = 'devel'
-#    LOGLEVEL        = 'warning'
-
-    yams_root = '~/DEV/'
+    dev_dir = '~/DEV/'
 
 elif yams.yenv.system() == 'darwin':
-#    CONFIG = 'devel'
-#    DEBUG  = 'full'
-#    LOGLEVEL        = 'warning'
-
-    yams_root = '/Volumes/Development/'
+    dev_dir = '~/DEV/'
 
 elif yams.yenv.system() == 'windows':
-#    CONFIG = 'devel'
-#    DEBUG  = 'full'
-#    LOGLEVEL        = 'warning'
-
     MSVS_VERSION = "7.1"
+    dev_dir = 'C:/DEV'
 
-    yams_root = 'D:/'
-
-YAMS_BUILD_DIR   = yams_root + 'BuildDir'
-YAMS_INSTALL_DIR = yams_root + 'CommonLib'
-YAMS_LIBEXT_DIR  = yams_root + 'CommonLibExt_'
-YAMS_BINPKGS_DIR = yams_root + 'BinPkgs'
-YAMS_CODE_DIRS   = [yams_root + 'yamsCode']
+from os.path import join
+YAMS_BUILD_DIR   = join(dev_dir, 'BuildDir')
+YAMS_INSTALL_DIR = join(dev_dir, 'InstallDir')
+YAMS_BINPKGS_DIR = join(dev_dir, 'BinPkgs')
+YAMS_CODE_DIRS   = [join(dev_dir, 'Src')]
 
 # ...
 

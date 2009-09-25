@@ -226,7 +226,7 @@ Option file
 
 |begintblock| build.options |endtitletblock|
 
-- This file is in prj_path/bin dir
+- This file is in :path:`prj_path/bin` dir
 - Set project options, is compatible with the previous yams version
 - Is a python script : any python module is usable
 - An example is available in :path:`<somewhere>/Config`
@@ -293,7 +293,9 @@ By project configs
 - Overrides project's build.options file
 - Have the same properties than build.options file
 - Are available in :path:`prj_path/bin/configs`
-- Are selected with "@config" special attribute global option
+- Are selected with "@config" special attribute global option or automatically
+  choosed in project's configurations following global's CONFIG option if the
+  requested config is available
 - Example : :command:`yams fwData/@crypto`
 
 

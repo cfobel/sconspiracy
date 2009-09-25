@@ -1,0 +1,9 @@
+syntax: glob
+
+.*.swp
+*.pyc
+.DS_Store
+
+Config/*.options
+.sconsign.dblite
+

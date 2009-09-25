@@ -112,6 +112,7 @@ def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
             src = linktarget
 
         action = os.symlink
+        if os.path.exists(dst): os.unlink(dst)
     else:
         action = shutil.copy
 

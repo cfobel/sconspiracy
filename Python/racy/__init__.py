@@ -181,11 +181,17 @@ def print_error(title, error, wrap=True):
 def print_warning(title, warning, wrap=True):
     print (os.linesep.join(racy_msg('Warning', title, warning, wrap)))
 
-def manage_exception(e):
+def get_last_exception_traceback():
+    import traceback
+    import sys
+    err, detail, tb = sys.exc_info()
+    tb = os.linesep*2 + ''.join(traceback.format_tb(tb))
+    return tb
+
+def manage_exception(e, default_print = print_error):
     from renv.options import get_option
     if get_option('RACY_DEBUG') == 'yes':
-        import traceback
-        print_msg (os.linesep.join(traceback.format_list(e.traceback[:-1])))
+        print_msg(get_last_exception_traceback())
     print_error(e.__class__.__name__, e)
 
 

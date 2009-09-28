@@ -19,7 +19,7 @@ LOGLEVEL= {
 
 PRJ_OPT_DIR = 'bin'
 
-VCS_DIRS = ['CVS', '.svn']
+VCS_DIRS = ['CVS', '.svn', '.hg']
 
 LIBNAME_SEP = "_"
 

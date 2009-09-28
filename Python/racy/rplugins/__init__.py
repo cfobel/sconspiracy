@@ -111,6 +111,7 @@ class Plugin(object):
 
 
 
+d = dir
 
 class PluginRegistry(object):
 
@@ -127,7 +128,6 @@ class PluginRegistry(object):
         root, dirs, files = walker.next()
         racy.rutils.remove_vcs_dirs(dirs)
 
-        # TODO : display warnings about invalids plugins
         for dir in dirs:
             try:
                 fp, pathname, description = imp.find_module(dir, [root])
@@ -137,6 +137,11 @@ class PluginRegistry(object):
             try:
                 plugin = imp.load_module(dir, fp, pathname, description)
                 self.load_plugin(plugin)
+            except Exception, e:
+                tb = str(e) + os.linesep + ''.join(racy.get_last_exception_traceback())
+                msg = "Unable to load '{plug}' plugin : {err}".format(
+                        plug = dir, err=tb )
+                racy.print_warning('Plugin load', msg, wrap=False)
             finally:
                 if fp:
                     fp.close()

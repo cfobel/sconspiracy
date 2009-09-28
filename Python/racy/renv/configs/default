@@ -1,0 +1,16 @@
+# -*- coding: UTF8 -*-
+# vim:filetype=python
+
+import racy.renv.configs.default
+
+def copy_vars(src_mod, dst):
+    match = racy.renv.configs.default.opt_name_regex.match
+    d = dict((el,getattr(src_mod,el)) for el in dir(src_mod) if match(el))
+
+    import copy
+    dst.update(copy.deepcopy(d))
+
+copy_vars(racy.renv.configs.default, locals())
+del copy_vars
+
+

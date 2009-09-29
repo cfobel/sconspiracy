@@ -286,37 +286,34 @@ class Version(str):
     def __repr__(self):
         return self.normalized.join(["'", "'"])
 
-    def __cmp_error__(self, other):
-        msg = "Cannot compare <Version> object to <{0}>".format(type(other))
-        raise TypeError, msg
 
     def __lt__(self, other):
         if isinstance(other, Version):
             return self.to_tuple < other.to_tuple
-        self.__cmp_error__(other)
+        str.__lt__(self, other)
 
     def __le__(self, other):
         if isinstance(other, Version):
             return self.to_tuple <= other.to_tuple
-        self.__cmp_error__(other)
+        str.__le__(self, other)
 
     def __eq__(self, other):
         if isinstance(other, Version):
             return self.to_tuple == other.to_tuple
-        self.__cmp_error__(other)
+        str.__eq__(self, other)
 
     def __ne__(self, other):
         if isinstance(other, Version):
             return self.to_tuple != other.to_tuple
-        self.__cmp_error__(other)
+        str.__ne__(self, other)
 
     def __gt__(self, other):
         if isinstance(other, Version):
             return self.to_tuple > other.to_tuple
-        self.__cmp_error__(other)
+        str.__gt__(self, other)
 
     def __ge__(self, other):
         if isinstance(other, Version):
             return self.to_tuple >= other.to_tuple
-        self.__cmp_error__(other)
+        str.__ge__(self, other)
 

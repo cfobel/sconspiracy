@@ -21,8 +21,8 @@ elif racy.renv.system() == 'windows':
 from os.path import join
 RACY_BUILD_DIR   = join(dev_dir, 'BuildDir')
 RACY_INSTALL_DIR = join(dev_dir, 'InstallDir')
-RACY_BINPKGS_DIR = join(dev_dir, 'BinPkgs')
-RACY_CODE_DIRS   = [join(dev_dir, 'Src')]
+RACY_BINPKGS_DIR = join(dev_dir, 'BinPkgsDir')
+RACY_CODE_DIRS   = [join(dev_dir, 'SrcDir')]
 
 # ...
 

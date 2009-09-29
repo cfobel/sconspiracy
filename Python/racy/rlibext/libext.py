@@ -19,6 +19,8 @@ class LibExt(object):
 
     arch           = racy.renv.options.get_option('ARCH')
 
+    compiler       = None
+
     depends_on     = []
 
     basepath       = racy.renv.dirs.libext

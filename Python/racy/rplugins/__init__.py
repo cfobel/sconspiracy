@@ -163,7 +163,7 @@ class PluginRegistry(object):
 
                 libs = [os.path.join(dir, 'libs') for dir in plugin.__path__]
                 libs = [lib for lib in libs if os.path.isdir(lib)]
-                racy.rlibext.load_libext(libs)
+                racy.rlibext.register.load_libext(libs)
 
                 plug.__load__()
                 racy.rlog.info.log('Loaded Plugin', plug.name)

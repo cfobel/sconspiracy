@@ -164,7 +164,7 @@ class RacyProject(object):
                         )
 
         self._platform  = platform
-        self._compiler  = cxx
+        self._compiler  = rutils.Version(cxx)
         self._debug     = debug
         self._config    = config
 
@@ -461,7 +461,7 @@ class RacyProject(object):
         db = self.projects_db
         miss = [el for el in libnames if not db.has_key(el.register_name)]
 
-        miss = [el for el in miss if not rlibext.is_available(el)]
+        miss = [el for el in miss if not rlibext.register.is_available(el)]
 
         if miss :
             raise RacyProjectError(self,
@@ -975,8 +975,8 @@ class ConstructibleRacyProject(InstallableRacyProject):
         else:
             uses_opts = []
 
-        rlibext.configure(prj, rec_uses, opts=['nolink'])
-        rlibext.configure(prj, uses, opts=uses_opts)
+        rlibext.register.configure(prj, rec_uses, opts=['nolink'])
+        rlibext.register.configure(prj, uses, opts=uses_opts)
 
         env.Prepend(**self.options)
 

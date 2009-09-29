@@ -185,7 +185,7 @@ class RacyProjectsDB(object):
                     opts += ['pkg'] if buildpkg else []
                     res += p.install(opts = opts) 
 
-                for libext in racy.rlibext.configure.configured.values():
+                for libext in racy.rlibext.register.configured.values():
                     if hasattr(libext, '__src__'):
                         buildoptions = os.path.join(libext.__src__,
                             'bin','build.options')

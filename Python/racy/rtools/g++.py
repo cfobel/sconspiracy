@@ -106,6 +106,19 @@ def manage_options(env, prj, options):
                CXXFLAGS   = CXXFLAGS
                )
 
+    if get_option('PLATFORM') == constants.MACOSX:
+        if prj.is_bundle:
+            import os
+            libname = ''.join(['lib',prj.full_name,'.dylib'])
+            install_path = os.path.join('Bundles', prj.versioned_name, libname)
+            flags = [
+                    '-dynamic',
+                    '-nostartfiles',
+                    '-install_name', install_path,
+                    '-multiply_defined','suppress',
+                    ]
+            env.Append(SHLINKFLAGS = flags)
+
 
 ##             # FIXME : not sure that -pg is a POSIX option.
 ##             if env['DEBUG'] == 'full' :

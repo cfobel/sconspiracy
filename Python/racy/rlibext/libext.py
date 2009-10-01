@@ -58,6 +58,7 @@ class LibExt(object):
         else:
             self.basepath = getattr(infosource, 'basepath',
                                     infosource.__path__[0])
+        self.basepath = os.path.abspath(self.basepath)
 
         names = [
                 'register_names', 'depends_on'    ,

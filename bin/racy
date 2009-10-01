@@ -181,7 +181,9 @@ def main():
 
     import racy
     racy_module_path = os.path.dirname(racy.__file__)
-    sconstruct_file = os.path.join(racy_module_path, 'rc','SConstruct')
+    racy_rc_path     = os.path.join(racy_module_path, 'rc')
+    os.chdir(racy_rc_path)
+    sconstruct_file  = os.path.join(racy_rc_path,'SConstruct')
     sys.argv.insert(1,sconstruct_file)
     sys.argv.insert(1,'-f')
 

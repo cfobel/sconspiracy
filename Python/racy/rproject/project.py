@@ -773,7 +773,8 @@ class InstallableRacyProject(RacyProject):
                                             return_orig = True
                                             )
             def rmbo(L):
-                return [el for el in L if 'build.options' not in el]
+                return [os.path.abspath(el) 
+                        for el in L if 'build.options' not in el]
             sources_files = rmbo(sources_files)
             install_files = rmbo(install_files)
             result = env.CopyFile( install_files, source = sources_files )

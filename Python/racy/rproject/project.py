@@ -375,7 +375,7 @@ class RacyProject(object):
 
     @cached_property
     def versioned_name (self):
-        """Returns the versionned project name 
+        """Returns the versioned project name 
         Ex: fwData_0-1
         """
         return LibName.SEP.join([self.name, self.version.normalized])
@@ -383,7 +383,7 @@ class RacyProject(object):
 
     @cached_property
     def name_version_config (self):
-        """Returns the versionned project name with the configuration 
+        """Returns the versioned project name with the configuration 
         Ex: fwData_0-1_config.
         """
         items = [el for el in 

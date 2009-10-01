@@ -208,6 +208,7 @@ def get_option(opt, prj=None, default=None, option_value=Undefined, config=None)
 
 
 
+import constants
 
 class Paths(object):
     var_names = {
@@ -259,7 +260,12 @@ class Paths(object):
         def f1(self):
             return self.get_path(var)
         def f2(self):
-            return os.path.join(getattr(self,root), var)
+            import racy.renv as renv
+            alternatives = {
+                    'lib' : {constants.MACOSX : 'Libraries'}
+                    }
+            name = alternatives.get(var,{}).get(renv.platform(),var)
+            return os.path.join(getattr(self,root), name)
             
         f = f2 if root is not None else f1
         return f
@@ -273,11 +279,11 @@ class Paths(object):
 
     user_configs   = property(__get_var( 'configs', root='config' ))
 
-    install_doc    = property(__get_var( 'doc'     , root='install'))
     install_bin    = property(__get_var( 'bin'     , root='install'))
-    install_lib    = property(__get_var( 'lib'     , root='install'))
-    install_bundle = property(__get_var( 'Bundles' , root='install'))
     install_binpkg = property(__get_var( 'Pkgs'    , root='install'))
+    install_bundle = property(__get_var( 'Bundles' , root='install'))
+    install_doc    = property(__get_var( 'doc'     , root='install'))
+    install_lib    = property(__get_var( 'lib'     , root='install'))
     install_share  = property(__get_var( 'share'   , root='install'))
 
 

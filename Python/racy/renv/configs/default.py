@@ -88,13 +88,6 @@ DEPRECATED = {
     'TESTLIB'     : 'Use "CPPUNIT" instead, managed by cppunit plugin' ,
     }
 
-# DISTCC/CCACHE/SCONSCACHE
-# #PACK??
-# #RESRC?
-# DSP
-# USEGCH
-# USESTDAFX
-
 import re
 # Variable names :
 # * can contain any upcase Alphanumerical char or an underscore 

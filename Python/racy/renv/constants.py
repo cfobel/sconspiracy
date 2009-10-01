@@ -33,8 +33,8 @@ COMMON_DEBUG   = {
                  }
 
 
-INCLUDE_PATH = 'include'
 BIN_PATH     = 'bin'
+INCLUDE_PATH = 'include'
 LIB_PATH     = 'lib'
 RC_PATH      = 'rc'
 SOURCE_PATH  = 'src'

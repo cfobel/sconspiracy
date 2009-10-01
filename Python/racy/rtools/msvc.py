@@ -200,10 +200,71 @@ def _get_msvc8_default_paths(env, version, suite, use_mfc_dirs):
     exe_path = string.join(exe_paths, os.pathsep )
     return (include_path, lib_path, exe_path)
 
-msvc._get_msvc8_default_paths = _get_msvc8_default_paths
+def get_visualstudio8_suites(version="8.0"):
+    """
+    Returns a sorted list of all installed Visual Studio 2005 suites found
+    in the registry. The highest version should be the first entry in the list.
+    """
 
-###############################################################################
-### msvs patch
+    suites = []
+
+    # Detect Standard, Professional and Team edition
+    try:
+        idk = SCons.Util.RegOpenKeyEx(SCons.Util.HKEY_LOCAL_MACHINE,
+            r'Software\Microsoft\VisualStudio\\' + version)
+        SCons.Util.RegQueryValueEx(idk, 'InstallDir')
+        editions = { 'PRO': r'Setup\VS\Pro' }       # ToDo: add standard and team editions
+        edition_name = 'STD'
+        for name, key_suffix in editions.items():
+            try:
+                idk = SCons.Util.RegOpenKeyEx(SCons.Util.HKEY_LOCAL_MACHINE,
+                    r'Software\Microsoft\VisualStudio\\'+version + '\\' + key_suffix )
+                edition_name = name
+            except SCons.Util.RegError:
+                pass
+            suites.append(edition_name)
+    except SCons.Util.RegError:
+        pass
+
+    # Detect Express edition
+    try:
+        idk = SCons.Util.RegOpenKeyEx(SCons.Util.HKEY_LOCAL_MACHINE,
+            r'Software\Microsoft\VCExpress\\' + version)
+        SCons.Util.RegQueryValueEx(idk, 'InstallDir')
+        suites.append('EXPRESS')
+    except SCons.Util.RegError:
+        pass
+
+    return suites
+
+def get_default_visualstudio8_suite(env):
+    """
+    Returns the Visual Studio 2005 suite identifier set in the env, or the
+    highest suite installed.
+    """
+    if not env.has_key('MSVS') or not SCons.Util.is_Dict(env['MSVS']):
+        env['MSVS'] = {}
+
+    if env.has_key('MSVS_SUITE'):
+        # TODO(1.5)
+        #suite = env['MSVS_SUITE'].upper()
+        suite = string.upper(env['MSVS_SUITE'])
+        suites = [suite]
+    else:
+        suite = 'EXPRESS'
+        suites = [suite]
+        if SCons.Util.can_read_reg:
+            suites = get_visualstudio8_suites(env.get('MSVS_VERSION','8.0'))
+            if suites:
+                suite = suites[0] #use best suite by default
+
+    env['MSVS_SUITE'] = suite
+    env['MSVS']['SUITES'] = suites
+    env['MSVS']['SUITE'] = suite
+
+    return suite
+
+	
 def get_msvs_install_dirs(version = None, vs8suite = None):
     """
     Get installed locations for various msvc-related products, like the .NET SDK
@@ -227,7 +288,7 @@ def get_msvs_install_dirs(version = None, vs8suite = None):
         if vs8suite == None:
             # We've been given no guidance about which Visual Studio 8
             # suite to use, so attempt to autodetect.
-            suites = get_visualstudio8_suites()
+            suites = get_visualstudio8_suites(str(version_num))
             if suites:
                 vs8suite = suites[0]
 
@@ -393,4 +454,6 @@ def get_msvs_install_dirs(version = None, vs8suite = None):
     return rv
 
 msvs.get_msvs_install_dirs = get_msvs_install_dirs
-
+msvs.get_visualstudio8_suites = get_visualstudio8_suites
+msvs.get_default_visualstudio8_suite = get_default_visualstudio8_suite
+msvc._get_msvc8_default_paths = _get_msvc8_default_paths

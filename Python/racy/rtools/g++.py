@@ -110,9 +110,12 @@ def manage_options(env, prj, options):
         if prj.is_bundle or prj.is_shared:
             import os
             libname = ''.join(['lib',prj.full_name,'.dylib'])
-            dir = 'Bundles' if prj.is_bundle else 'Libraries'
-            install_path = os.path.join('@executable_path', '..', dir,
-                                                prj.versioned_name, libname)
+            if prj.is_bundle:
+                install_path = os.path.join('@executable_path', '..',
+                                        'Bundles', prj.versioned_name, libname)
+            else:
+                install_path = os.path.join('@executable_path', '..',
+                                        'Libraries', libname)
             flags = [
                     '-dynamic',
                     '-nostartfiles',
@@ -122,16 +125,3 @@ def manage_options(env, prj, options):
             env.Append(SHLINKFLAGS = flags)
 
 
-## ### # #Bundle/Shared
-## # 
-## # 
-## # #    if (env['TYPE']=='shared' or env['TYPE']=='bundle') and unittest == 0:
-## # #        installPath = ''
-## # #        if env['TYPE']=='bundle':
-## # #            installPath = '@executable_path/' + 'Bundles/' + myLibFinal.split('_')[0] + '_' + myLibFinal.split('_')[1] + '/lib' + myLibFinal + '.dylib'
-## # #            env.Append( LIBS = [ 'dl' ] )
-## # #        else:
-## # #            installPath = '@executable_path/' + 'Librairies/' + 'lib' + myLibFinal + '.dylib'
-## # #        env['LINKFLAGS']   += ' -dynamic -nostartfiles -dynamiclib -install_name ' + installPath
-## # #        env['SHLINKFLAGS'] += ' -multiply_defined suppress '
-## # #        env['SHLIBSUFFIX']  = '.dylib'

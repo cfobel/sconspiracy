@@ -119,7 +119,7 @@ class CppUnitProject(ConstructibleRacyProject):
 
     @run_once
     def configure_env(self):
-        racy.rlibext.configure(self, ['cppunit'])
+        racy.rlibext.register.configure(self, ['cppunit'])
 
         super(CppUnitProject, self).configure_env()
 

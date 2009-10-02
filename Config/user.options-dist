@@ -9,20 +9,20 @@ CONFIG = 'devel'
 #LOGLEVEL        = 'warning'
 
 if racy.renv.system() == 'linux':
-    dev_dir = '~/DEV/'
+    dev_dir = '~/DEV'
 
 elif racy.renv.system() == 'darwin':
-    dev_dir = '~/DEV/'
+    dev_dir = '~/DEV'
 
 elif racy.renv.system() == 'windows':
     MSVS_VERSION = "7.1"
     dev_dir = 'C:/DEV'
 
 from os.path import join
-RACY_BUILD_DIR   = join(dev_dir, 'BuildDir')
-RACY_INSTALL_DIR = join(dev_dir, 'InstallDir')
-RACY_BINPKGS_DIR = join(dev_dir, 'BinPkgsDir')
-RACY_CODE_DIRS   = [join(dev_dir, 'SrcDir')]
+RACY_BUILD_DIR   =  join(dev_dir, 'Build')
+RACY_INSTALL_DIR =  join(dev_dir, 'Install')
+RACY_BINPKGS_DIR =  join(dev_dir, 'BinPkgs')
+RACY_CODE_DIRS   = [join(dev_dir, 'Src')]
 
 # ...
 

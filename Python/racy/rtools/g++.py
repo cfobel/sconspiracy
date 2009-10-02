@@ -107,10 +107,12 @@ def manage_options(env, prj, options):
                )
 
     if get_option('PLATFORM') == constants.MACOSX:
-        if prj.is_bundle:
+        if prj.is_bundle or prj.is_shared:
             import os
             libname = ''.join(['lib',prj.full_name,'.dylib'])
-            install_path = os.path.join('Bundles', prj.versioned_name, libname)
+            dir = 'Bundles' if prj.is_bundle else 'Libraries'
+            install_path = os.path.join('@executable_path', '..', dir,
+                                                prj.versioned_name, libname)
             flags = [
                     '-dynamic',
                     '-nostartfiles',
@@ -120,29 +122,6 @@ def manage_options(env, prj, options):
             env.Append(SHLINKFLAGS = flags)
 
 
-##             # FIXME : not sure that -pg is a POSIX option.
-##             if env['DEBUG'] == 'full' :
-##                 env.Append(CXXFLAGS   = '-Wall' )
-##                 #==========================================
-##                 #
-## #                env['CXXFLAGS'] += ' -include mpatrol.h '
-## #                env.Append( LIBS = [ 'mpatrol', 'bfd' ] )
-##                 #
-##                 #==========================================
-##             if env['DEBUG'] == 'profil' :
-##                 env['CXXFLAGS'] += ' -pg -gfull '
-##             elif env['DEBUG'] == 'mpatrol' :
-##                 #env['CXXFLAGS'] += ' -DLD_PRELOAD -DUSEDEBUG -DLOGALL -fcheck-memory-usage -impatrol.h'
-##                 env['CXXFLAGS'] += ' -Wall '
-## #                env['CXXFLAGS'] += ' -DLD_PRELOAD -include mpatrol.h '
-## #                env.Append( LIBS = [ 'mpatrol', 'bfd' ] )
-##             elif env['DEBUG']=='leaktracer' :
-##                 env['CXXFLAGS'] += ' -DLD_PRELOAD '
-##                 env.Append( LIBS = [ 'LeakTracer' ] )
-
-## #         '-m32'
-## #         '-m64'
-## # 
 ## ### # #Bundle/Shared
 ## # 
 ## # 
@@ -156,5 +135,3 @@ def manage_options(env, prj, options):
 ## # #        env['LINKFLAGS']   += ' -dynamic -nostartfiles -dynamiclib -install_name ' + installPath
 ## # #        env['SHLINKFLAGS'] += ' -multiply_defined suppress '
 ## # #        env['SHLIBSUFFIX']  = '.dylib'
-## # 
-## #

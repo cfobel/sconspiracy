@@ -49,13 +49,6 @@ class Environment(Env):
                 tool = constants.SYSTEM_DEFAULT_TOOL[renv.system()]
             self.Tool(tool)
 
-            lib_dirs = [renv.dirs.libext]
-            lib_path = [ join(p, 'lib'    ) for p in lib_dirs]
-            cpp_path = [ join(p, 'include') for p in lib_dirs]
-
-            self.AppendUnique( LIBPATH = lib_path )
-            self.AppendUnique( CPPPATH = cpp_path )
-
             self.Decider('MD5-timestamp')
 
             self.prj_db = db = RacyProjectsDB(env = self)

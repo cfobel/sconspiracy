@@ -28,7 +28,6 @@ BINPKG_VERSIONS   = {}
 
 # --- individual projects variables ---
 TYPE              = 'no type defined'
-NAME              = '' # Internal use only
 
 LOGLEVEL          = 'warning'
 
@@ -71,7 +70,6 @@ import os
 RACY_CONFIG_DIR    = ''
 RACY_BUILD_DIR     = ''
 RACY_INSTALL_DIR   = ''
-RACY_LIBEXT_DIR    = ''
 RACY_BINPKGS_DIR   = ''
 RACY_CODE_DIRS     = []
 
@@ -87,6 +85,10 @@ DEPRECATED = {
     'TESTRUNNER'  : 'Use "CPPUNIT" instead, managed by cppunit plugin' ,
     'TESTLIB'     : 'Use "CPPUNIT" instead, managed by cppunit plugin' ,
     }
+
+
+NAME              = '' # Internal use only
+
 
 import re
 # Variable names :

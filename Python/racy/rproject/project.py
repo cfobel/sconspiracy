@@ -48,8 +48,8 @@ ALLBIN    = BINLIBEXT + BINSTATIC + BINLIB + BINEXEC
 ALLBUNDLE = BUNDLE + BINBUNDLE
 ALLSTATIC = STATIC + BINSTATIC
 ALLSHARED = SHARED + BINSHARED
-ALLEXEC   = EXEC   + BINEXEC  
-ALLLIB    = LIB + BINLIB
+ALLEXEC   = EXEC   + BINEXEC
+ALLLIB    = LIB    + BINLIB
 ALLLIBEXT = LIBEXT + BINLIBEXT
 #------------------------------------------------------------------------------
 
@@ -57,7 +57,7 @@ ALLLIBEXT = LIBEXT + BINLIBEXT
 @racy.no_undef_attr_write
 class LibName(str):
     """ Analyse the string representing the lib's name to extract wanted
-    informations (name, version, ...) 
+    informations (name, version, ...)
     lib's name string format = name_version_config_etc
     """
     SEP = constants.LIBNAME_SEP
@@ -578,35 +578,6 @@ class RacyProject(object):
         """Returns deps provided as binary packages that project depends on.
         """
         return self.bin_libs_deps + self.bin_bundles_deps
-
-
-    #def _get_rec_deps(self, callers, src_deps = True):
-        #"""Returns recursive dependencies (libs + bundles). Usefull to get all
-        #include path for example.
-        #"""
-        #if self in callers:
-            #cycle = [prj.name for prj in callers[callers.index(self):]]
-            #msg = " -> ".join(cycle + [self.name])
-            #raise RacyProjectError(self,
-                    #('Cyclic dependency on {prj.name}: ' + msg )
-                    #)
-        #db = self.projects_db
-
-        #dbdeps = db.src_lib_deps if src_deps else db.bin_lib_deps
-
-        #deps = dbdeps.get(self)
-        #callers.append(self)
-        #if not deps:
-            #if src_deps:
-                #deps = list(self.source_deps)
-            #else:
-                #deps = list(self.bin_deps)
-            #for lib in self.source_deps:
-                #deps += lib._get_rec_deps(callers, src_deps)
-            #deps = tuple(set(deps))
-            #dbdeps[self] = deps
-        #callers.remove(self)
-        #return deps
 
 
     def _get_rec_deps(self, callers, attribs = ['source_deps']):

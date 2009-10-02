@@ -61,27 +61,6 @@ class register(object):
             self.libs[name][comp][nv] = libext
 
 
-    def load_libext(self, path):
-        def get_libext_files(pth):
-            import re
-            pth = racy.rutils.iterize(pth)
-            file_re = re.compile("^\w+$")
-            res = []
-            for p in pth:
-                libext_files = os.walk(p).next()[2]
-                libext_files = [ os.path.join(p,f) 
-                        for f in libext_files if file_re.match(f) ]
-                res += libext_files
-            return res
-
-        predefs = {
-                "LibExt"   : LibExt,
-                "register" : self
-                }
-        for f in get_libext_files(path):
-            execfile(f, predefs) 
-
-
 
     def load_binpkgs(self, path):
         from racy.renv.options import get_option
@@ -147,7 +126,7 @@ class register(object):
         else:
             libname  = getattr(lib,'name',lib).lower()
             libreg = self.libs
-            if libname in libreg:
+            if libname in libreg and libreg[libname]:
                 from racy.renv.options import get_option
 
                 comp = prj.compiler
@@ -206,13 +185,6 @@ class register(object):
 
 register = register()
 
-
-#try:
-    #import libs
-    #register.load_libext(libs.__path__)
-    #del libs
-#except ImportError:
-    #pass
 
 try:
     register.load_binpkgs(racy.renv.dirs.binpkg)

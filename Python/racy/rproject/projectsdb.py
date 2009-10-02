@@ -215,7 +215,7 @@ class RacyProjectsDB(object):
 
                 return res[0]
             elif target.name:
-                msg = 'Unknown target : {trg.name}'.format(trg=target)
+                msg = 'Unknown target : {trg.name}'.format(trg = target)
                 racy.print_warning('Unknown target', msg)
 
         except racy.RacyException, e:

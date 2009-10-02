@@ -23,7 +23,7 @@ class LibExt(object):
 
     depends_on     = []
 
-    basepath       = racy.renv.dirs.libext
+    basepath       = racy.Undefined
 
     libpath        = []
     libs           = []
@@ -58,7 +58,10 @@ class LibExt(object):
         else:
             self.basepath = getattr(infosource, 'basepath',
                                     infosource.__path__[0])
-        self.basepath = os.path.abspath(self.basepath)
+            self.basepath = os.path.abspath(self.basepath)
+
+        if self.basepath is racy.Undefined:
+            raise LibExtException, "Unable to find {0} base path"
 
         names = [
                 'register_names', 'depends_on'    ,
@@ -143,11 +146,14 @@ class LibExt(object):
 
     @staticmethod
     def absolutize(path, base):
+        """Return an absolute path : path if path is an abspath else base+path
+        """
         if not os.path.isabs(path):
             path = os.path.join(base, path)
             path = os.path.normpath(path)
+            path = os.path.abspath(path)
         return path
-        return [abspath(path) for path in paths]
+        #return [os.path.abspath(path) for path in paths]
 
 
     def preconfigure(self, env, opts):

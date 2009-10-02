@@ -216,7 +216,6 @@ class Paths(object):
         'config'    : 'RACY_CONFIG_DIR'   ,
         'build'     : 'RACY_BUILD_DIR'    ,
         'install'   : 'RACY_INSTALL_DIR'  ,
-        'libext'    : 'RACY_LIBEXT_DIR'   ,
         'binpkg'    : 'RACY_BINPKGS_DIR'  ,
         'code'      : 'RACY_CODE_DIRS'    ,
         }
@@ -273,7 +272,6 @@ class Paths(object):
     config         = property(__get_var('config'))
     build          = property(__get_var('build'))
     install        = property(__get_var('install'))
-    libext         = property(__get_var('libext'))
     binpkg         = property(__get_var('binpkg'))
     code           = property(__get_var('code'))
 

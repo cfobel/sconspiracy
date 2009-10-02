@@ -20,7 +20,7 @@ ALLOWED_COMMANDLINE_OPTIONS = [
 
         'RACY_BUILD_DIR'  ,
         'RACY_INSTALL_DIR',
-        'RACY_LIBEXT_DIR' ,
+        'RACY_BINPKGS_DIR',
         'RACY_CODE_DIRS'  ,
 
         ]
@@ -39,9 +39,11 @@ COMMANDLINE_OPTIONS_DESC = {
         'RACY_DEBUG': 'Switch SConspiracy to debug mode'                    ,
         'LOGLEVEL'  : 'Log level'                                           ,
         'CONFIG'    : 'Select the config to use'                            ,
+
         'BUILD'     : ('If "no", nothing will be compiled. Usefull for '
                        'Doxygen generation without having to build project '
                        'for ex.')                                           ,
+
         'BUILDDEPS' : 'if yes build target\'s dependencies'                 ,
         'BUILDPKG'  : 'if yes generate target\'s binary packages'           ,
         'CXX'       : 'Select c++ compiler executable'                      ,
@@ -50,7 +52,7 @@ COMMANDLINE_OPTIONS_DESC = {
 
         'RACY_BUILD_DIR'   : 'Build dir path'                               ,
         'RACY_INSTALL_DIR' : 'Install dir path'                             ,
-        'RACY_LIBEXT_DIR'  : 'External libraries path'                      ,
+        'RACY_BINPKGS_DIR' : 'Binaries packages path'                       ,
         'RACY_CODE_DIRS'   : 'List of path containing SConspiracy projects' ,
 
         }
@@ -63,7 +65,7 @@ def check_opts(opts):
 
     if forbiden:
         import racy
-        msg = "{opts} option(s) not allowed in commandline arguments"
+        msg = '{opts} option(s) not allowed in commandline arguments'
         raise racy.RacyCommandLineError, msg.format(opts = forbiden)
 
 
@@ -110,11 +112,11 @@ def get_opts_help():
             current = opts.get_option(opt)
             help.append(get_opt_help(opt, desc, opt_def, allowed, current))
 
-    help.append("= Global options ==============================================================")
+    help.append('= Global options '      + '='*67 )
     get_help_for(ALLOWED_COMMANDLINE_OPTIONS)
-    help.append("= By projects options =========================================================")
-    get_help_for(ALLOWED_COMMANDLINE_PRJ_OPTIONS, True)
-    help.append("===============================================================================")
+    help.append('= By projects options ' + '='*57 )
+    get_help_for(ALLOWED_COMMANDLINE_PRJ_OPTIONS, for_prj_opts = True)
+    help.append('='*79)
     
     return help
 

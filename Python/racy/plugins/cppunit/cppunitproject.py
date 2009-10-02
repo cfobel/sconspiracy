@@ -136,7 +136,6 @@ class CppUnitProject(ConstructibleRacyProject):
             run_env = self.env.Clone()
 
             dirs = racy.renv.dirs
-            libext = opjoin(dirs.libext ,"lib")
             install_lib = opjoin(dirs.install,"lib")
 
             env_var = {
@@ -146,10 +145,8 @@ class CppUnitProject(ConstructibleRacyProject):
             }
             env_var = env_var[racy.renv.system()]
 
-            run_env.AppendENVPath(env_var, libext)
             run_env.AppendENVPath(env_var, install_lib)
-            run_test = run_env.Alias('run'+self.name, res, res[0].abspath,
-                    )
+            run_test = run_env.Alias('run'+self.name, res, res[0].abspath)
             run_env.AlwaysBuild(run_test)
 
             res += run_test

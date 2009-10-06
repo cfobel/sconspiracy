@@ -250,6 +250,9 @@ class Paths(object):
                 racy.print_warning('Environment warning',msg)
                 #raise racy.EnvError, msg
 
+        if vn.endswith('DIRS'):
+            res = rutils.iterize(res)
+
         if rutils.is_iterable(res):
             return [os.path.abspath(p) for p in res]
         else:
@@ -258,7 +261,8 @@ class Paths(object):
     def __get_var(var, root = None):
         def f1(self):
             return self.get_path(var)
-        def f2(self):
+            return path
+        def f2(self): #derived path
             import racy.renv as renv
             alternatives = {
                     'lib' : {constants.MACOSX : 'Libraries'}

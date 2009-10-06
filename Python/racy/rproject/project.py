@@ -1073,38 +1073,33 @@ class ConstructibleRacyProject(InstallableRacyProject):
                 ]
 
         info = [
-                ('register_names', [self.name]   )           ,
-                ('version'       , self.version.normalized  ),
-                ('debug'         , self.is_debug )           ,
-                ('arch'          , arch )                    ,
-                ('platform'      , self.platform )           ,
-                ('compiler'      , self.compiler )           ,
-                ('depends_on'    , depends )                 ,
-                ('cpppath'       , [ ('include', ) ] )       ,
-                ('libpath'       , [ ('lib'    , ) ] )       ,
-                ('libs'          , [self.full_name])         ,
-                ('extra_libs'    , [])                       ,
-                ('cppdefines'    , [])                       ,
-                ('frameworkpath' , [])                       ,
-                ('frameworks'    , [])                       ,
-                ('cxxflags'      , [])                       ,
-                ('linkflags'     , [])                       ,
-                ('parse_configs' , [])                       ,
+                ('    register_names', [self.name]   )           ,
+                ('    version'       , self.version.normalized  ),
+                ('    debug'         , self.is_debug )           ,
+                ('    arch'          , arch )                    ,
+                ('    platform'      , self.platform )           ,
+                ('    compiler'      , self.compiler )           ,
+                ('    depends_on'    , depends )                 ,
+                ('    cpppath'       , [ ('include', ) ] )       ,
+                ('    libpath'       , [ ('lib'    , ) ] )       ,
+                ('    libs'          , [self.full_name])         ,
+                ('    extra_libs'    , [])                       ,
+                ('    cppdefines'    , [])                       ,
+                ('    frameworkpath' , [])                       ,
+                ('    frameworks'    , [])                       ,
+                ('    cxxflags'      , [])                       ,
+                ('    linkflags'     , [])                       ,
+                ('    parse_configs' , [])                       ,
                 ]
 
         def get_content(source):
             return '\n\n'.join([ '{0} = {1!r}'.format(*el) for el in source])
 
-        infocontent = get_content(info)
+        infocontent = '\n'.join([
+            "class Description(object):",
+            get_content(info)
+            ])
         bocontent = get_content(buildoption)
-
-        def writer(infosource):
-            def write_file(target, source, env):
-                for t in target:
-                    output = file(str(t), "w")
-                    output.write(infosource)
-                    output.close()
-            return write_file
 
         pkg_path = self.install_pkg_path
         infofile = pathjoin(pkg_path, '__init__.py')

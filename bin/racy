@@ -154,7 +154,7 @@ else:
 libs.extend(map(lambda x: os.path.join(x, scons_version), prefs))
 libs.extend(map(lambda x: os.path.join(x, 'scons'), prefs))
 
-sys.path = libs + sys.path
+sys.path = libs + sys.path + ['/opt/local/lib/scons-1.2.0/']
 
 ##############################################################################
 # END STANDARD SCons SCRIPT HEADER

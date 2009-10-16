@@ -11,6 +11,7 @@ import re
 import os
 
 from racy.renv   import constants
+from racy.renv.options import get_option
 from racy.rtools import get_tool
 from racy.rutils import merge_lists_of_dict, is_true
 
@@ -69,6 +70,8 @@ def generate(env):
         else :
             CXXFLAGS += ['/Zi']
 
+    CPPDEFINES += [ ('__ARCH__' , r'\"{0}\"'.format(get_option('ARCH'))) ]
+    
     names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS']
     attrs = [locals()[n] for n in names]
     env.MergeFlags(dict(zip(names,attrs)), unique=True)

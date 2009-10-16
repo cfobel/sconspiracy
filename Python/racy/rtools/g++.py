@@ -72,7 +72,8 @@ def generate(env):
     elif get_option('ARCH') == '64':
         CXXFLAGS  += ['-m64']
         LINKFLAGS += ['-m64']
-
+        
+    CPPDEFINES += [ ('__ARCH__' , r'\"{0}\"'.format(get_option('ARCH'))) ]
 
     names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS']
     attrs = [locals()[n] for n in names]

@@ -25,6 +25,8 @@ class LibExt(object):
 
     basepath       = racy.Undefined
 
+    binpath        = []
+
     libpath        = []
     libs           = []
     extra_libs     = []
@@ -65,6 +67,7 @@ class LibExt(object):
 
         names = [
                 'register_names', 'depends_on'    ,
+                'binpath'       ,
                 'libpath'       , 'libs'          , 'extra_libs',
                 'cpppath'       , 'cppdefines'    ,
                 'frameworks'    , 'frameworkpath' ,
@@ -72,10 +75,10 @@ class LibExt(object):
                 'parse_configs' 
                 ]
         for name in names:
-            classattr = getattr(infosource, name)
+            classattr = getattr(infosource, name, getattr(self, name))
             #check if classattr is not a property
             if not hasattr(classattr,'getter'):
-                attr = getattr(infosource, name)
+                attr = getattr(infosource, name, getattr(self, name))
                 setattr(self,name, list(attr))
 
         self.version = racy.rutils.Version(infosource.version)
@@ -104,6 +107,10 @@ class LibExt(object):
     @property
     def DEBUG_SUFFIX(self):
         return self.debug_suffix if self.debug else ''
+
+    @property
+    def BINPATH(self):
+        return self.binpath
 
     @property
     def LIBPATH(self):
@@ -153,8 +160,12 @@ class LibExt(object):
             path = os.path.normpath(path)
             path = os.path.abspath(path)
         return path
-        #return [os.path.abspath(path) for path in paths]
 
+    @staticmethod
+    def get_libext_path(path):
+        path = racy.rutils.iterize(path)
+        path = os.path.join(*path)
+        return path
 
     def preconfigure(self, env, opts):
         pass
@@ -176,7 +187,7 @@ class LibExt(object):
             attr = getattr(self, name)
             if attr:
                 if 'PATH' in name:
-                    attr = [os.path.join(*path) for path in attr]
+                    attr = [self.get_libext_path(path) for path in attr]
                     attr = [self.absolutize(path, self.basepath) for path in attr]
                 conf[name] = attr
 
@@ -193,4 +204,9 @@ class LibExt(object):
                     env[name] = back_env[name]
 
         env.AppendUnique(**conf)
+
+
+        bin_path = [self.get_libext_path(path) for path in self.BINPATH]
+        bin_path = [self.absolutize(path, self.basepath) for path in bin_path]
+        env.PrependENVPath('PATH',bin_path)
 

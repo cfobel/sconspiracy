@@ -133,7 +133,7 @@ class register(object):
 
                 if comp not in libreg[libname]:
                     comp_avail = [el for el in libreg[libname] 
-                                        if el != UNSPECIFIED_COMPLIER]
+                                        if str(el) != UNSPECIFIED_COMPLIER]
                     if comp_avail:
                         comp = sorted(comp_avail)[-1]
                     else:

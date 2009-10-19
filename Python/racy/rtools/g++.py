@@ -75,6 +75,7 @@ def generate(env):
         
     CPPDEFINES += [ ('__ARCH__' , r'\"{0}\"'.format(get_option('ARCH'))) ]
 
+
     names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS']
     attrs = [locals()[n] for n in names]
     env.MergeFlags(dict(zip(names,attrs)), unique=True)
@@ -117,12 +118,16 @@ def manage_options(env, prj, options):
             else:
                 install_path = os.path.join('@executable_path', '..',
                                         'Libraries', libname)
+
+            
             flags = [
                     '-dynamic',
                     '-nostartfiles',
                     '-install_name', install_path,
                     '-multiply_defined','suppress',
+#                    '/usr/lib/dylib1.o', #??
                     ]
             env.Append(SHLINKFLAGS = flags)
+
 
 

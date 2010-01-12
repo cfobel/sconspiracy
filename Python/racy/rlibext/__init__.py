@@ -201,7 +201,3 @@ register = register()
 
 def load_binpkgs():
     register.load_binpkgs(racy.renv.dirs.binpkg)
-#try:
-#    register.load_binpkgs(racy.renv.dirs.binpkg)
-#except racy.EnvError:
-#    pass

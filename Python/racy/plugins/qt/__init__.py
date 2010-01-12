@@ -45,8 +45,8 @@ def ui_sources(prj):
     """Returns ui source files of the project"""
     return rutils.DeepGlob(
             ['ui'],
-            prj.src_path,
-            prj.build_dir
+            prj.include_path,
+            inc_build_dir(prj)
             )
 
 
@@ -61,8 +61,43 @@ class Plugin(racy.rplugins.Plugin):
         prj.variant_dir( inc_build_dir(prj), prj.include_path )
         env = prj.env
         
-        qtsources  = [env.Uic(ui)  for  ui in ui_sources(prj)]
-        qtsources += [env.Moc(inc) for inc in includes(prj)]
-        prj.special_source = qtsources
 
+        import SCons
+        CLVar = SCons.Util.CLVar
+        env['QT_UICDECLPREFIX'] = 'ui_'
+        env['QT_UICCOM'] = [
+                CLVar('$QT_UIC $QT_UICDECLFLAGS -o ${TARGETS[0]} $SOURCE'),
+                # remove qt3 things :
+                #CLVar('$QT_UIC $QT_UICIMPLFLAGS -impl ${TARGETS[0].file} '
+                    #'-o ${TARGETS[1]} $SOURCE'),
+                #CLVar('$QT_MOC $QT_MOCFROMHFLAGS -o ${TARGETS[2]} ${TARGETS[0]}')
+                ]
+
+        # reuse/rewrite scanner ?
+        uicBld = env.Builder(action=SCons.Action.Action('$QT_UICCOM', '$QT_UICCOMSTR'),
+                     #emitter=uicEmitter,
+                     src_suffix='$QT_UISUFFIX',
+                     suffix='$QT_UICDECLSUFFIX',
+                     prefix='$QT_UICDECLPREFIX',
+                     #source_scanner=uicScanner
+                     )
+        env['BUILDERS']['Uic'] = uicBld
+
+
+        uic = [env.Uic(ui)  for  ui in ui_sources(prj)]
+        moc = [env.Moc(inc) for inc in includes(prj)]
+
+        sources = rutils.DeepGlob(
+                constants.CXX_SOURCE_EXT, 
+                prj.src_path, 
+                prj.build_dir
+                )
+
+        #prj.special_source += uic
+        prj.special_source += moc
+
+        
+        env.Depends(sources, uic)
+        env.Append(CPPPATH = inc_build_dir(prj))
+        #prj.sources
         return []

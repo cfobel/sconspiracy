@@ -60,6 +60,19 @@ class register(object):
             libext.__src__ = src
             self.libs[name][comp][nv] = libext
 
+            # Management of tools added by libexts
+            # WARNING : actually if several binpkgs provide the same tool, the
+            # last loaded one will be used
+            if hasattr(cls, "scons_tools"):
+                import racy.renv.environment
+                tool = dict(cls.scons_tools)
+                for t, opt in tool.items():
+                    for var, val in opt.items():
+                        if isinstance(val,basestring) and 'DIR' in var:
+                            opt[var] = LibExt.absolutize(val,libext(name,False).basepath)
+
+                racy.renv.environment.add_tool(tool)
+
 
 
     def load_binpkgs(self, path):
@@ -186,7 +199,9 @@ class register(object):
 register = register()
 
 
-try:
+def load_binpkgs():
     register.load_binpkgs(racy.renv.dirs.binpkg)
-except racy.EnvError:
-    pass
+#try:
+#    register.load_binpkgs(racy.renv.dirs.binpkg)
+#except racy.EnvError:
+#    pass

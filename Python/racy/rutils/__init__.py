@@ -63,7 +63,7 @@ def is_true(v):
 
 #------------------------------------------------------------------------------
 def DeepGlob(extensions, src_dir= '.', replace_dir = "", return_orig = False, 
-        invert_matches = False ):
+        invert_matches = False, filter = lambda x:True):
     """ Do a deep Glob, lookin up for file matching extensions, in 
     src_dir (default '.'), replacing srd_dir by replace_dir if given.
 
@@ -80,12 +80,13 @@ def DeepGlob(extensions, src_dir= '.', replace_dir = "", return_orig = False,
     result      = []
 
     if invert_matches:
-        file_match = lambda x: not regex.match(x)
+        file_match = lambda x: not file_match(x)
 
     for root, dirs, files in os.walk(src_dir, topdown=True):
         #don't walk in vcs dirs
         remove_vcs_dirs(dirs)
         result += [ join(root, name) for name in files if file_match(name) ]
+        result = [res for res in result if filter(res)]
 
     if replace_dir:
         result_orig = result

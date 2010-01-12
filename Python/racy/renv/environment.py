@@ -9,6 +9,13 @@
 from SCons.Environment import Environment as Env
 from SCons import Action
 
+tools = {
+        'default':{}
+        }
+
+def add_tool(tool):
+    tools.update(tool)
+
 def CopyBuilder (target, source, env):
     from racy import rutils
     rutils.copy(
@@ -34,6 +41,11 @@ class Environment(Env):
 
         for opt in ['DEBUG', 'TOOL', 'MSVS_VERSION']:
             kwargs[opt] = get_option(opt)
+
+        for t, opt in tools.items():
+            kwargs.setdefault('tools',[])
+            kwargs['tools'] += [t]
+            kwargs.update(opt)
 
         Env.__init__(self, *args, **kwargs)
 

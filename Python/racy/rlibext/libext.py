@@ -44,7 +44,8 @@ class LibExt(object):
 
     debug_suffix   = ''
 
-    scons_tool     = {}
+    scons_tools    = []
+    scons_env      = {}
 
     name  = None
     debug = None

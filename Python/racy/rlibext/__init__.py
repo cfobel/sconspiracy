@@ -65,14 +65,16 @@ class register(object):
             # last loaded one will be used
             if hasattr(cls, "scons_tools"):
                 import racy.renv.environment
-                tool = dict(cls.scons_tools)
-                for t, opt in tool.items():
-                    for var, val in opt.items():
-                        if isinstance(val,basestring) and 'DIR' in var:
-                            opt[var] = LibExt.absolutize(val,libext(name,False).basepath)
+                racy.renv.environment.add_tool(cls.scons_tools)
 
-                racy.renv.environment.add_tool(tool)
+            if hasattr(cls, "scons_env"):
+                import racy.renv.environment
+                vars = dict(cls.scons_env)
+                for var, val in vars.items():
+                    if isinstance(val,basestring) and (var.endswith('DIR')):
+                        vars[var] = LibExt.absolutize(val,libext(name,False).basepath)
 
+                racy.renv.environment.add_var(vars)
 
 
     def load_binpkgs(self, path):

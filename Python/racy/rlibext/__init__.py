@@ -51,6 +51,7 @@ class register(object):
                         fileorig = overrided.__src__,
                         file     = src
                         )
+                import racy
                 racy.print_warning("Overrided libext", msg)
 
             libext = cls

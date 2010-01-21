@@ -35,8 +35,8 @@ def generate(env):
 #        env['SHLINKCOM'] = [env['SHLINKCOM'], MTCOM + '2']
     env['WINDOWS_INSERT_MANIFEST'] = True
 
-    env['WIN32_INSERT_DEF']        = 1
-    constants.CXX_SOURCE_EXT      += [env['WIN32DEFSUFFIX'][1:]]
+    #env['WIN32_INSERT_DEF']        = 1
+    #constants.CXX_SOURCE_EXT      += [env['WIN32DEFSUFFIX'][1:]]
 
     CXXFLAGS = [
             '/GR', 

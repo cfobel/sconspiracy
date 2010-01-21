@@ -118,13 +118,12 @@ class DoxygenProject(ConstructibleRacyProject):
             for dep in prj.source_rec_deps:
                 dirs += [dep.src_path, dep.include_path]
 
+        dot = env.WhereIs('dot', os.environ['PATH'])
+        env['ENV']['DOX_DOT_PATH']      = dot
         env['ENV']['DOX_INCLUDES_PATH'] = " ".join(env['CPPPATH'])
         env['ENV']['DOX_PRJNAME']       = self.base_name
         env['ENV']['DOX_INPUTDIR']      = " ".join(dirs)
         env['ENV']['DOX_OUTPUTDIR']     = self.build_dir
-
-        dot = env.WhereIs('dot', os.environ['PATH'])
-        env['ENV']['DOX_OUTPUTDIR']     = dot
 
 #        print "#"*50
 #        print 'DOX_INCLUDES_PATH', env['ENV']['DOX_INCLUDES_PATH']

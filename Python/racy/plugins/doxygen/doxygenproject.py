@@ -122,6 +122,10 @@ class DoxygenProject(ConstructibleRacyProject):
         env['ENV']['DOX_PRJNAME']       = self.base_name
         env['ENV']['DOX_INPUTDIR']      = " ".join(dirs)
         env['ENV']['DOX_OUTPUTDIR']     = self.build_dir
+
+        dot = env.WhereIs('dot', os.environ['PATH'])
+        env['ENV']['DOX_OUTPUTDIR']     = dot
+
 #        print "#"*50
 #        print 'DOX_INCLUDES_PATH', env['ENV']['DOX_INCLUDES_PATH']
 #        print 'DOX_PRJNAME'      , env['ENV']['DOX_PRJNAME']      

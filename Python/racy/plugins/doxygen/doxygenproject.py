@@ -126,7 +126,7 @@ class DoxygenProject(ConstructibleRacyProject):
             matchpath = glob ( os.sep.join ( [prgfiles, "*", "bin"] ) )
             dot = env.WhereIs('dot', os.pathsep.join( matchpath ))
 
-        env['ENV']['DOX_DOT_PATH']      = dot
+        env['ENV']['DOX_DOT_PATH']      = os.path.split(dot)[0]
         env['ENV']['DOX_INCLUDES_PATH'] = " ".join(env['CPPPATH'])
         env['ENV']['DOX_PRJNAME']       = self.base_name
         env['ENV']['DOX_INPUTDIR']      = " ".join(dirs)

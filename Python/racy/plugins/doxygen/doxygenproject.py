@@ -119,6 +119,13 @@ class DoxygenProject(ConstructibleRacyProject):
                 dirs += [dep.src_path, dep.include_path]
 
         dot = env.WhereIs('dot', os.environ['PATH'])
+
+        prgfiles = os.environ.get('PROGRAMFILES','')
+        if not dot and prgfiles:
+            from glob import glob
+            matchpath = glob ( os.sep.join ( [prgfiles, "*", "bin"] ) )
+            dot = env.WhereIs('dot', os.pathsep.join( matchpath ))
+
         env['ENV']['DOX_DOT_PATH']      = dot
         env['ENV']['DOX_INCLUDES_PATH'] = " ".join(env['CPPPATH'])
         env['ENV']['DOX_PRJNAME']       = self.base_name

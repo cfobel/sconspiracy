@@ -7,21 +7,22 @@
 
 
 ALLOWED_COMMANDLINE_OPTIONS = [
-        'ARCH'            ,
-        'DEBUG'           ,
-        'LOGLEVEL'        ,
-        'CONFIG'          ,
-        'BUILD'           ,
-        'BUILDDEPS'       ,
-        'BUILDPKG'        ,
-        'RACY_DEBUG'      ,
-        'USEVISIBILITY'   ,
-        'CXX'             ,
+        'ARCH'             ,
+        'DEBUG'            ,
+        'LOGLEVEL'         ,
+        'CONFIG'           ,
+        'BUILD'            ,
+        'BUILDDEPS'        ,
+        'BUILDPKG'         ,
+        'RACY_DEBUG'       ,
+        'USEVISIBILITY'    ,
+        'CXX'              ,
 
-        'RACY_BUILD_DIR'  ,
-        'RACY_INSTALL_DIR',
-        'RACY_BINPKGS_DIR',
-        'RACY_CODE_DIRS'  ,
+        'RACY_BUILD_DIR'   ,
+        'RACY_INSTALL_DIR' ,
+        'RACY_BINPKGS_DIR' ,
+        'RACY_CODE_DIRS'   ,
+        'OPTIMIZATIONLEVEL',
 
         ]
 
@@ -34,26 +35,27 @@ ALLOWED_COMMANDLINE_PRJ_OPTIONS = [
         ]
 
 COMMANDLINE_OPTIONS_DESC = {
-        'ARCH'      : 'Architecture destination'                            ,
-        'DEBUG'     : 'Debug mode'                                          ,
-        'RACY_DEBUG': 'Switch SConspiracy to debug mode'                    ,
-        'LOGLEVEL'  : 'Log level'                                           ,
-        'CONFIG'    : 'Select the config to use'                            ,
+        'ARCH'              : 'Architecture destination'                            ,
+        'DEBUG'             : 'Debug mode'                                          ,
+        'RACY_DEBUG'        : 'Switch SConspiracy to debug mode'                    ,
+        'LOGLEVEL'          : 'Log level'                                           ,
+        'OPTIMIZATIONLEVEL' : 'Optimization level'                                  ,
+        'CONFIG'            : 'Select the config to use'                            ,
 
-        'BUILD'     : ('If "no", nothing will be compiled. Usefull for '
-                       'Doxygen generation without having to build project '
-                       'for ex.')                                           ,
+        'BUILD'             : ('If "no", nothing will be compiled. Usefull for '
+                               'Doxygen generation without having to build project '
+                               'for ex.')                                           ,
 
-        'BUILDDEPS' : 'if yes build target\'s dependencies'                 ,
-        'BUILDPKG'  : 'if yes generate target\'s binary packages'           ,
-        'CXX'       : 'Select c++ compiler executable'                      ,
+        'BUILDDEPS'         : 'if yes build target\'s dependencies'                 ,
+        'BUILDPKG'          : 'if yes generate target\'s binary packages'           ,
+        'CXX'               : 'Select c++ compiler executable'                      ,
 
-        'USEVISIBILITY'    : 'Switch visibility mode'                       ,
+        'USEVISIBILITY'     : 'Switch visibility mode'                       ,
 
-        'RACY_BUILD_DIR'   : 'Build dir path'                               ,
-        'RACY_INSTALL_DIR' : 'Install dir path'                             ,
-        'RACY_BINPKGS_DIR' : 'Binaries packages path'                       ,
-        'RACY_CODE_DIRS'   : 'List of path containing SConspiracy projects' ,
+        'RACY_BUILD_DIR'    : 'Build dir path'                               ,
+        'RACY_INSTALL_DIR'  : 'Install dir path'                             ,
+        'RACY_BINPKGS_DIR'  : 'Binaries packages path'                       ,
+        'RACY_CODE_DIRS'    : 'List of path containing SConspiracy projects' ,
 
         }
 

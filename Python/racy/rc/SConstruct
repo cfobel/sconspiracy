@@ -7,7 +7,7 @@ import SCons
 
 import racy
 import racy.rlog as rlog
-import racy.rlibext as rlibext
+#import racy.rlibext as rlibext
 
 EnsureSConsVersion(1, 2, 0)
 EnsurePythonVersion(2, 6)
@@ -20,6 +20,7 @@ SCons.Defaults.DefaultEnvironment(tools = [])
 try:
 
     racy.renv.register_env()
+    import racy.rlibext as rlibext
     racy.load_plugins()
     racy.renv.check_env()
     racy.rlibext.load_binpkgs()

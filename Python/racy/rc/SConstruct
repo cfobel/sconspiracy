@@ -111,7 +111,7 @@ def display_build_status():
     Here you could do all kinds of complicated things."""
     status, failures_message = build_status()
     if status == 'failed':
-        print "Build failled"
+        print "Build failed"
 
     print failures_message
     if status == 'ok':

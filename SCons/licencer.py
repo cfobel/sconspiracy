@@ -1,6 +1,6 @@
 # -*- coding: UTF8 -*-
 # ***** BEGIN LICENSE BLOCK *****
-# Sconspiracy - Copyright (C) IRCAD, 2004-2009.
+# Sconspiracy - Copyright (C) IRCAD, 2004-2010.
 # Distributed under the terms of the BSD Licence as
 # published by the Open Source Initiative.  
 # ****** END LICENSE BLOCK ******
@@ -23,25 +23,25 @@ comments['.py'] = {
         }
 
 comments['.hpp'] = comments['.cpp']
-comments['.c'] = comments['.cpp']
-comments['.h'] = comments['.cpp']
+comments['.c']   = comments['.cpp']
+comments['.h']   = comments['.cpp']
 comments['.cxx'] = comments['.cpp']
 comments['.hxx'] = comments['.cpp']
-comments['.py'] = comments['.py']
+comments['.py']  = comments['.py']
 
 ignore_lines = ['vim:', 'utf8', 'UTF8']
-licence['begin'] = '***** BEGIN LICENSE BLOCK *****'
-licence['end']   = '****** END LICENSE BLOCK ******'
+licence['begin']    = '***** BEGIN LICENSE BLOCK *****'
+licence['end']      = '****** END LICENSE BLOCK ******'
 licence['newbegin'] = '***** BEGIN LICENSE BLOCK *****'
 licence['newend']   = '****** END LICENSE BLOCK ******'
 
-licence['LGPL'] = """FW4SPL - Copyright (C) IRCAD, 2009.
+licence['LGPL'] = """FW4SPL - Copyright (C) IRCAD, 2009-2010.
 Distributed under the terms of the GNU Lesser General Public License (LGPL) as
-published by the Free Software Foundation.  """
+published by the Free Software Foundation."""
 
-licence['BSD'] = """Sconspiracy - Copyright (C) IRCAD, 2004-2009.
+licence['BSD'] = """Sconspiracy - Copyright (C) IRCAD, 2004-2010.
 Distributed under the terms of the BSD Licence as
-published by the Open Source Initiative.  """
+published by the Open Source Initiative."""
 
 sep = '\n'
 

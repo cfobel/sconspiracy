@@ -41,11 +41,12 @@ class Plugin(racy.rplugins.Plugin):
         self.set_stdout()
 
     def set_stdout(self, user_pattern=None):
+        patterns = []
         if sys.stdout.isatty():
             if user_pattern:
-                patterns = user_pattern
+                patterns += user_pattern
             else:
-                patterns = base.scons_patterns
+                patterns += base.scons_patterns
                 if platform.system() == "Windows":
                     patterns += base.msvs_patterns
                 else:

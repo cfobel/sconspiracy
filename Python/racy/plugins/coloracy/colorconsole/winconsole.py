@@ -113,7 +113,7 @@ class ColorText(BaseColorText):
     def __init__(self, fg = None, bg = None, txt = '', console='stdout', **kwargs):
         super(ColorText, self).__init__(**kwargs)
 
-        cons = getattr(self, console, self.stdout)
+        self.cons = cons = getattr(self, console, self.stdout)
         if fg:
             fgcolor = self.get_fgcolor(fg)
         else:

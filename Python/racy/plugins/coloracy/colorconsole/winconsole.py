@@ -11,7 +11,7 @@ Colors text in console mode application (win32).
 Uses ctypes and Win32 methods SetConsoleTextAttribute and
 GetConsoleScreenBufferInfo.
 
-Code inspired from 
+Code inspired from MIT-licensed code from André Burgaud
 http://www.burgaud.com/bring-colors-to-the-windows-console-with-python/
 """
 

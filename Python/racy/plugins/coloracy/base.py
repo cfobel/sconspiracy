@@ -38,9 +38,9 @@ cscons    = cyan
 scons_patterns = [
         ([cscons, magenta]       , ['^Target :','.*$']),
         ([cerror]                , ['^scons:.*[eE]rrors?.*$']),
-        ([cerror, cfile, cerror] , ['^[^/]*\[?', '/.*', '[:\]].*(interrupted|failed).*$']),
+        ([cerror, cfile, cerror] , ['^.*?', '[^:\] ]+', '[:\]].*(interrupted|failed).*$']),
         ([cerror]                , ['^Build failed$']),
-        ([cscons, cfile]         , ['^Removed', ' /.*']),
+        ([cscons, cfile]         , ['^Removed', ' .*']),
         ([cscons, cfile, cscons, cfile, cscons] , ['^Install file.+?[\'"]', '.*?', '[\'"].*?[\'"]', '.*?', '[\'"].*$']),
 
         # exception header : +-[Error]: PRJError =========
@@ -66,9 +66,10 @@ gcc_patterns = [
         ([magenta, blue, magenta]   , ['^[^\W]*(gcc|g\+\+)[0-9\-\.]* .*?', '(\W[^ ]+\.(cpp|cc|cxx|c|so|dylib))' ,'.*$']),
 
         #gcc errors, warnings, In *
-        ([cfile,cnone,clinenum,cnone, cerror, cyan]   , ['^/[^:]+', ':', '\d+', ':\W*', 'error:', '.*$']),
-        ([cfile,cnone,clinenum,cnone, cwarning, cyan] , ['^/[^:]+', ':', '\d+', ':\W*', 'warning:', '.*$']),
-        ([cfile,cnone, cyan]                          , ['^/[^:]+', ':\W*', 'In.*$']),
+        ([cfile,cnone,clinenum,cnone, cerror, cyan]   , ['^[^:]+', ':', '\d+', ':\W*', 'error:', '.*$']),
+        ([cnone, cerror, cyan]   , ['^.*', 'error', '.*$']),
+        ([cfile,cnone,clinenum,cnone, cwarning, cyan] , ['^[^:]+', ':', '\d+', ':\W*', 'warning:', '.*$']),
+        ([cfile,cnone, cyan]                          , ['^[^:]+', ':\W*', 'In.*$']),
 
         ([cfile,cnone,clinenum,cnone] , ['^/.*', ':', '\d+', ':.*$']), # /a/file:num: *
         ]

@@ -14,7 +14,7 @@ class BaseColorText(object):
 
     cons = None
 
-    def __init__(self, out = sys.stdout):
+    def __init__(self, out = sys.stdout, console = 'notused'):
         self.out = out
 
     def get_bgcolor(self, color):

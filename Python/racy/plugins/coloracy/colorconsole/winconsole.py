@@ -107,28 +107,30 @@ class WinConsole(object):
 
 
 class ColorText(BaseColorText):
-    cons = WinConsole()
+    stdout = WinConsole()
+    stderr = WinConsole('stderr')
 
-    def __init__(self, fg = None, bg = None, txt = '', **kwargs):
+    def __init__(self, fg = None, bg = None, txt = '', console='stdout', **kwargs):
         super(ColorText, self).__init__(**kwargs)
 
+        cons = getattr(self, console, self.stdout)
         if fg:
             fgcolor = self.get_fgcolor(fg)
         else:
-            fgcolor = self.cons.default_fg
+            fgcolor = cons.default_fg
         if bg:
             bgcolor = self.get_bgcolor(bg)
         else:
-            bgcolor = self.cons.default_bg
+            bgcolor = cons.default_bg
 
         self.color = bgcolor | fgcolor
         self.txt   = txt
 
-        self.write()
+        self.write(cons)
 
-    def write(self):
-        self.cons.set_text_attr(self.color)
+    def write(self, cons):
+        cons.set_text_attr(self.color)
         self.out.write(self.txt)
-        self.cons.set_text_attr(self.cons.default_colors)
+        cons.set_text_attr(cons.default_colors)
 
 

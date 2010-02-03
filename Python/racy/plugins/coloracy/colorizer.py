@@ -35,10 +35,11 @@ class Colorizer(object):
     text.
     """
     
-    def __init__(self, patterns= ([''] , ['^.*$']) ):
+    def __init__(self, patterns= ([''] , ['^.*$']), type='stdout' ):
         self.queue = deque()
         self.writing = False
         self.regex = re.compile( get_regex(patterns) )
+        self.type = type
 
     def __call__(self, txt, out):
         if self.writing:
@@ -61,7 +62,7 @@ class Colorizer(object):
                     val = d[color]
                     if val:
                         if e:
-                            ColorText(fg=e, txt=val, out=out)
+                            ColorText(fg=e, txt=val, out=out, console=self.type)
                         else:
                             out.write(val)
             else:

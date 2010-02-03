@@ -19,11 +19,11 @@ class Proxy(object):
         return getattr( self.__subject, name )
 
 
-class ColorStdOutProxy(Proxy):
+class ColorConsoleProxy(Proxy):
     """ StdOut proxy """
 
     def __init__(self, subject, *args, **kwargs):
-        super(ColorStdOutProxy, self).__init__(subject)
+        super(ColorConsoleProxy, self).__init__(subject)
         self.colorizer = Colorizer(*args, **kwargs)
 
     def write(self, s):

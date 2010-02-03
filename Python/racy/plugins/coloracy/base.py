@@ -54,7 +54,12 @@ scons_patterns = [
         ([cscons], ['^"+$']),
         ]
 
-msvs_patterns = []
+msvs_patterns = [
+        ([magenta, blue, magenta]   , ['^[^\W]*(cl|link)[0-9\-\.]* .*?', '(\W[^ ]+\.(cpp|cc|cxx|c|lib|dll))' ,'.*$']),
+
+        ([cfile,cnone,clinenum,cnone, cerror, cyan]   , ['^[^(]+', '\(', '\d+', '\) :\W*',  'error'  , '.*$']),
+        ([cfile,cnone,clinenum,cnone, cwarning, cyan] , ['^[^(]+', '\(', '\d+', '\) :\W*',  'warning', '.*$']),
+        ]
 
 gcc_patterns = [
         #gcc command

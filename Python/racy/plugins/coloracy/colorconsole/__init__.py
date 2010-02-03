@@ -13,8 +13,8 @@ import platform
 import os
 
 is_win  = platform.system() == 'Windows'
-is_msys = "msys"   in os.environ.get('OSTYPE').lower()
-is_cygw = "cygwin" in os.environ.get('OSTYPE').lower()
+is_msys = "msys"   in os.environ.get('OSTYPE','').lower()
+is_cygw = "cygwin" in os.environ.get('OSTYPE','').lower()
 
 if is_win and not any([is_msys, is_cygw]) :
     from winconsole import ColorText

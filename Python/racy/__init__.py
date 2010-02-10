@@ -67,12 +67,12 @@ class LibError(RacyException):
 
 class LibMissingVersion(LibError):
     msg_template = ('Missing <{lib.name}> vesion in <{prj.name}> options '
-                    '[{prj.opts_path}]. Current is <{lib.versioned_name}>.')
+                    '[{prj.opts_source}]. Current is <{lib.versioned_name}>.')
 
 
 
 class LibBadVersion(LibError):
-    msg_template = ('<{lib}> in <{prj.name}> options [{prj.opts_path}] '
+    msg_template = ('<{lib}> in <{prj.name}> options [{prj.opts_source}] '
                     'should be updated to <{cur_lib.versioned_name}>.')
 
 

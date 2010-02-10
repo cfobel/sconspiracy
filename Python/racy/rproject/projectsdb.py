@@ -122,9 +122,9 @@ class RacyProjectsDB(object):
     def _register_prj(self, prj):
         if prj.register_name in self._prj_map:
             prev_prj = self._prj_map[prj.register_name]
-            msg = """An existing project is already called <{0.register_name}>.
-                  defined here   : {1.project_dir}
-                  redefined here : {0.project_dir}
+            msg = """An existing project is already named <{0.register_name}>.
+                  defined here   : {1.opts_source}
+                  redefined here : {0.opts_source}
                   """.format(prj, prev_prj)
             racy.print_warning( 'Project {0.full_name}'.format(prj), msg)
 
@@ -136,13 +136,13 @@ class RacyProjectsDB(object):
 
 
     @memoize
-    def _make_prj_from_file(self, file, args = {},
+    def _make_prj_from(self, file, args = {},
             factory = ConstructibleRacyProject):
         kwargs = {}
         kwargs.update(self.prj_args)
         kwargs.update(args)
 
-        prj = factory(file, **kwargs)
+        prj = factory(build_options=file, **kwargs)
 
         return prj
 
@@ -159,7 +159,7 @@ class RacyProjectsDB(object):
         if args.get('config'):
             target.name = '_'.join([target.name, config])
 
-        prj = self._make_prj_from_file(file, args)
+        prj = self._make_prj_from(file, args)
 
         self._register_prj(prj)
 
@@ -170,7 +170,7 @@ class RacyProjectsDB(object):
 
             db = self
             if target.name and db.has_key(target.name):
-                print 'Target : ' + name # XXX
+                racy.print_msg('Target : ' + name)
                 rlog.info.log("Target", name)
                 prj      = db[target.name]
                 
@@ -190,7 +190,7 @@ class RacyProjectsDB(object):
                         buildoptions = os.path.join(libext.__src__,
                             'bin','build.options')
                         if os.path.exists(buildoptions):
-                            libextprj = self._make_prj_from_file(buildoptions,
+                            libextprj = self._make_prj_from(buildoptions,
                                     factory=InstallableRacyProject)
                             if libextprj.name not in self.installed_libext:
                                 res += libextprj.install(['bin','rc'])

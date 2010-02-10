@@ -50,7 +50,7 @@ class CppUnitProject(ConstructibleRacyProject):
 
 
         super(CppUnitProject, self).__init__(
-                                        options_file = opt_file, 
+                                        build_options = opt_file, 
                                         config = config,
                                         **prj.projects_db.prj_args
                                         )

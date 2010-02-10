@@ -7,7 +7,7 @@
 
 import os
 
-from os.path import join as pathjoin
+from os.path import join as pathjoin, abspath, normpath
 
 
 import racy
@@ -43,14 +43,14 @@ BINBUNDLE = ('bin_bundle', )
 BINEXEC   = ('bin_exec'  , )
 BINLIB    = BINSHARED + BINSTATIC
 
-ALL       = LIBEXT + STATIC + LIB + EXEC
-ALLBIN    = BINLIBEXT + BINSTATIC + BINLIB + BINEXEC
-ALLBUNDLE = BUNDLE + BINBUNDLE
-ALLSTATIC = STATIC + BINSTATIC
-ALLSHARED = SHARED + BINSHARED
-ALLEXEC   = EXEC   + BINEXEC
-ALLLIB    = LIB    + BINLIB
-ALLLIBEXT = LIBEXT + BINLIBEXT
+TYPE_ALL       = LIBEXT + STATIC + LIB + EXEC
+TYPE_ALLBIN    = BINLIBEXT + BINSTATIC + BINLIB + BINEXEC
+TYPE_ALLBUNDLE = BUNDLE + BINBUNDLE
+TYPE_ALLSTATIC = STATIC + BINSTATIC
+TYPE_ALLSHARED = SHARED + BINSHARED
+TYPE_ALLEXEC   = EXEC   + BINEXEC
+TYPE_ALLLIB    = LIB    + BINLIB
+TYPE_ALLLIBEXT = LIBEXT + BINLIBEXT
 #------------------------------------------------------------------------------
 
 @racy.no_undef_attr_read
@@ -115,7 +115,7 @@ class RacyProject(object):
     _config_dir    = None
     _config        = None
     _debug         = None
-    _opts_file     = None
+    _opts_source   = None
     _platform      = None
     _project_dir   = None
 
@@ -126,23 +126,38 @@ class RacyProject(object):
 
     base_name      = None
 
-    def __init__(self, options_file, 
+    def __init__(self, build_options, prj_path=None,
             platform='', cxx='', debug='',
             config = None,
             locals=None, globals=None, projects_db = {}):
 
-        self._opts_file   = options_file
-        self._project_dir = os.path.dirname(options_file)
-        self._config_dir  = pathjoin(self._project_dir,'configs')
 
-        if not os.path.isfile(options_file):
-            raise RacyProjectError( self, '{prj._opts_file} is not a file')
+        if os.path.isfile(build_options):
+            build_options = abspath(normpath(build_options))
+            build_options_dir = os.path.dirname(build_options)
+            if prj_path is None:
+                prj_path = pathjoin(build_options, '..', '..')
+                prj_path = abspath(normpath(prj_path))
+        else :
+            error = []
+            if not isinstance(build_options, dict):
+                error.append('build_options:"{0}" is neither a file nor a '
+                        'dictionnary.'.format(build_options))
+            if prj_path is None:
+                error.append('"prj_path" must be specified if "build_options" '
+                             'is not a file.')
+            if error:
+                raise RacyProjectError( self, ' '.join(error) )
+
+        self._opts_source = build_options
+        self._project_dir = prj_path
+        self._config_dir  = pathjoin(build_options_dir,'configs')
 
         self.prj_locals = locals = locals if locals is not None else {}
         globals = globals if globals is not None else {}
         
-        l = get_config(os.path.basename(options_file),
-                   path    = self._project_dir,
+        get_config(os.path.basename(build_options),
+                   path    = build_options_dir,
                    locals  = locals,
                    globals = globals,
                    )
@@ -170,7 +185,7 @@ class RacyProject(object):
 
         self.base_name = self.prj_locals.get('NAME')
         if not self.base_name:
-            self.base_name = self._opts_file.split(os.path.sep)[-3]
+            self.base_name = os.path.basename(prj_path)
  
 
         self.projects_db    = projects_db
@@ -201,10 +216,11 @@ class RacyProject(object):
         config = ''.join([name, ':', config])
         
         class PRJError(RacyProjectError):
-            """Local exception to handle bad-value with guilty file name"""
+            """Local exception to handle bad-value with guilty options source"""
             def __init__(this, msg):
+                msg = [msg, ". In: {prj._opts_source}"]
                 RacyProjectError.__init__(this,
-                        self, msg + ". File : {prj._opts_file}")
+                        self, ''.join(msg))
 
         allowedvalues.check_value_with_msg(opt, kwargs['option_value'], config,
                 except_class=PRJError)
@@ -219,8 +235,8 @@ class RacyProject(object):
 
     def get_path (self, path = ""):
         """Return base path of project."""
-        path = pathjoin(self.opts_path, '..', '..', path)
-        return os.path.abspath(os.path.normpath(path))
+        path = pathjoin(self.opts_source, '..', '..', path)
+        return abspath(normpath(path))
 
 
     @property
@@ -245,26 +261,20 @@ class RacyProject(object):
     def config (self):
         return self._config
 
-
-    @property
-    def project_dir (self):
-        """Return path of options file"""
-        return self._project_dir
-
     @property
     def vc_dir (self):
-        """Return path of options file"""
-        return pathjoin(self._project_dir, 'vc')
+        """Return directory of vc resrc file"""
+        return pathjoin(self.bin_path, 'vc')
 
     @property
     def root_path (self):
         """Return path of project"""
-        return os.path.dirname(self._project_dir)
+        return self._project_dir
 
     @property
-    def opts_path (self):
+    def opts_source (self):
         """Return path of options file"""
-        return self._opts_file
+        return self._opts_source
 
 
     @cached_property
@@ -370,7 +380,7 @@ class RacyProject(object):
     @cached_property
     def desc(self):
         """Returns a description string of the project"""
-        return "<{prj.name}> [{prj._opts_file}]".format(prj = self)
+        return "<{prj.name}> [{prj._opts_source}]".format(prj = self)
     
 
     @cached_property
@@ -676,9 +686,9 @@ class RacyProject(object):
 
     @cached_property
     def install_rc_path(self):
-        if self.type in ALLEXEC + ALLLIB + BINLIBEXT:
+        if self.type in TYPE_ALLEXEC + TYPE_ALLLIB + BINLIBEXT:
             install_dir = renv.dirs.install_share
-        elif self.type in ALLBUNDLE:
+        elif self.type in TYPE_ALLBUNDLE:
             install_dir = renv.dirs.install_bundle
         else:
             raise RacyProjectError ( self,
@@ -691,11 +701,11 @@ class RacyProject(object):
 
     @cached_property
     def install_path(self):
-        if self.type in ALLEXEC:
+        if self.type in TYPE_ALLEXEC:
             install_dir = renv.dirs.install_bin
-        elif self.type in ALLLIB + BINLIBEXT:
+        elif self.type in TYPE_ALLLIB + BINLIBEXT:
             install_dir = renv.dirs.install_lib
-        elif self.type in ALLBUNDLE:
+        elif self.type in TYPE_ALLBUNDLE:
             install_dir = pathjoin(renv.dirs.install_bundle,
                     self.versioned_name)
         else:
@@ -707,7 +717,7 @@ class RacyProject(object):
 
     @cached_property
     def install_pkg_path(self):
-        if self.type in ALLEXEC + ALLLIB + BINLIBEXT:
+        if self.type in TYPE_ALLEXEC + TYPE_ALLLIB + BINLIBEXT:
             install_dir = renv.dirs.install_binpkg
         else:
             raise RacyProjectError ( self,
@@ -722,10 +732,10 @@ class InstallableRacyProject(RacyProject):
 
     env = None
 
-    def __init__(self, options_file, env, **kwargs):
+    def __init__(self, build_options, env, **kwargs):
         self.env = env.Clone()
         super(InstallableRacyProject,self).__init__(
-                options_file = options_file, 
+                build_options = build_options, 
                 **kwargs
                 )
 
@@ -744,7 +754,7 @@ class InstallableRacyProject(RacyProject):
                                             return_orig = True
                                             )
             def rmbo(L):
-                return [os.path.abspath(el) 
+                return [abspath(el) 
                         for el in L if 'build.options' not in el]
             sources_files = rmbo(sources_files)
             install_files = rmbo(install_files)
@@ -808,11 +818,11 @@ class InstallableRacyProject(RacyProject):
         if 'rc' in opts:
             result += self.install_rc()
 
-        if ('bin' in opts and self.type in ALLBIN):
+        if ('bin' in opts and self.type in TYPE_ALLBIN):
             func = ''.join(['install_', self.type])
             result += getattr(self,func)()
 
-        if 'pkg' in opts and self.type not in ALLBIN:
+        if 'pkg' in opts and self.type not in TYPE_ALLBIN:
             result += self.install_pkg()
 
         return result

@@ -25,6 +25,9 @@ class register(object):
     configured = {}
 
     def __call__(self, cls, src=None):
+        self.register(cls, src)
+
+    def register(self, cls, src=None):
         if issubclass(cls, LibExt):
             src = traceback.extract_stack()[-2][0] # caller's file
 
@@ -138,10 +141,12 @@ class register(object):
     def configure(self, prj, lib, opts = []):
         if hasattr(lib, '__iter__'):
             for el in lib:
-                self.configure(prj, el)
+                self.configure(prj, el, opts)
         else:
-            libname  = getattr(lib,'name',lib).lower()
-            libreg = self.libs
+            libname = getattr(lib,'name',lib).lower()
+            libreg  = self.libs
+            libext  = None
+
             if libname in libreg and libreg[libname]:
                 from racy.renv.options import get_option
 
@@ -167,7 +172,7 @@ class register(object):
 
                 if version != binpkg_versions.setdefault(libname,version):
                     msg = ( 'Libext <{libext}> required version {req} (in {prj} '
-                            '[{prj.opts_path}]) is in conflict with currently'
+                            '[{prj.opts_source}]) is in conflict with currently'
                             'configured version {current}. (You may need to '
                             'update your "BINPKG_VERSIONS" variable)' 
                             )
@@ -183,6 +188,13 @@ class register(object):
                 libext = factory(libname, get_option('DEBUG') != 'release')
                 libext.__src__ = factory.__src__
         
+            else: 
+                msg = ( 'Libext <{libext}> not found, '
+                        'required by {prj} ({prj.opts_source})' )
+                raise racy.LibExtException, msg.format(libext=lib,prj=prj)
+
+
+            if libext:
                 depends_opts = list(set(opts + ['nolink']))
 
                 if 'forcelink' in opts:
@@ -192,10 +204,6 @@ class register(object):
                 libext.configure(prj.env, opts)
 
                 self.configured.setdefault(libname, libext)
-            else: 
-                msg = ( 'Libext <{libext}> not found, '
-                        'required by {prj} ({prj.opts_path})' )
-                raise racy.LibExtException, msg.format(libext=lib,prj=prj)
 
 
 

@@ -33,10 +33,10 @@ class DoxygenProject(ConstructibleRacyProject):
                    'ConstructibleRacyProject as first argument')
             raise DoxygenError( self, msg )
 
-        opt_file = prj.opts_path
+        opts = prj.opts_source
 
         super(DoxygenProject, self).__init__(
-                                        options_file = opt_file, 
+                                        build_options = opts, 
                                         config = config,
                                         **prj.projects_db.prj_args
                                         )

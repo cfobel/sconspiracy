@@ -129,6 +129,11 @@ class CppUnitProject(ConstructibleRacyProject):
     @memoize
     def result (self, deps_results):
         res = super(CppUnitProject, self).result(deps_results=deps_results)
+        return res
+
+    @memoize
+    def install (self, opts = []):
+        res = super(CppUnitProject, self).install(opts = opts)
 
         if self.get_lower(self.test_run_var_name) == 'yes':
             if self.type == 'shared':
@@ -139,21 +144,18 @@ class CppUnitProject(ConstructibleRacyProject):
             install_lib = opjoin(dirs.install,"lib")
 
             env_var = {
-             "linux"  : 'LD_LIBRARY_PATH'  ,
-             "darwin" : 'DYLD_LIBRARY_PATH',
-             "windows": 'PATH'             ,
-            }
+                    "linux"  : 'LD_LIBRARY_PATH'  ,
+                    "darwin" : 'DYLD_LIBRARY_PATH',
+                    "windows": 'PATH'             ,
+                    }
             env_var = env_var[racy.renv.system()]
 
             run_env.AppendENVPath(env_var, install_lib)
             run_test = run_env.Alias('run'+self.name, res, res[0].abspath)
+            run_env.Depends(run_test, res[0])
             run_env.AlwaysBuild(run_test)
 
             res += run_test
 
         return res
-
-    @memoize
-    def install (self, opts = []):
-        return super(CppUnitProject, self).install(opts = [])
 

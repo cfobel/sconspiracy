@@ -112,7 +112,6 @@ class RacyProject(object):
     methods to get project informations."""
 
     _compiler      = None
-    _config_dir    = None
     _config        = None
     _debug         = None
     _opts_source   = None
@@ -135,6 +134,7 @@ class RacyProject(object):
 
         if not build_options_is_dict and os.path.isfile(build_options):
             build_options = abspath(normpath(build_options))
+            build_options_dir = os.path.dirname(build_options)
             if prj_path is None:
                 prj_path = pathjoin(build_options, '..', '..')
                 prj_path = abspath(normpath(prj_path))
@@ -149,11 +149,12 @@ class RacyProject(object):
             if error:
                 raise RacyProjectError( self, ' '.join(error) )
 
-        build_options_dir = pathjoin(prj_path, 'bin')
+            build_options_dir = pathjoin(prj_path,'bin')
 
+
+        config_dir  = pathjoin(build_options_dir,'configs')
         self._opts_source = build_options
         self._project_dir = prj_path
-        self._config_dir  = pathjoin(build_options_dir,'configs')
 
         self.prj_locals = locals = locals if locals is not None else {}
         globals = globals if globals is not None else {}
@@ -172,13 +173,13 @@ class RacyProject(object):
         if not config:
             global_config = renv.options.get_option( "CONFIG" )
             has_global_config = os.path.exists(
-                    pathjoin(self._config_dir, global_config))
+                    pathjoin(config_dir, global_config))
             if has_global_config:
                 config = global_config
 
         if config:
             locals = get_config(config,
-                        path          = self._config_dir,
+                        path          = config_dir,
                         locals        = locals,
                         globals       = globals,
                         write_postfix = True,

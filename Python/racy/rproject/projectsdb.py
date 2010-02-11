@@ -191,16 +191,9 @@ class RacyProjectsDB(object):
                                 'TYPE'    : 'bin_libext',
                                 'VERSION' : libext.version,
                                 'NAME'    : libext.name,
-                                }
-                        #buildoptions = os.path.join(libext.__src__,
-                            #'bin','build.options')
-                        #if os.path.exists(buildoptions):
-                            #libextprj = self._make_prj_from(buildoptions,
-                                    #factory=InstallableRacyProject)
-                            #if libextprj.name not in self.installed_libext:
-                                #res += libextprj.install(['bin','rc'])
-                                #self.installed_libext.append(libextprj.name)
 
+                                'LIBEXTFACTORY' : libext,
+                                }
 
                         libextprj = self._make_prj_from(
                                 buildoptions,

@@ -777,7 +777,23 @@ class InstallableRacyProject(RacyProject):
 
     @memoize
     def install_bin_libext (self):
-        return self.install_files(self.lib_path, self.install_path, ['.*'])
+        env = self.env
+        import fnmatch
+        libext = self.get('LIBEXTFACTORY')
+
+        patterns = []
+        patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}*'))
+        if racy.renv.system() == "windows":
+            patterns.append( '{0}.pdb*' )
+            patterns.append( env.subst('{0}${WINDOWSSHLIBMANIFESTSUFFIX}*') )
+
+        for pattern in patterns:
+            matches = []
+            for lib in libext.LIBS:
+                matches.append( fnmatch.translate(pattern.format(lib)) )
+        regex = '|'.join(matches)
+
+        return self.install_files(self.lib_path, self.install_path, regex)
 
     @memoize
     def install_bin_bundle (self):

@@ -131,16 +131,16 @@ class RacyProject(object):
             config = None,
             locals=None, globals=None, projects_db = {}):
 
+        build_options_is_dict = isinstance(build_options, dict)
 
-        if os.path.isfile(build_options):
+        if not build_options_is_dict and os.path.isfile(build_options):
             build_options = abspath(normpath(build_options))
-            build_options_dir = os.path.dirname(build_options)
             if prj_path is None:
                 prj_path = pathjoin(build_options, '..', '..')
                 prj_path = abspath(normpath(prj_path))
         else :
             error = []
-            if not isinstance(build_options, dict):
+            if not build_options_is_dict:
                 error.append('build_options:"{0}" is neither a file nor a '
                         'dictionnary.'.format(build_options))
             if prj_path is None:
@@ -149,6 +149,8 @@ class RacyProject(object):
             if error:
                 raise RacyProjectError( self, ' '.join(error) )
 
+        build_options_dir = pathjoin(prj_path, 'bin')
+
         self._opts_source = build_options
         self._project_dir = prj_path
         self._config_dir  = pathjoin(build_options_dir,'configs')
@@ -156,12 +158,17 @@ class RacyProject(object):
         self.prj_locals = locals = locals if locals is not None else {}
         globals = globals if globals is not None else {}
         
-        get_config(os.path.basename(build_options),
-                   path    = build_options_dir,
-                   locals  = locals,
-                   globals = globals,
-                   )
+        if build_options_is_dict:
+            locals.update(build_options)
+        else:
+            get_config(os.path.basename(build_options),
+                    path    = build_options_dir,
+                    locals  = locals,
+                    globals = globals,
+                    )
 
+        # Check if one project config matches the global specified CONFIG
+        # if a specific config has not been specified
         if not config:
             global_config = renv.options.get_option( "CONFIG" )
             has_global_config = os.path.exists(
@@ -235,7 +242,7 @@ class RacyProject(object):
 
     def get_path (self, path = ""):
         """Return base path of project."""
-        path = pathjoin(self.opts_source, '..', '..', path)
+        path = pathjoin(self._project_dir, path)
         return abspath(normpath(path))
 
 

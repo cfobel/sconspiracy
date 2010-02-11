@@ -136,13 +136,13 @@ class RacyProjectsDB(object):
 
 
     @memoize
-    def _make_prj_from(self, file, args = {},
+    def _make_prj_from(self, source, args = {},
             factory = ConstructibleRacyProject):
         kwargs = {}
         kwargs.update(self.prj_args)
         kwargs.update(args)
 
-        prj = factory(build_options=file, **kwargs)
+        prj = factory(build_options=source, **kwargs)
 
         return prj
 
@@ -187,16 +187,29 @@ class RacyProjectsDB(object):
 
                 for libext in racy.rlibext.register.configured.values():
                     if hasattr(libext, '__src__'):
-                        buildoptions = os.path.join(libext.__src__,
-                            'bin','build.options')
-                        if os.path.exists(buildoptions):
-                            libextprj = self._make_prj_from(buildoptions,
-                                    factory=InstallableRacyProject)
-                            if libextprj.name not in self.installed_libext:
-                                res += libextprj.install(['bin','rc'])
-                                self.installed_libext.append(libextprj.name)
+                        buildoptions = {
+                                'TYPE'    : 'bin_libext',
+                                'VERSION' : libext.version,
+                                'NAME'    : libext.name,
+                                }
+                        #buildoptions = os.path.join(libext.__src__,
+                            #'bin','build.options')
+                        #if os.path.exists(buildoptions):
+                            #libextprj = self._make_prj_from(buildoptions,
+                                    #factory=InstallableRacyProject)
+                            #if libextprj.name not in self.installed_libext:
+                                #res += libextprj.install(['bin','rc'])
+                                #self.installed_libext.append(libextprj.name)
 
-                            
+
+                        libextprj = self._make_prj_from(
+                                buildoptions,
+                                args = {'prj_path' : libext.__src__},
+                                factory=InstallableRacyProject)
+                        if libextprj.name not in self.installed_libext:
+                            res += libextprj.install(['bin','rc'])
+                            self.installed_libext.append(libextprj.name)
+                
                 pack = []
                 #pack = prj.env.Package(
                         ##source=res,
@@ -208,7 +221,7 @@ class RacyProjectsDB(object):
                         #DESCRIPTION='fwCore lib',
                         #SUMMARY='f4s basics',
                         #VENDOR='IRCAD',
-                        #X_MSI_LANGUAGE = 'En',
+                        #X_MSI_LANGUAGE = '1033',
                         #)
 
                 res = prj.env.Alias(prj.full_name, res+pack)

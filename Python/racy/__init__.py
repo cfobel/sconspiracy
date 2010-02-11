@@ -113,11 +113,20 @@ class RacyAttributeException(RacyException):
         self.attr = attr
         self.msg = msg
     def __str__(self):
-        msg = ("In file {file[0]}:{file[1]}, {obj.__class__} has no attribute <{attr}>, can't "
-               "{msg}")
+        desc = getattr(self.obj, 'desc', None)
+        msg = ("In file {file[0]}:{file[1]}, {obj.__class__} has no attribute "
+               "<{attr}>, can't {msg}.{desc}")
         
-        msg = msg.format(obj=self.obj, attr=self.attr, msg=self.msg, 
-                file = self.traceback[-3] )
+        descmsg = ""
+        if desc:
+            descmsg = ' Instance description: {1}]]'.format(os.linesep,desc)
+        msg = msg.format(
+                obj  = self.obj,
+                desc = descmsg,
+                attr = self.attr,
+                msg  = self.msg,
+                file = self.traceback[-3]
+                )
         return msg
 
 

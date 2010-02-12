@@ -10,6 +10,8 @@ import os
 
 import racy
 
+from racy import LibExtException
+
 @racy.no_undef_attr_read
 @racy.no_undef_attr_write
 class LibExt(object):
@@ -63,13 +65,15 @@ class LibExt(object):
 
         if infosource is None:
             infosource = self.__class__
+            infosource_instance = self
         else:
+            infosource_instance = infosource()
             self.basepath = getattr(infosource, 'basepath',
                                     infosource.__path__[0])
             self.basepath = os.path.abspath(self.basepath)
 
         if self.basepath is racy.Undefined:
-            raise LibExtException, "Unable to find {0} base path"
+            raise LibExtException, "Unable to find {0} base path".format(name)
 
         names = [
                 'register_names', 'depends_on'    ,
@@ -79,17 +83,32 @@ class LibExt(object):
                 'cpppath'       , 'cppdefines'    ,
                 'frameworks'    , 'frameworkpath' ,
                 'cxxflags'      , 'linkflags'     ,
-                'parse_configs' 
+                'parse_configs' ,
+                'scons_tools'   , 'scons_env'     ,
                 ]
+        import copy
         for name in names:
-            classattr = getattr(infosource, name, getattr(self, name))
-            #check if classattr is not a property
-            if not hasattr(classattr,'getter'):
-                attr = getattr(infosource, name, getattr(self, name))
-                setattr(self,name, list(attr))
+            attr = getattr(infosource_instance, name, getattr(self, name))
 
-        self.version = racy.rutils.Version(infosource.version)
-        self.arch = infosource.arch
+            if callable(attr):
+                try:
+                    attr = attr()
+                except TypeError:
+                    msg = ("libext callable members must take only one "
+                            "argument (self). '{attr}' method is"
+                            "invalid  in '{lib}' __init__.py file.")
+                    raise LibExtException, msg.format(lib=self.name, attr=name)
+
+            if hasattr(attr,'__iter__'):
+                setattr(self,name, copy.deepcopy(attr))
+            else:
+                msg = ("libext members must be a simple type (list, dict, str"
+                       "...), a callable, or a property. '{attr}' attribute is"
+                       "invalid  in '{lib}' __init__.py file.")
+                raise LibExtException, msg.format(lib=self.name, attr=name)
+
+        self.version = racy.rutils.Version(infosource_instance.version)
+        self.arch = infosource_instance.arch
 
         self.init()
         platform_init()

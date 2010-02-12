@@ -801,7 +801,12 @@ class InstallableRacyProject(RacyProject):
 
         regex = '|'.join(matches)
 
-        return self.install_files(self.lib_path, self.install_path, regex)
+        if regex:
+            res = self.install_files(self.lib_path, self.install_path, regex)
+        else:
+            res = []
+
+        return res
 
     @memoize
     def install_bin_bundle (self):

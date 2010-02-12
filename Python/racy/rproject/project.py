@@ -788,6 +788,8 @@ class InstallableRacyProject(RacyProject):
             patterns.append( '{0}.pdb*' )
             patterns.append( env.subst('{0}${WINDOWSSHLIBMANIFESTSUFFIX}*') )
 
+        patterns.extend(libext.libs_install)
+
         matches = []
         for pattern in patterns:
             for lib in libext.LIBS:

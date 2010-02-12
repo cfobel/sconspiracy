@@ -29,6 +29,8 @@ class LibExt(object):
 
     libpath        = []
     libs           = []
+    libs_install   = []
+
     extra_libs     = []
 
     cpppath        = []
@@ -53,7 +55,8 @@ class LibExt(object):
     __src__ = None
 
     def __init__(self, name, debug, infosource=None):
-        func = getattr(self, racy.renv.system(), self.not_managed)
+        platform_init = getattr(self, racy.renv.system(),
+                                self.platform_not_managed)
 
         self.name = name
         self.debug = debug
@@ -71,7 +74,8 @@ class LibExt(object):
         names = [
                 'register_names', 'depends_on'    ,
                 'binpath'       ,
-                'libpath'       , 'libs'          , 'extra_libs',
+                'libpath'       , 'libs'          ,
+                'libs_install'  , 'extra_libs'    ,
                 'cpppath'       , 'cppdefines'    ,
                 'frameworks'    , 'frameworkpath' ,
                 'cxxflags'      , 'linkflags'     ,
@@ -88,7 +92,7 @@ class LibExt(object):
         self.arch = infosource.arch
 
         self.init()
-        func()
+        platform_init()
 
     def init(self):
         pass
@@ -102,7 +106,7 @@ class LibExt(object):
     def windows(self):
         pass
 
-    def not_managed(self):
+    def platform_not_managed(self):
         msg = '<{0}> system is not managed.'.format(racy.renv.system())
         from racy import LibExtException
         raise LibExtException, msg

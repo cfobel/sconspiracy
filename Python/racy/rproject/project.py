@@ -783,17 +783,22 @@ class InstallableRacyProject(RacyProject):
         libext = self.get('LIBEXTFACTORY')
 
         patterns = []
-        patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}*'))
         if racy.renv.system() == "windows":
+            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
             patterns.append( '{0}.pdb*' )
             patterns.append( env.subst('{0}${WINDOWSSHLIBMANIFESTSUFFIX}*') )
+        else:
+            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}*'))
 
-        patterns.extend(libext.libs_install)
 
         matches = []
         for pattern in patterns:
             for lib in libext.LIBS:
                 matches.append( fnmatch.translate(pattern.format(lib)) )
+
+        for pattern in libext.libs_install:
+            matches.append( fnmatch.translate(pattern) )
+
         regex = '|'.join(matches)
 
         return self.install_files(self.lib_path, self.install_path, regex)

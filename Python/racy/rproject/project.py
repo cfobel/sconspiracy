@@ -787,6 +787,9 @@ class InstallableRacyProject(RacyProject):
             patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
             patterns.append( '{0}.pdb*' )
             patterns.append( env.subst('{0}${WINDOWSSHLIBMANIFESTSUFFIX}*') )
+        elif racy.renv.system() == "darwin":
+            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
+            patterns.append( env.subst('${SHLIBPREFIX}{0}.*${SHLIBSUFFIX}'))
         else:
             patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}*'))
 

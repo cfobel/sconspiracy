@@ -59,7 +59,7 @@ def generate(env):
     else :
         merge_lists_of_dict(locals(), constants.COMMON_DEBUG)
 
-        CXXFLAGS  += [ '-O0', '-ggdb3' ]
+        CXXFLAGS  += [ '-O0', '-ggdb2' ]
 
     env['TOOLINFO'] = {}
     env['TOOLINFO']['NAME']    = 'gcc'

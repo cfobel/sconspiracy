@@ -83,10 +83,14 @@ class Environment(Env):
             racy_sconsdir     = dirname(sconsign_file[0])
         else:
             racy_sconsdir     = '.'
-        racy_sconsignfile = join(racy_sconsdir,'.sconsign.dblite')
-        racy_sconsignfile = abspath(racy_sconsignfile)
-        self.SConsignFile(racy_sconsignfile)
-        rlog.info.log(".sconsign file", racy_sconsignfile)
+
+        racy_db_file_default = join(racy_sconsdir,'.sconsign.dblite')
+        racy_db_file_default = abspath(racy_db_file_default)
+
+        racy_db_file = get_option('RACY_DBFILE', default=racy_db_file_default)
+
+        self.SConsignFile(racy_db_file)
+        rlog.info.log(".sconsign file", racy_db_file)
 
         import os
         from racy.renv.configs.commandline import get_opts_help

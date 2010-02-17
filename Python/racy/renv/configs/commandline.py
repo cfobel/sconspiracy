@@ -18,6 +18,7 @@ ALLOWED_COMMANDLINE_OPTIONS = [
         'USEVISIBILITY'    ,
         'CXX'              ,
 
+        'RACY_DBFILE'      ,
         'RACY_BUILD_DIR'   ,
         'RACY_INSTALL_DIR' ,
         'RACY_BINPKGS_DIR' ,
@@ -52,6 +53,7 @@ COMMANDLINE_OPTIONS_DESC = {
 
         'USEVISIBILITY'     : 'Switch visibility mode'                       ,
 
+        'RACY_DBFILE'       : 'Scons\'s signatures file'                     ,
         'RACY_BUILD_DIR'    : 'Build dir path'                               ,
         'RACY_INSTALL_DIR'  : 'Install dir path'                             ,
         'RACY_BINPKGS_DIR'  : 'Binaries packages path'                       ,

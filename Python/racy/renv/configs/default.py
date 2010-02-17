@@ -24,6 +24,8 @@ JOBS              = 'auto'
 
 RACY_DEBUG        = 'no'
 
+RACY_DBFILE       = ''
+
 BINPKG_VERSIONS   = {}
 
 # --- individual projects variables ---

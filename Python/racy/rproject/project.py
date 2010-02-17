@@ -1052,11 +1052,14 @@ class ConstructibleRacyProject(InstallableRacyProject):
                 raise RacyProjectError( prj, msg)
 
         else:
+            dep_results = []
+            for dep in prj.source_libs_deps + prj.source_bundles_deps:
+                dep_results.append( dep.build() )
             result = self.result(deps_results=False)
+
             if result:
-                for dep in prj.source_libs_deps + prj.source_bundles_deps:
-                    depresult = dep.build()
-                    env.Depends(result, depresult)
+                for dep_result in dep_results:
+                    env.Depends(result, dep_result)
             else:
                 #case when bundle is codeless
                 for bun in prj.source_bundles_deps:

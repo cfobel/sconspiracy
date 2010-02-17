@@ -79,6 +79,7 @@ class LibExt(object):
                 'register_names', 'depends_on'    ,
                 'binpath'       ,
                 'libpath'       , 'libs'          ,
+                'debug_suffix'  ,
                 'libs_install'  , 'extra_libs'    ,
                 'cpppath'       , 'cppdefines'    ,
                 'frameworks'    , 'frameworkpath' ,
@@ -99,13 +100,16 @@ class LibExt(object):
                             "invalid  in '{lib}' __init__.py file.")
                     raise LibExtException, msg.format(lib=self.name, attr=name)
 
-            if hasattr(attr,'__iter__'):
+            if isinstance(attr,basestring) or hasattr(attr,'__iter__'):
                 setattr(self,name, copy.deepcopy(attr))
             else:
-                msg = ("libext members must be a simple type (list, dict, str"
-                       "...), a callable, or a property. '{attr}' attribute is"
-                       "invalid  in '{lib}' __init__.py file.")
-                raise LibExtException, msg.format(lib=self.name, attr=name)
+                msg = ("libext members must be a allowed type (list, dict, str"
+                       "), a callable, or a property. '{attr}' attribute type "
+                       "({attrtype}) is invalid  in '{lib}' __init__.py file.")
+                raise LibExtException, msg.format(
+                        lib=self.name,
+                        attr=name,
+                        attrtype=type(attr))
 
         self.version = racy.rutils.Version(infosource_instance.version)
         self.arch = infosource_instance.arch

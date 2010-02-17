@@ -185,6 +185,7 @@ class RacyProjectsDB(object):
                     opts += ['pkg'] if buildpkg else []
                     res += p.install(opts = opts) 
 
+                prj_targets = list(res)
                 for libext in racy.rlibext.register.configured.values():
                     if hasattr(libext, '__src__'):
                         buildoptions = {
@@ -200,7 +201,9 @@ class RacyProjectsDB(object):
                                 args = {'prj_path' : libext.__src__},
                                 factory=InstallableRacyProject)
                         if libextprj.name not in self.installed_libext:
-                            res += libextprj.install(['bin','rc'])
+                            libext_targets = libextprj.install(['bin','rc'])
+                            prj.env.Depends(prj_targets, libext_targets)
+                            res += libext_targets
                             self.installed_libext.append(libextprj.name)
                 
                 pack = []

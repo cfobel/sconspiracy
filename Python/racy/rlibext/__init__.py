@@ -195,6 +195,10 @@ class register(object):
 
 
             if libext:
+                # calling dependencies of libext.
+                # Except if 'forcelink' is present in the options,
+                # prj won't link agains dependents libext
+
                 depends_opts = list(set(opts + ['nolink']))
 
                 if 'forcelink' in opts:

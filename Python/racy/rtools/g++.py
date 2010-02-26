@@ -15,6 +15,7 @@ gplusplus = get_tool('SCons.Tool.g++')
 
 exists = gplusplus.exists
 
+
 def generate(env):
     """Add Builders and construction variables for g++ to an Environment."""
 
@@ -23,6 +24,7 @@ def generate(env):
         gplusplus.compilers = [compiler]
     gplusplus.generate(env)
     env.__class__.ManageOption = manage_options
+    env.__class__.InstallFileFilter = install_file_filter
 
     CXXFLAGS = [
             '-pipe'             ,
@@ -129,5 +131,8 @@ def manage_options(env, prj, options):
                     ]
             env.Append(SHLINKFLAGS = flags)
 
+
+def install_file_filter(env, f):
+    return hasattr(f,"get_path")
 
 

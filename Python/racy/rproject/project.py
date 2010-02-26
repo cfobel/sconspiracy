@@ -1098,8 +1098,8 @@ class ConstructibleRacyProject(InstallableRacyProject):
         result = build_results
 
         if result and prj.sources:
-            #do not install alias-like targets
-            to_install = [r for r in result if hasattr(r,"get_path")]
+            filter = env.InstallFileFilter
+            to_install = [r for r in result if filter(r)]
             result = env.Install(dir = prj.install_path, source = to_install)
         else:
             result = []

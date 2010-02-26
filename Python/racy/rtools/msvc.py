@@ -26,6 +26,7 @@ def generate(env):
 
     msvc.generate(env)
     env.__class__.ManageOption = manage_options
+    env.__class__.InstallFileFilter = install_file_filter
 
     # Run manifest tool as part of the link step
     # The number at the end of the line indicates the file type (1: EXE; 2:DLL).
@@ -135,6 +136,16 @@ def manage_options(env, prj, options):
     if os.path.exists( rc_file ):
         res_file = env.RES(rc_file)
         prj.special_source.append(res_file)
+
+
+def install_file_filter(env, f):
+    to_install = [ '.exe', '.dll', '.pdb']
+    res = hasattr(f,"get_path")
+    if res:
+        res = any(res.get_path().endswith(exit) for ext in to_install)
+    return res
+            
+
 
 
 

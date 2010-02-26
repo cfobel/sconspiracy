@@ -918,7 +918,8 @@ class ConstructibleRacyProject(InstallableRacyProject):
         
         LIBPATH  = prj.get('STDLIBPATH')
 
-        lib_dep = prj.lib_rec_deps if self.is_exec else prj.source_libs_deps
+        need_rec_deps = self.is_exec or racy.renv.system()=='windows'
+        lib_dep = prj.lib_rec_deps if need_rec_deps else prj.source_libs_deps
         LIBPATH += [ self.env.Dir(lib.build_dir) for lib in lib_dep]
         LIBS = [ lib.full_name for lib in lib_dep ]
 
@@ -1118,11 +1119,6 @@ class ConstructibleRacyProject(InstallableRacyProject):
         env = self.env
         arch = renv.options.get_option('ARCH')
         depends = list(self.uses + self.libs + self.bundles)
-        #buildoption  = [
-                #('TYPE'   , ''.join(['bin_', self.type])),
-                #('VERSION', self.version.normalized )    ,
-                #('NAME'   , self.name )                  ,
-                #]
 
         info = [
                 ('    register_names', [self.name]   )           ,
@@ -1151,15 +1147,12 @@ class ConstructibleRacyProject(InstallableRacyProject):
             "class Description(object):",
             get_content(info)
             ])
-        #bocontent = get_content(buildoption)
 
         pkg_path = self.install_pkg_path
         infofile = pathjoin(pkg_path, '__init__.py')
-        #bofile   = pathjoin(pkg_path, constants.BIN_PATH, 'build.options')
 
         res = []
         res += env.WriteFile(infofile, infocontent)
-        #res += env.WriteFile(bofile, bocontent)
 
         return res
 

@@ -229,8 +229,9 @@ class LibExt(object):
                 from racy import LibExtException
                 raise LibExtException, e
 
-            if nolink:
-                for name in ['LIBPATH','LIBS','LINKFLAGS']:
+        if nolink:
+            for name in ['LIBPATH','LIBS','LINKFLAGS']:
+                if env.has_key(name):
                     env[name] = back_env[name]
 
         env.AppendUnique(**conf)

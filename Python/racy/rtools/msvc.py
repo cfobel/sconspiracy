@@ -142,7 +142,7 @@ def install_file_filter(env, f):
     to_install = [ '.exe', '.dll', '.pdb']
     res = hasattr(f,"get_path")
     if res:
-        res = any(f.get_path().endswith(exit) for ext in to_install)
+        res = any(f.get_path().endswith(ext) for ext in to_install)
     return res
             
 

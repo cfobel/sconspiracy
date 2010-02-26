@@ -281,7 +281,7 @@ def get_default_visualstudio8_suite(env):
 
     return suite
 
-	
+
 def get_msvs_install_dirs(version = None, vs8suite = None):
     """
     Get installed locations for various msvc-related products, like the .NET SDK

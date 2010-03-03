@@ -33,6 +33,10 @@ class Plugin(object):
     
 
     #----------------------------------------
+    def init(self):
+        return False
+
+    #----------------------------------------
     def has_additive(self, prj):
         return False
 
@@ -173,6 +177,7 @@ class PluginRegistry(object):
                         old  = oldpl,
                         name = name
                         )
+            plug.init()
         else:
             msg = ("<{0}> is not a python module, "
                    "can't load as SConspiracy plugin.")
@@ -206,6 +211,9 @@ class PluginRegistry(object):
     def get_env_addons(self, env):
         return self.get_plugins_result(env, "env_addon")
 
+    def initialize_plugins(self):
+        for p in self.plugins.values():
+            p.Plugin.init()
 
 register = PluginRegistry()
 del PluginRegistry

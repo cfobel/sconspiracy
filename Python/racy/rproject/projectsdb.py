@@ -9,7 +9,7 @@ import os
 
 import racy
 import racy.rlog     as rlog
-import racy.rplugins as yplug
+import racy.rplugins as rplug
 
 from racy.renv             import constants
 from racy.renv.options     import get_option
@@ -115,7 +115,7 @@ class RacyProjectsDB(object):
     def get_additive_projects(self, prj):
         res = []
         for dep in (prj,) + prj.source_rec_deps:
-            res += yplug.register.get_additive_projects(dep)
+            res += rplug.register.get_additive_projects(dep)
 
         return res
 

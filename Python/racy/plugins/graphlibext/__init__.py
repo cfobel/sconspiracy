@@ -56,10 +56,12 @@ class Plugin(racy.rplugins.Plugin):
                     )
                 fp=None
                 try:
-                    os.mkdir(GRAPHLIBEXT_INSTALL_PATH)
+                    if not os.path.exists(GRAPHLIBEXT_INSTALL_PATH):
+                        os.mkdir(GRAPHLIBEXT_INSTALL_PATH)
                     fp = open(file, 'w')
                     fp.write(graph)
                     fp.flush()
+                    racy.print_msg("Written: {0}".format(file))
                 except Exception,e:
                     racy.print_error( 'GraphLibExt error', GraphLibExtError(e) )
                 finally:

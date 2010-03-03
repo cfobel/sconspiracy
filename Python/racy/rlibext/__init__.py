@@ -27,7 +27,8 @@ class register(object):
     def __call__(self, cls, src=None):
         self.register(cls, src)
 
-    def register(self, cls, src=None):
+    def register(reg, cls, src=None):
+        self = reg
         if issubclass(cls, LibExt):
             src = traceback.extract_stack()[-2][0] # caller's file
 
@@ -80,12 +81,29 @@ class register(object):
 
                 racy.renv.environment.add_var(vars)
 
-
-    def load_binpkgs(self, path):
+    def load_module(reg, module, callback=register):
+        import types
         from racy.renv.options import get_option
         arch     = get_option('ARCH')
         debug    = get_option('DEBUG') != 'release'
         platform = get_option('PLATFORM')
+        for key, obj in module.__dict__.items():
+            if not key.startswith('_'):
+                if isinstance(obj,(types.ClassType,types.TypeType)):
+                    is_usable = (
+                            obj.arch == arch,
+                            obj.platform == platform,
+                            obj.debug == debug,
+                            )
+                    if all(is_usable):
+                        srcpath = module.__path__[0]
+                        obj.__path__ = [srcpath]
+
+                        callback( reg=reg, cls=obj, src=srcpath)
+
+
+
+    def load_binpkgs(reg, path, callback=load_module):
         modules  = []
 
         for root, dirs, files in os.walk(path):
@@ -94,7 +112,6 @@ class register(object):
                 modules.append(os.path.split(root))
 
         import imp
-        import types
         for path, name in modules:
             desc = imp.find_module(name, [path])
 
@@ -105,20 +122,7 @@ class register(object):
                 if fp:
                     fp.close()
 
-            for key, obj in module.__dict__.items():
-                if not key.startswith('_'):
-                    if isinstance(obj,(types.ClassType,types.TypeType)):
-                        is_usable = (
-                                obj.arch == arch,
-                                obj.platform == platform,
-                                obj.debug == debug,
-                                )
-                        if all(is_usable):
-                            srcpath = os.path.join(path,name)
-                            obj.__path__ = [srcpath]
-                            self(obj, srcpath)
-
-
+            callback(reg=reg, module=module)
 
     def is_available(self, lib, compiler=None, version=None):
         if version is None:
@@ -188,7 +192,7 @@ class register(object):
                 libext = factory(libname, get_option('DEBUG') != 'release')
                 libext.__src__ = factory.__src__
         
-            else: 
+            else:
                 msg = ( 'Libext <{libext}> not found, '
                         'required by {prj} ({prj.opts_source})' )
                 raise racy.LibExtException, msg.format(libext=lib,prj=prj)

@@ -87,7 +87,9 @@ class Environment(Env):
         racy_db_file_default = join(racy_sconsdir,'.sconsign.dblite')
         racy_db_file_default = abspath(racy_db_file_default)
 
-        racy_db_file = get_option('RACY_DBFILE', default=racy_db_file_default)
+        racy_db_file = get_option('RACY_DBFILE')
+        if not racy_db_file:
+            racy_db_file = racy_db_file_default
 
         self.SConsignFile(racy_db_file)
         rlog.info.log(".sconsign file", racy_db_file)

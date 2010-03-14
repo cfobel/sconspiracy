@@ -139,7 +139,7 @@ def manage_options(env, prj, options):
 
 
 def install_file_filter(env, f):
-    to_install = [ '.exe', '.dll', '.pdb']
+    to_install = [ '.exe', '.dll', '.pdb', '.manifest']
     res = hasattr(f,"get_path")
     if res:
         res = any(f.get_path().endswith(ext) for ext in to_install)

@@ -30,10 +30,10 @@ def generate(env):
 
     # Run manifest tool as part of the link step
     # The number at the end of the line indicates the file type (1: EXE; 2:DLL).
-#    if '8' in env['MSVS']['VERSION'] :
-#        MTCOM = 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;'
-#        env['LINKCOM']   = [env['LINKCOM']  , MTCOM + '1']
-#        env['SHLINKCOM'] = [env['SHLINKCOM'], MTCOM + '2']
+    if re.match('^9', env['MSVS']['VERSION']):
+        MTCOM = 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;'
+        env['LINKCOM']   = [env['LINKCOM']  , MTCOM + '1']
+        env['SHLINKCOM'] = [env['SHLINKCOM'], MTCOM + '2']
     env['WINDOWS_INSERT_MANIFEST'] = True
 
     #env['WIN32_INSERT_DEF']        = 1
@@ -139,7 +139,7 @@ def manage_options(env, prj, options):
 
 
 def install_file_filter(env, f):
-    to_install = [ '.exe', '.dll', '.pdb', '.manifest']
+    to_install = [ '.exe', '.dll', '.pdb']
     res = hasattr(f,"get_path")
     if res:
         res = any(f.get_path().endswith(ext) for ext in to_install)

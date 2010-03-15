@@ -63,7 +63,8 @@ msvs_patterns = [
 
 gcc_patterns = [
         #gcc command
-        ([magenta, blue, magenta]   , ['^[^\W]*(gcc|g\+\+)[0-9\-\.]* .*?', '(\W[^ ]+\.(cpp|cc|cxx|c|so|dylib))' ,'.*$']),
+        #([magenta, blue, magenta]   , ['^[^\W]*(gcc|g\+\+)[0-9\-\.]* .*?', '(\W[^ ]+\.(cpp|cc|cxx|c|so|dylib))' ,'.*$']),
+        ([magenta, blue, magenta]   , ['^[^\W]*(gcc|g\+\+)[0-9\-\.]* .*?', '-o (\W[^ ]+)' ,'.*$']),
 
         #gcc errors, warnings, In *
         ([cfile,cnone,clinenum,cnone, cerror, cyan]   , ['^[^:]+', ':', '\d+', ':\W*', 'error:', '.*$']),

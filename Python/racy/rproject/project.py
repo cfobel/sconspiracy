@@ -918,7 +918,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
         
         LIBPATH  = prj.get('STDLIBPATH')
 
-        need_rec_deps = self.is_exec or racy.renv.system()=='windows'
+        need_rec_deps = self.is_exec or racy.renv.system() in ['windows','darwin']
         lib_dep = prj.lib_rec_deps if need_rec_deps else prj.source_libs_deps
         LIBPATH += [ self.env.Dir(lib.build_dir) for lib in lib_dep]
         LIBS = [ lib.full_name for lib in lib_dep ]

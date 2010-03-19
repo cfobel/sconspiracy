@@ -205,7 +205,7 @@ class register(object):
 
                 depends_opts = list(set(opts + ['nolink']))
 
-                if 'forcelink' in opts or racy.renv.system() == 'windows':
+                if 'forcelink' in opts or racy.renv.system() in ['windows','darwin']:
                     opts = list( set(opts) - set(['nolink']) )
 
                 self.configure(prj, libext.depends_on, depends_opts)

@@ -61,7 +61,10 @@ def generate(env):
     else :
         merge_lists_of_dict(locals(), constants.COMMON_DEBUG)
 
-        CXXFLAGS  += [ '-O0', '-ggdb2' ]
+        gdb_level = 'gdb3'
+        if get_option('PLATFORM') == constants.MACOSX:
+            gdb_level = 'gdb2'
+        CXXFLAGS  += [ '-O0', '-g' + gdb_level ]
 
     env['TOOLINFO'] = {}
     env['TOOLINFO']['NAME']    = 'gcc'
@@ -86,6 +89,10 @@ def generate(env):
 def manage_options(env, prj, options):
     CPPDEFINES = []
     CXXFLAGS   = []
+
+    if is_true(options.get('WARNINGSASERRORS', 'no')):
+        CXXFLAGS += ['-Werror']
+
     if 'OPTIMIZATIONLEVEL' in options:
         CXXFLAGS += ['-O{0}'.format(options['OPTIMIZATIONLEVEL'])]
 

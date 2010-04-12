@@ -32,6 +32,7 @@ CONSOLE       = ['yes','no']
 #TEST          = ['no', 'exec', 'xml', 'shared']
 
 #OPTIMIZATIONLEVEL = 0
+WARNINGSASERRORS = ['yes','no']
 
 
 BUILD         = ['yes','no']

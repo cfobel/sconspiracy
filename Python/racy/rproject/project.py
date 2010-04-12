@@ -1003,8 +1003,9 @@ class ConstructibleRacyProject(InstallableRacyProject):
         env.Prepend(**self.options)
 
         tool_level_options = [
-                'OPTIMIZATIONLEVEL', 
-                'NOLIB', 
+                'WARNINGSASERRORS',
+                'OPTIMIZATIONLEVEL',
+                'NOLIB',
                 'CONSOLE',
                 'USEVISIBILITY',
                 ]

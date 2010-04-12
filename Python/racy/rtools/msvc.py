@@ -93,6 +93,9 @@ def manage_options(env, prj, options):
     if env.get('DEBUG') != 'release' :
         env['PDB'] = os.path.join(prj.build_dir, prj.full_name + ".pdb")
 
+    if is_true(options.get('WARNINGSASERRORS', 'no')):
+        CXXFLAGS += ['/WX']
+
     if str(options.get('OPTIMIZATIONLEVEL')) in ['1','2']:
         CXXFLAGS += ['/O{0}'.format(options['OPTIMIZATIONLEVEL'])]
 

@@ -24,15 +24,17 @@ ALLOWED_COMMANDLINE_OPTIONS = [
         'RACY_BINPKGS_DIR' ,
         'RACY_CODE_DIRS'   ,
         'OPTIMIZATIONLEVEL',
+        'WARNINGSASERRORS' ,
 
         ]
 
 ALLOWED_COMMANDLINE_PRJ_OPTIONS = [
-        'LOGLEVEL'     ,
-        'BUILD'        ,
-        'BUILDDEPS'    ,
-        'BUILDPKG'     ,
-        'USEVISIBILITY',
+        'LOGLEVEL'        ,
+        'BUILD'           ,
+        'BUILDDEPS'       ,
+        'BUILDPKG'        ,
+        'USEVISIBILITY'   ,
+        'WARNINGSASERRORS',
         ]
 
 COMMANDLINE_OPTIONS_DESC = {
@@ -41,6 +43,7 @@ COMMANDLINE_OPTIONS_DESC = {
         'RACY_DEBUG'        : 'Switch SConspiracy to debug mode'                    ,
         'LOGLEVEL'          : 'Log level'                                           ,
         'OPTIMIZATIONLEVEL' : 'Optimization level'                                  ,
+        'WARNINGSASERRORS'  : 'Treat compilation warning as errors '                ,
         'CONFIG'            : 'Select the config to use'                            ,
 
         'BUILD'             : ('If "no", nothing will be compiled. Usefull for '

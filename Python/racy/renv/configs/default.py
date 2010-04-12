@@ -45,6 +45,7 @@ MSVS_VERSION      = ''
 USEVISIBILITY     = 'yes'
 CONSOLE           = 'no'
 OPTIMIZATIONLEVEL = 0
+WARNINGSASERRORS  = 'no'
 
 PREFIX            = []
 POSTFIX           = []

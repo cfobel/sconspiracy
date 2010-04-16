@@ -67,7 +67,7 @@ def check_value_with_msg(opt, val, location, exceptions = {},
                                                     loc   = location,
                                                     allow = allowed
                                                     )
-        raise except_class, msg
+        raise except_class(msg)
 
 def check_dict_with_msg(d, location, exceptions = {},
         except_class = ConfigError):

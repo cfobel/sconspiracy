@@ -223,15 +223,8 @@ class RacyProject(object):
         config = (self.config if self.config else "default")
         config = ''.join([name, ':', config])
         
-        class PRJError(RacyProjectError):
-            """Local exception to handle bad-value with guilty options source"""
-            def __init__(this, msg):
-                msg = [msg, ". In: {prj._opts_source}"]
-                RacyProjectError.__init__(this,
-                        self, ''.join(msg))
-
-        allowedvalues.check_value_with_msg(opt, kwargs['option_value'], config,
-                except_class=PRJError)
+        allowedvalues.check_value_with_msg(opt, kwargs['option_value'], config
+                + " " + str(kwargs['prj']._opts_source))
         res = renv.options.get_option( **kwargs )
         return res
 
@@ -466,7 +459,15 @@ class RacyProject(object):
     def is_bin_lib (self):
         return self.is_bin_shared
 
-
+    @property
+    def is_bin (self):
+        return any( [ 
+            self.is_bin_shared,
+            self.is_bin_lib,
+            self.is_bin_libext,
+            self.is_bin_exec,
+            self.is_bin_bundle,
+            ])
 
     @cached_property
     def is_console (self):
@@ -516,36 +517,50 @@ class RacyProject(object):
 
 
     @cached_property
-    def uses (self):
+    def uses(self):
         """Returns external libs that project depends on"""
         return tuple(LibName(use.strip()) for use in self.get('USE'))
 
 
     def _get_deps(self, item, src_projects, check_versions=True):
         db = self.projects_db
+        items = getattr(self,item)
         try:
             if check_versions and src_projects:
                 def check_vers(dep):
                     try:
-                        return db[dep.register_name].version==dep.version
+                        name = dep.register_name
+                        registered = name in db
+                        return registered and not db[name].version==dep.version
                     except KeyError:
                         raise RacyProjectError(self,
                             ''.join(['Missing <' , dep.register_name , '>. '
                                         'Required by {prj.desc}'])
                                         )
 
-                bad_versions = tuple(dep for dep in getattr(self,item) 
-                            if dep.register_name in db and not check_vers(dep))
+                bad_versions = tuple(dep for dep in items if check_vers(dep))
                 if bad_versions:
                     raise LibBadVersion(bad_versions, self)
 
+
             if src_projects:
-                deps = tuple( db[dep.register_name]
-                                for dep in getattr(self,item)
-                                if dep.register_name in db )
+                def is_src_project(dep):
+                    name = dep.register_name
+                    return name in db and not db[dep.register_name].is_bin
+
+                validator = is_src_project
             else:
-                deps = tuple( dep for dep in getattr(self,item) 
-                        if dep.register_name not in db )
+                def is_bin_prj(dep):
+                    name = dep.register_name
+                    if name not in db:
+                        libext = rlibext.register.get_lib_for_prj(name, self)
+                    return db[name].is_bin
+
+                validator = is_bin_prj
+
+
+            deps = tuple( db[dep.register_name]
+                            for dep in items if validator(dep) )
 
             return deps
 
@@ -592,10 +607,17 @@ class RacyProject(object):
                                 check_versions=False)
 
     @cached_property
+    def bin_uses_deps(self):
+        """Returns bundles provided as binary packages that project depends on.
+        """
+        return self._get_deps('uses', src_projects = False,
+                                check_versions=False)
+
+    @cached_property
     def bin_deps(self):
         """Returns deps provided as binary packages that project depends on.
         """
-        return self.bin_libs_deps + self.bin_bundles_deps
+        return self.bin_libs_deps + self.bin_bundles_deps + self.bin_uses_deps
 
 
     def _get_rec_deps(self, callers, attribs = ['source_deps']):
@@ -780,7 +802,7 @@ class InstallableRacyProject(RacyProject):
     def install_bin_libext (self):
         env = self.env
         import fnmatch
-        libext = self.get('LIBEXTFACTORY')
+        libext = self.get('LIBEXTINSTANCE')
 
         patterns = []
         if racy.renv.system() == "windows":
@@ -963,7 +985,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
 
     def manage_options(self, opts):
-        """Delegate management of options specified in opts to ytool."""
+        """Delegate management of options specified in opts to rtool."""
         opts = rutils.iterize(opts)
 
         prj = self
@@ -988,17 +1010,15 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         self.variant_dir(prj.build_dir, prj.src_path)
 
-        uses = prj.uses + prj.bin_deps
-        rec_uses = set(tuple(dep.uses for dep in self.source_rec_deps) +
-                self.bin_rec_deps) - set(uses)
+        bin_deps = prj.bin_deps
+        rec_bin_deps = set(self.bin_rec_deps) - set(bin_deps)
 
+        link_opts = []
         if self.is_exec:
-            uses_opts = ['forcelink']
-        else:
-            uses_opts = []
+            link_opts += ['forcelink']
 
-        rlibext.register.configure(prj, rec_uses, opts=['nolink'])
-        rlibext.register.configure(prj, uses, opts=uses_opts)
+        rlibext.register.configure(prj, rec_bin_deps, opts=['nolink'])
+        rlibext.register.configure(prj, bin_deps    , opts=link_opts)
 
         env.Prepend(**self.options)
 
@@ -1057,6 +1077,8 @@ class ConstructibleRacyProject(InstallableRacyProject):
             dep_results = []
             for dep in prj.source_libs_deps + prj.source_bundles_deps:
                 dep_results.append( dep.build() )
+            for dep in self.bin_rec_deps:
+                dep_results.append( dep.install(['bin','rc']) )
             result = self.result(deps_results=False)
 
             if result:

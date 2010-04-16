@@ -113,7 +113,11 @@ class RacyAttributeException(RacyException):
         self.attr = attr
         self.msg = msg
     def __str__(self):
-        desc = getattr(self.obj, 'desc', None)
+        desc = None
+        #using hasattr because getattr(obj, attr, default) will raise an 
+        # exception if obj has <no_undef_attr_read>
+        if hasattr(self.obj, 'desc'):
+            desc = getattr(self.obj, 'desc', None)
         msg = ("In file {file[0]}:{file[1]}, {obj.__class__} has no attribute "
                "<{attr}>, can't {msg}.{desc}")
         

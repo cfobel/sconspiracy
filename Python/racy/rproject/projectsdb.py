@@ -119,14 +119,18 @@ class RacyProjectsDB(object):
 
         return res
 
-    def _register_prj(self, prj):
+    def register_prj(self, prj, raise_exception=True):
         if prj.register_name in self._prj_map:
             prev_prj = self._prj_map[prj.register_name]
             msg = """An existing project is already named <{0.register_name}>.
                   defined here   : {1.opts_source}
                   redefined here : {0.opts_source}
                   """.format(prj, prev_prj)
-            racy.print_warning( 'Project {0.full_name}'.format(prj), msg)
+            if raise_exception:
+                raise RacyProjectError(prj, msg)
+            else:
+                racy.print_warning( 'Project {0.full_name}'.format(prj), msg)
+
 
         self._prj_map[prj.register_name] = prj
 
@@ -136,21 +140,29 @@ class RacyProjectsDB(object):
 
 
     @memoize
-    def _make_prj_from(self, source, args = {},
-            factory = ConstructibleRacyProject):
+    def make_prj_from(self, source, args = {},
+            factory = ConstructibleRacyProject ):
         kwargs = {}
         kwargs.update(self.prj_args)
         kwargs.update(args)
 
         prj = factory(build_options=source, **kwargs)
 
+
         return prj
+
+    @memoize
+    def make_prj_from_libext(self, libext):
+        return self.make_prj_from(
+                libext.__project_source__,
+                args = {'prj_path' : libext.__src__},
+                factory=InstallableRacyProject)
 
     def _register_prj_from_file(self, file):
         name = file.split(os.sep)[-3]
 
         target = racy.renv.TARGETS.get(name)
-        
+
         args = {}
         for el in target.args:
             if el.startswith("@") :
@@ -159,9 +171,9 @@ class RacyProjectsDB(object):
         if args.get('config'):
             target.name = '_'.join([target.name, config])
 
-        prj = self._make_prj_from(file, args)
+        prj = self.make_prj_from(file, args)
+        self.register_prj(prj, raise_exception=False)
 
-        self._register_prj(prj)
 
     def target_lookup(self, name, **kw):
 
@@ -186,25 +198,6 @@ class RacyProjectsDB(object):
                     res += p.install(opts = opts) 
 
                 prj_targets = list(res)
-                for libext in racy.rlibext.register.configured.values():
-                    if hasattr(libext, '__src__'):
-                        buildoptions = {
-                                'TYPE'    : 'bin_libext',
-                                'VERSION' : libext.version,
-                                'NAME'    : libext.name,
-
-                                'LIBEXTFACTORY' : libext,
-                                }
-
-                        libextprj = self._make_prj_from(
-                                buildoptions,
-                                args = {'prj_path' : libext.__src__},
-                                factory=InstallableRacyProject)
-                        if libextprj.name not in self.installed_libext:
-                            libext_targets = libextprj.install(['bin','rc'])
-                            prj.env.Depends(prj_targets, libext_targets)
-                            res += libext_targets
-                            self.installed_libext.append(libextprj.name)
                 
                 pack = []
                 #pack = prj.env.Package(

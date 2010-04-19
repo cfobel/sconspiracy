@@ -87,11 +87,7 @@ class CppUnitProject(ConstructibleRacyProject):
     def sources(self):
         files = ['{0}.cpp'.format(cls) for cls in self.classtest]
 
-        testfiles  = rutils.DeepGlob(
-                        constants.CXX_SOURCE_EXT, 
-                        self.src_path, 
-                        self.build_dir
-                        )
+        testfiles = super(CppUnitProject,self).sources
         testfiles  = [f for f in testfiles if os.path.basename(f) in files]
         testfiles += [ self.runner_src ]
 

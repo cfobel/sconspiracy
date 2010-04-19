@@ -49,7 +49,7 @@ def includes(prj):
 
 
 def inc_build_dir(prj):
-    return os.path.join(renv.dirs.build, prj.full_name, constants.INCLUDE_PATH)
+    return map(self.get_build_dir_for_path, prj.include_path)
 
 def ui_sources(prj):
     """Returns ui source files of the project"""
@@ -65,10 +65,11 @@ class Plugin(racy.rplugins.Plugin):
     name = "qt"
 
     def has_additive(self, prj):
-        return [use for use in prj.uses if 'qt' in use.lower()]
+        return [use for use in prj.uses if use.startswith('qt')]
 
     def get_additive(self, prj):
-        prj.variant_dir( inc_build_dir(prj), prj.include_path )
+        for builddir, incpath in zip( inc_build_dir(prj), prj.include_path ):
+            prj.variant_dir( builddir, incpath )
         env = prj.env
 
         localtoolpath = os.path.join(__path__[0], 'sconstools')

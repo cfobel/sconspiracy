@@ -280,12 +280,14 @@ class RacyProject(object):
 
     @cached_property
     def src_path (self):
-        return self.get_path(constants.SOURCE_PATH)
+        dirs = [constants.SOURCE_PATH] + self.get('PRJ_SOURCES')
+        return map(self.get_path, dirs)
 
 
     @cached_property
     def include_path (self):
-        return self.get_path(constants.INCLUDE_PATH)
+        dirs = [constants.INCLUDE_PATH] + self.get('PRJ_INCLUDES')
+        return map(self.get_path, dirs)
 
 
     @cached_property
@@ -679,7 +681,9 @@ class RacyProject(object):
     @cached_property
     def deps_include_path (self):
         """Returns include paths for all dependencies using source_rec_deps."""
-        inc = tuple(lib.include_path for lib in self.source_rec_deps)
+        inc = [lib.include_path for lib in self.source_rec_deps]
+        if len(inc)>1:
+            inc = reduce( lambda a,b : a+b, inc)
         return inc
 
 
@@ -697,10 +701,12 @@ class RacyProject(object):
     @cached_property
     def sources(self):
         """Returns CXX source files of the project"""
+        build_dirs = map(self.get_build_dir_for_path, self.src_path)
+
         return rutils.DeepGlob(
-                constants.CXX_SOURCE_EXT, 
-                self.src_path, 
-                self.build_dir
+                constants.CXX_SOURCE_EXT,
+                self.src_path,
+                build_dirs
                 ) + self.special_source
 
 
@@ -708,6 +714,9 @@ class RacyProject(object):
     def build_dir(self):
         return pathjoin(renv.dirs.build, self.full_name)
 
+
+    def get_build_dir_for_path(self, path):
+        return pathjoin( self.build_dir , os.path.split(path)[1] )
 
     @cached_property
     def target(self):
@@ -850,11 +859,14 @@ class InstallableRacyProject(RacyProject):
         """
         pkg_path = self.install_pkg_path
 
+        def get_include_path_target(path):
+            return pathjoin( pkg_path , os.path.split(path)[1] )
+
         rc  = pathjoin(pkg_path, constants.RC_PATH)
-        inc = pathjoin(pkg_path, constants.INCLUDE_PATH)
+        inc = map(get_include_path_target, self.include_path)
 
         install_args = [
-                (self.rc_path     , rc , ['.*'])                    ,
+                (self.rc_path     , rc , ['.*'])                  ,
                 (self.include_path, inc, constants.CXX_HEADER_EXT),
                 ]
 
@@ -941,8 +953,9 @@ class ConstructibleRacyProject(InstallableRacyProject):
         CPPDEFINES += prj.get('DEF')
 
         
-        CPPPATH = [ prj.include_path ] 
-        CPPPATH += list(prj.deps_include_path) + prj.get('INC')
+        CPPPATH  = prj.include_path
+        CPPPATH += prj.deps_include_path
+        CPPPATH += prj.get('INC')
         
         LIBPATH  = prj.get('STDLIBPATH')
 
@@ -1004,6 +1017,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
         # ManageOption has been added by the ytool
         self.env.ManageOption(prj = self, options = options)
 
+
     def variant_dir(self, build_dir, src_dir):
         self.env.VariantDir(build_dir, src_dir, duplicate=0)
 
@@ -1014,7 +1028,10 @@ class ConstructibleRacyProject(InstallableRacyProject):
         prj = self
         env = self.env
 
-        self.variant_dir(prj.build_dir, prj.src_path)
+        for path in prj.src_path:
+            pathname = os.path.split(path)[1]
+            builddir = pathjoin( prj.build_dir , pathname )
+            self.variant_dir(builddir, path)
 
         bin_deps = prj.bin_deps
         rec_bin_deps = set(self.bin_rec_deps) - set(bin_deps)

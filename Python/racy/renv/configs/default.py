@@ -60,6 +60,9 @@ USE               = []
 DEF               = []
 INC               = []
 
+PRJ_INCLUDES      = []
+PRJ_SOURCES       = []
+
 STDLIBPATH        = []
 STDLIB            = []
 NOLIB             = []

@@ -62,7 +62,7 @@ def is_true(v):
 
 
 #------------------------------------------------------------------------------
-def DeepGlob(extensions, src_dir= '.', replace_dir = "", return_orig = False, 
+def DeepGlob(extensions, src_dir= '.', replace_dir = '', return_orig = False, 
         invert_matches = False, filter = lambda x:True):
     """ Do a deep Glob, lookin up for file matching extensions, in 
     src_dir (default '.'), replacing srd_dir by replace_dir if given.
@@ -73,27 +73,52 @@ def DeepGlob(extensions, src_dir= '.', replace_dir = "", return_orig = False,
     Accept regex as extensions (don't use '^')
     if extensions is None, match all files
     """
-    replace_dir = normpath(replace_dir)
-    src_dir     = normpath(src_dir)
-    regex       = get_re_from_extensions(extensions)
-    file_match  = regex.match # cache the function
-    result      = []
+    if is_iterable(src_dir):
+        kwargs = {
+        'extensions'     : extensions,
+        'src_dir'        : None,
+        'replace_dir'    : None,
+        'return_orig'    : return_orig,
+        'invert_matches' : invert_matches,
+        'filter'         : filter
+        }
+        result = []
+        if not is_iterable(replace_dir):
+            replace_dir = [replace_dir] * len(src_dir)
 
-    if invert_matches:
-        file_match = lambda x: not file_match(x)
+        for dir, replace in zip(src_dir, replace_dir):
+            kwargs['src_dir']     = dir
+            kwargs['replace_dir'] = replace
+            result += DeepGlob(**kwargs)
+        if return_orig:
+            cat = lambda a,b: (a[0]+b[0], a[1]+b[1])
+            if len(result)>1:
+                result = reduce(cat, result)
 
-    for root, dirs, files in os.walk(src_dir, topdown=True):
-        #don't walk in vcs dirs
-        remove_vcs_dirs(dirs)
-        result += [ join(root, name) for name in files if file_match(name) ]
-        result = [res for res in result if filter(res)]
+    else:
+        replace_dir = normpath(replace_dir)
+        src_dir     = normpath(src_dir)
+        regex       = get_re_from_extensions(extensions)
+        file_match  = regex.match # cache the function
+        result      = []
 
-    if replace_dir:
-        result_orig = result
-        result = [normpath(f).replace(src_dir, replace_dir, 1) for f in result]
+        if invert_matches:
+            file_match = lambda x: not file_match(x)
 
-    if return_orig and replace_dir:
-        result = result_orig, result
+        for root, dirs, files in os.walk(src_dir, topdown=True):
+            #don't walk in vcs dirs
+            remove_vcs_dirs(dirs)
+            result += [ join(root, name) for name in files if file_match(name) ]
+            result = [res for res in result if filter(res)]
+
+        if replace_dir:
+            result_orig = result
+            norm = lambda f:normpath(f).replace(src_dir, replace_dir, 1)
+            result = map(norm, result)
+
+        if return_orig and replace_dir:
+            result = result_orig, result
+
     return result
 
 

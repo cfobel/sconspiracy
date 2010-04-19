@@ -875,6 +875,7 @@ class InstallableRacyProject(RacyProject):
 
     @memoize
     def install(self, opts = ['rc']):
+        env = self.env
         result = []
         if 'rc' in opts:
             result += self.install_rc()
@@ -885,6 +886,11 @@ class InstallableRacyProject(RacyProject):
 
         if 'pkg' in opts and self.type not in TYPE_ALLBIN:
             result += self.install_pkg()
+
+        bin_results = []
+        for dep in self.bin_rec_deps:
+            bin_results.append( dep.install(opts) )
+        env.Depends(result, bin_results)
 
         return result
 
@@ -1077,15 +1083,12 @@ class ConstructibleRacyProject(InstallableRacyProject):
             dep_results = []
             for dep in prj.source_libs_deps + prj.source_bundles_deps:
                 dep_results.append( dep.build() )
-            for dep in self.bin_rec_deps:
-                dep_results.append( dep.install(['bin','rc']) )
             result = self.result(deps_results=False)
 
             if result:
-                for dep_result in dep_results:
-                    env.Depends(result, dep_result)
+                env.Depends(result, dep_results)
             else:
-                #case when bundle is codeless
+                # this may happends if we are in a codeless bundle
                 for bun in prj.source_bundles_deps:
                     result += bun.build()
 
@@ -1134,7 +1137,13 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         if 'deps' in opts:
             deps = prj.source_libs_deps + prj.source_bundles_deps
-            result += [dep.install(opts) for dep in deps]
+            deps_results = []
+            deps_results += [dep.install(opts) for dep in deps]
+            bin_results = []
+            for dep in self.bin_rec_deps:
+                bin_results.append( dep.install(['bin','rc']) )
+            env.Depends(result, deps_results)
+            env.Depends(result, bin_results)
 
         return result
         

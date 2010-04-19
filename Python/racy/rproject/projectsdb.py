@@ -197,8 +197,6 @@ class RacyProjectsDB(object):
                     opts += ['pkg'] if buildpkg else []
                     res += p.install(opts = opts) 
 
-                prj_targets = list(res)
-                
                 pack = []
                 #pack = prj.env.Package(
                         ##source=res,

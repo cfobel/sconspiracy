@@ -62,6 +62,7 @@ INC               = []
 
 PRJ_INCLUDES      = []
 PRJ_SOURCES       = []
+PRJ_SOURCES_FILES = []
 
 STDLIBPATH        = []
 STDLIB            = []

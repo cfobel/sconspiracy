@@ -234,7 +234,7 @@ class RacyProject(object):
         return self.get(opt).lower()
     
 
-    def get_path (self, path = ""):
+    def get_path(self, path = ""):
         """Return base path of project."""
         path = pathjoin(self._project_dir, path)
         return abspath(normpath(path))
@@ -279,15 +279,20 @@ class RacyProject(object):
 
 
     @cached_property
-    def src_path (self):
-        dirs = [constants.SOURCE_PATH] + self.get('PRJ_SOURCES')
-        return map(self.get_path, dirs)
+    def src_dirs (self):
+        return [constants.SOURCE_PATH] + self.get('PRJ_SOURCES')
 
+    @cached_property
+    def src_path (self):
+        return map(self.get_path, self.src_dirs)
+
+    @cached_property
+    def include_dirs (self):
+        return [constants.INCLUDE_PATH] + self.get('PRJ_INCLUDES')
 
     @cached_property
     def include_path (self):
-        dirs = [constants.INCLUDE_PATH] + self.get('PRJ_INCLUDES')
-        return map(self.get_path, dirs)
+        return map(self.get_path, self.include_dirs)
 
 
     @cached_property
@@ -697,17 +702,35 @@ class RacyProject(object):
         """Returns the numeric value of loglevel."""
         return constants.LOGLEVEL[self.loglevel]
 
+    @cached_property
+    def extra_sources_build_dirs(self):
+        dirs = set(map(os.path.dirname, self.get('PRJ_SOURCES_FILES')))
+        builddirs = map( self.get_build_dir_for , dirs )
+        dirs      = map( self.get_path , dirs )
+        return zip(builddirs, dirs)
+
+    @cached_property
+    def extra_sources(self):
+        return map(self.get_build_dir_for, self.get('PRJ_SOURCES_FILES'))
+
+    @cached_property
+    def sources_build_dirs(self):
+        dirs = set(self.src_dirs)
+        builddirs = map( self.get_build_dir_for , dirs )
+        dirs      = map( self.get_path , dirs )
+        return zip(builddirs, dirs)
+
 
     @cached_property
     def sources(self):
         """Returns CXX source files of the project"""
-        build_dirs = map(self.get_build_dir_for_path, self.src_path)
+        build_dirs = map(self.get_build_dir_for, self.src_path)
 
         return rutils.DeepGlob(
                 constants.CXX_SOURCE_EXT,
                 self.src_path,
                 build_dirs
-                ) + self.special_source
+                ) + self.extra_sources + self.special_source
 
 
     @cached_property
@@ -715,8 +738,11 @@ class RacyProject(object):
         return pathjoin(renv.dirs.build, self.full_name)
 
 
-    def get_build_dir_for_path(self, path):
-        return pathjoin( self.build_dir , os.path.split(path)[1] )
+    def get_build_dir_for(self, file):
+        prj_path = self.get_path()
+        if file.startswith(prj_path):
+            file = file[len(prj_path)+1:]
+        return pathjoin( self.build_dir , file )
 
     @cached_property
     def target(self):
@@ -1028,9 +1054,14 @@ class ConstructibleRacyProject(InstallableRacyProject):
         prj = self
         env = self.env
 
-        for path in prj.src_path:
-            pathname = os.path.split(path)[1]
-            builddir = pathjoin( prj.build_dir , pathname )
+        for path, dir in zip(prj.src_path, prj.src_dirs):
+            builddir = pathjoin( prj.build_dir , dir )
+            self.variant_dir(builddir, path)
+
+        builddirs  = []
+        builddirs += prj.sources_build_dirs
+        builddirs += prj.extra_sources_build_dirs
+        for builddir, path in builddirs:
             self.variant_dir(builddir, path)
 
         bin_deps = prj.bin_deps

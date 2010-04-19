@@ -94,5 +94,4 @@ class Plugin(racy.rplugins.Plugin):
 
         env.Depends(sources, uic)
         env.Append(CPPPATH = inc_build_dir(prj))
-        #prj.sources
         return []

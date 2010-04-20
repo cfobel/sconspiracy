@@ -141,7 +141,6 @@ def no_undef_attr_read(cls):
             raise AttributeError
         else:
             raise RacyAttributeException(self, attr, 'read')
-        
     cls.__getattr__ = __getattr__
     return cls
 
@@ -154,7 +153,7 @@ def no_undef_attr_write(cls):
             object.__setattr__(self,attr,value)
     cls.__setattr__ = __setattr__
     return cls
-    
+
 
 #------------------------------------------------------------------------------
 def load_plugins():
@@ -163,7 +162,7 @@ def load_plugins():
     plugins_path = os.path.join(os.path.dirname(racy.__file__), 'plugins')
     racy.rplugins.register.load_dir( plugins_path )
 
-    
+
 #------------------------------------------------------------------------------
 def racy_msg (level, title, msg, wrap, width=MSG_WIDTH):
     import textwrap
@@ -208,7 +207,26 @@ def manage_exception(e, default_print = print_error):
     print_error(e.__class__.__name__, e)
 
 
+#------------------------------------------------------------------------------
+def path(dir=None):
+    root = os.path.dirname(__file__)
+    if dir:
+        root = os.path.join(root, dir)
+    return root
+
+
+#------------------------------------------------------------------------------
+def ressources(file):
+    rc = path("rc")
+    if file:
+        rc = os.path.join(rc, file)
+    return rc
+
+#------------------------------------------------------------------------------
+
+
 try:
     import renv
 except RacyException, e:
     manage_exception(e)
+

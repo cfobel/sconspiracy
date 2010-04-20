@@ -155,6 +155,7 @@ def get_first_existing_file(files):
             return file
 
 
+#------------------------------------------------------------------------------
 def tupleize(iterable):
     """Recursively <tupleize> an iterable to obtain a hashable object"""
     if hasattr(iterable, "__iter__"):
@@ -164,6 +165,7 @@ def tupleize(iterable):
     return iterable
 
 
+#------------------------------------------------------------------------------
 def memoize(f, cache={}):
     """Memoization decorator. Store the computed values in 'cache'. If cache is
     not specified, every results will be store in the same dict (the one in the
@@ -194,6 +196,7 @@ def cached_property(f):
         setattr(self, fullname, res)
         return res
 
+
     func.__name__ = f.__name__
     #p = property(memoize(f)) 
     # do not memoized anymore for property -> optimized
@@ -216,6 +219,7 @@ def run_once(f):
         return res
     return func
 
+#------------------------------------------------------------------------------
 def time_it(func):
     """Internal use, class method timing decorator"""
     import time
@@ -247,6 +251,19 @@ def is_iterable(obj):
     return hasattr(obj, "__iter__")
 def iterize(obj):
     return obj if is_iterable(obj) else [obj]
+
+
+#------------------------------------------------------------------------------
+def put_file_content(filename, content):
+    with open(filename, 'w') as f:
+        f.write(content)
+
+#------------------------------------------------------------------------------
+def get_file_content(filename):
+    read_data = None
+    with open(filename, 'r') as f:
+        read_data = f.read()
+    return read_data
 
 #------------------------------------------------------------------------------
 class ListFromStr(list):

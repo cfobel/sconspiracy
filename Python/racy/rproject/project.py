@@ -62,7 +62,6 @@ class LibName(str):
     """
     SEP = constants.LIBNAME_SEP
 
-
     @cached_property
     def _splited(self):
         return self.split(LibName.SEP)
@@ -223,8 +222,11 @@ class RacyProject(object):
         config = (self.config if self.config else "default")
         config = ''.join([name, ':', config])
         
-        allowedvalues.check_value_with_msg(opt, kwargs['option_value'], config
-                + " " + str(kwargs['prj']._opts_source))
+        allowedvalues.check_value_with_msg(
+                opt,
+                kwargs['option_value'],
+                config + " " + str(kwargs['prj'].opts_source)
+                )
         res = renv.options.get_option( **kwargs )
         return res
 
@@ -891,10 +893,9 @@ class InstallableRacyProject(RacyProject):
         rc  = pathjoin(pkg_path, constants.RC_PATH)
         inc = map(get_include_path_target, self.include_path)
 
-        install_args = [
-                (self.rc_path     , rc , ['.*'])                  ,
-                (self.include_path, inc, constants.CXX_HEADER_EXT),
-                ]
+        install_args = [ (self.rc_path     , rc , ['.*']) ]
+        for incpth, replace in zip(self.include_path, inc):
+            install_args.append((incpth, replace, constants.CXX_HEADER_EXT))
 
         res = []
         for args in install_args:
@@ -979,11 +980,13 @@ class ConstructibleRacyProject(InstallableRacyProject):
         CPPDEFINES += prj.get('DEF')
 
         
-        CPPPATH  = prj.include_path
+        CPPPATH  = []
+        CPPPATH += prj.include_path
         CPPPATH += prj.deps_include_path
         CPPPATH += prj.get('INC')
         
-        LIBPATH  = prj.get('STDLIBPATH')
+        LIBPATH  = []
+        LIBPATH += prj.get('STDLIBPATH')
 
         need_rec_deps = self.is_exec or racy.renv.system() in ['windows','darwin']
         lib_dep = prj.lib_rec_deps if need_rec_deps else prj.source_libs_deps
@@ -996,9 +999,11 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         LIBS += prj.get('STDLIB')
         
-        CXXFLAGS = prj.get('CXXFLAGS')
-
-        LINKFLAGS = prj.get('LINKFLAGS')
+        CXXFLAGS   = []
+        CXXFLAGS  += prj.get('CXXFLAGS')
+                   
+        LINKFLAGS  = []
+        LINKFLAGS += prj.get('LINKFLAGS')
 
         if not prj.is_exec:
             if self.get('USEVISIBILITY') in ["no", "racy"]:
@@ -1196,37 +1201,43 @@ class ConstructibleRacyProject(InstallableRacyProject):
         return result
         
     def generate_pkg_files(self):
-        env = self.env
+        from string import Template
+        env  = self.env
+        prj  = self
+        opts = prj.prj_locals
+
         arch = renv.options.get_option('ARCH')
         depends = list(self.uses + self.libs + self.bundles)
+        depends = map(lambda obj:getattr(obj, 'name', obj), depends)
+        CPPPATH = map(lambda x:[x], self.include_dirs)
+        LIBPATH = [ ['lib'] ] + opts.get('STDLIBPATH')
 
-        info = [
-                ('    register_names', [self.name]   )           ,
-                ('    version'       , self.version.normalized  ),
-                ('    debug'         , self.is_debug )           ,
-                ('    arch'          , arch )                    ,
-                ('    platform'      , self.platform )           ,
-                ('    compiler'      , self.compiler )           ,
-                ('    depends_on'    , depends )                 ,
-                ('    cpppath'       , [ ('include', ) ] )       ,
-                ('    libpath'       , [ ('lib'    , ) ] )       ,
-                ('    libs'          , [self.full_name])         ,
-                ('    extra_libs'    , [])                       ,
-                ('    cppdefines'    , [])                       ,
-                ('    frameworkpath' , [])                       ,
-                ('    frameworks'    , [])                       ,
-                ('    cxxflags'      , [])                       ,
-                ('    linkflags'     , [])                       ,
-                ('    parse_configs' , [])                       ,
-                ]
 
-        def get_content(source):
-            return '\n\n'.join([ '{0} = {1!r}'.format(*el) for el in source])
+        infos = {
+                'REGISTER_NAMES' : [prj.name]            ,
+                'VERSION'        : prj.version.normalized,
+                'ISDEBUG'        : prj.is_debug          ,
+                'ARCH'           : arch                  ,
+                'PLATFORM'       : prj.platform          ,
+                'COMPILER'       : prj.compiler          ,
+                'DEPENDSON'      : depends               ,
+                'CPPPATH'        : CPPPATH               ,
+                'LIBPATH'        : LIBPATH               ,
+                'LIBS'           : [prj.full_name]       ,
+                'EXTRALIBS'      : opts.get('STDLIB')    ,
+                'CPPDEFINES'     : opts.get('DEF')       ,
+                'FRAMEWORKPATH'  : []                    ,
+                'FRAMEWORK'      : []                    ,
+                'CXXFLAGS'       : []                    ,
+                'LINKFLAGS'      : []                    ,
+                #'CXXFLAGS'       : opts.get('CXXFLAGS')  ,
+                #'LINKFLAGS'      : opts.get('LINKFLAGS') ,
+                }
 
-        infocontent = '\n'.join([
-            "class Description(object):",
-            get_content(info)
-            ])
+        tpl_file = racy.ressources('binpkg.__init__.py.tpl')
+        tpl = Template(rutils.get_file_content(tpl_file))
+        print tpl.substitute(infos)
+        infocontent = tpl.substitute(infos)
 
         pkg_path = self.install_pkg_path
         infofile = pathjoin(pkg_path, '__init__.py')

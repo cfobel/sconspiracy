@@ -20,6 +20,13 @@ def system():
     import platform
     return platform.system().lower()
 
+def is_linux():
+    return system() == "linux"
+def is_darwin():
+    return system() == "darwin"
+def is_windows():
+    return system() == "windows"
+
 def platform():
     """Returns the platform racy' name."""
     from racy.renv import constants

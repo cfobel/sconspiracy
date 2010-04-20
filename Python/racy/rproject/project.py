@@ -1236,7 +1236,6 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         tpl_file = racy.ressources('binpkg.__init__.py.tpl')
         tpl = Template(rutils.get_file_content(tpl_file))
-        print tpl.substitute(infos)
         infocontent = tpl.substitute(infos)
 
         pkg_path = self.install_pkg_path

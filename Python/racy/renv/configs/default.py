@@ -68,6 +68,7 @@ STDLIBPATH        = []
 STDLIB            = []
 NOLIB             = []
 
+CFLAGS            = []
 CXXFLAGS          = []
 LINKFLAGS         = []
 

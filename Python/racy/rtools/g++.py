@@ -26,6 +26,9 @@ def generate(env):
     env.__class__.ManageOption = manage_options
     env.__class__.InstallFileFilter = install_file_filter
 
+    CFLAGS = [
+            '-pipe',
+            ]
     CXXFLAGS = [
             '-pipe'             ,
             '-Winvalid-pch'     ,
@@ -65,6 +68,7 @@ def generate(env):
         if get_option('PLATFORM') == constants.MACOSX:
             gdb_level = 'gdb2'
         CXXFLAGS  += [ '-O0', '-g' + gdb_level ]
+        CFLAGS  += [ '-O0', '-g' + gdb_level ]
 
     env['TOOLINFO'] = {}
     env['TOOLINFO']['NAME']    = 'gcc'
@@ -72,16 +76,18 @@ def generate(env):
 
 
     if get_option('ARCH') == '32':
-        CXXFLAGS  += ['-m32']
-        LINKFLAGS += ['-m32']
+        arch_option = ['-m32']
     elif get_option('ARCH') == '64':
-        CXXFLAGS  += ['-m64']
-        LINKFLAGS += ['-m64']
-        
+        arch_option = ['-m64']
+
+    CFLAGS    += arch_option
+    CXXFLAGS  += arch_option
+    LINKFLAGS += arch_option
+    
     CPPDEFINES += [ ('__ARCH__' , r'\"{0}\"'.format(get_option('ARCH'))) ]
 
 
-    names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS']
+    names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS', 'CFLAGS']
     attrs = [locals()[n] for n in names]
     env.MergeFlags(dict(zip(names,attrs)), unique=True)
 
@@ -89,12 +95,14 @@ def generate(env):
 def manage_options(env, prj, options):
     CPPDEFINES = []
     CXXFLAGS   = []
+    CFLAGS   = []
 
     if is_true(options.get('WARNINGSASERRORS', 'no')):
         CXXFLAGS += ['-Werror']
 
     if 'OPTIMIZATIONLEVEL' in options:
         CXXFLAGS += ['-O{0}'.format(options['OPTIMIZATIONLEVEL'])]
+        CFLAGS += ['-O{0}'.format(options['OPTIMIZATIONLEVEL'])]
 
     if options.get('USEVISIBILITY') == 'racy':
         CPPDEFINES += [
@@ -114,7 +122,8 @@ def manage_options(env, prj, options):
                 ]
 
     env.Append(CPPDEFINES = CPPDEFINES,
-               CXXFLAGS   = CXXFLAGS
+               CXXFLAGS   = CXXFLAGS,
+               CFLAGS     = CFLAGS
                )
 
     if get_option('PLATFORM') == constants.MACOSX:

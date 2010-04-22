@@ -999,6 +999,9 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         LIBS += prj.get('STDLIB')
         
+        CFLAGS   = []
+        CFLAGS  += prj.get('CFLAGS')
+                   
         CXXFLAGS   = []
         CXXFLAGS  += prj.get('CXXFLAGS')
                    

@@ -1028,7 +1028,8 @@ class ConstructibleRacyProject(InstallableRacyProject):
         names = [
                 'CPPDEFINES', 'CPPPATH' ,
                 'LIBPATH'   , 'LIBS'    ,
-                'LINKFLAGS' , 'CXXFLAGS'
+                'CFLAGS'    , 'CXXFLAGS'
+                'LINKFLAGS' ,
                 ]
 
         attrs = [locals()[n] for n in names]

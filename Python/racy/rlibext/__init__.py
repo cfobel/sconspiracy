@@ -231,8 +231,9 @@ class register(object):
 
             db = prj.projects_db
             if libext.name not in db:
-                libextprj = db.make_prj_from_libext(libext)
-                db.register_prj(libextprj)
+                libextprjs = db.make_prj_from_libext(libext)
+                for libextprj in libextprjs:
+                    db.register_prj(libextprj)
 
         else:
             msg = ( 'Libext <{libext}> not found, '

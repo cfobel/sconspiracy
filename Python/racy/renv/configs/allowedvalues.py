@@ -19,7 +19,7 @@ TOOL          = ['auto','g++','msvc']
 
 TYPE          = [
                 'exec','shared','static','bundle',
-                'bin_shared', 'bin_bundle', 'bin_exec', 'bin_libext',
+                'bin_shared', 'bin_bundle', 'bin_exec', 'bin_libext'
                 ]
 
 

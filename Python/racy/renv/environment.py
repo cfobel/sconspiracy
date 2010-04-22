@@ -5,6 +5,7 @@
 # published by the Open Source Initiative.  
 # ****** END LICENSE BLOCK ******
 
+import racy.rscons.url
 
 from SCons.Environment import Environment as Env
 from SCons import Action
@@ -54,6 +55,8 @@ class Environment(Env):
 
         act = self.Action( CopyBuilder, "Install file '$$SOURCE' as '$$TARGET'")
         self.__CopyBuilder__ = self.Builder(action = act)
+
+        self.Download = self.Builder(action = racy.rscons.url.URL.Download)
 
         racy.rplugins.register.get_env_addons(self)
 

@@ -140,20 +140,23 @@ class RacyProjectsDB(object):
 
 
     @memoize
-    def make_prj_from(self, source, args = {},
+    def make_prjs_from(self, source, args = {},
             factory = ConstructibleRacyProject ):
         kwargs = {}
         kwargs.update(self.prj_args)
         kwargs.update(args)
 
-        prj = factory(build_options=source, **kwargs)
+        prj = [factory(build_options=source, **kwargs)]
 
+        replacement = rplug.register.get_replacement_projects(*prj)
+        if replacement:
+            prj = replacement
 
         return prj
 
     @memoize
     def make_prj_from_libext(self, libext):
-        return self.make_prj_from(
+        return self.make_prjs_from(
                 libext.__project_source__,
                 args = {'prj_path' : libext.__src__},
                 factory=InstallableRacyProject)
@@ -171,8 +174,9 @@ class RacyProjectsDB(object):
         if args.get('config'):
             target.name = '_'.join([target.name, config])
 
-        prj = self.make_prj_from(file, args)
-        self.register_prj(prj, raise_exception=False)
+        prjs = self.make_prjs_from(file, args)
+        for prj in prjs:
+            self.register_prj(prj, raise_exception=False)
 
 
     def target_lookup(self, name, **kw):

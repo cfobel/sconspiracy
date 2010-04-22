@@ -35,10 +35,8 @@ def generate(env):
         env['LINKCOM']   = [env['LINKCOM']  , MTCOM + '1']
         env['SHLINKCOM'] = [env['SHLINKCOM'], MTCOM + '2']
     env['WINDOWS_INSERT_MANIFEST'] = True
-
-    #env['WIN32_INSERT_DEF']        = 1
-    #constants.CXX_SOURCE_EXT      += [env['WIN32DEFSUFFIX'][1:]]
-
+    
+    CFLAGS = []
     CXXFLAGS = [
             '/GR', 
             ]
@@ -62,10 +60,12 @@ def generate(env):
 
         CXXFLAGS += ['/W3','/EHs','/Zm600','/MD','/Oi','/Ot','/Ob2','/TP']
         #CXXFLAGS += [ '/O{0}'.format(env['OPTIMIZATIONLEVEL']) , ]
+        CFLAGS += ['/MD']
     else :
         merge_lists_of_dict(locals(), constants.COMMON_DEBUG)
 
         CXXFLAGS += ['/W3','/EHsc','/MDd','/Od']
+        CFLAGS += ['/MDd']
 
         if re.match('^[78]', env['MSVS']['VERSION']):
             CXXFLAGS += ['/Z7','/Wp64']
@@ -76,7 +76,7 @@ def generate(env):
 
     CPPDEFINES += [ ('__ARCH__' , r'\"{0}\"'.format(get_option('ARCH'))) ]
     
-    names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS']
+    names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS','CFLAGS']
     attrs = [locals()[n] for n in names]
     env.MergeFlags(dict(zip(names,attrs)), unique=True)
 
@@ -139,6 +139,11 @@ def manage_options(env, prj, options):
     if os.path.exists( rc_file ):
         res_file = env.RES(rc_file)
         prj.special_source.append(res_file)
+        
+    def_files = [os.path.join(p, prj.name + '.def') for p in prj.src_path]
+    if any(map(os.path.exists, def_files)):
+        env['WIN32_INSERT_DEF']        = 1
+        constants.CXX_SOURCE_EXT      += [env['WIN32DEFSUFFIX'][1:]]
 
 
 def install_file_filter(env, f):

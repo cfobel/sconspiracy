@@ -1028,7 +1028,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
         names = [
                 'CPPDEFINES', 'CPPPATH' ,
                 'LIBPATH'   , 'LIBS'    ,
-                'CFLAGS'    , 'CXXFLAGS'
+                'CFLAGS'    , 'CXXFLAGS',
                 'LINKFLAGS' ,
                 ]
 

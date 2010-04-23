@@ -1,23 +1,24 @@
 # -*- coding: UTF8 -*-
 
+import os
 import string
 import UserDict
 
-import SCons.Errors
 import SCons.Node
 import SCons.Util
 
 import urllib2
 
+import racy
 
-class URLNameSpace(UserDict.UserDict):
-    def URL(self, name, **kw):
-        if isinstance(name, URL):
+class UrlNameSpace(UserDict.UserDict):
+    def Url(self, name, **kw):
+        if isinstance(name, racy.rscons.url.Url):
             return name
         try:
             a = self[name]
         except KeyError:
-            a = apply(URL, (name,), kw)
+            a = apply(racy.rscons.url.Url, (name,), kw)
             self[name] = a
         return a
 
@@ -27,19 +28,19 @@ class URLNameSpace(UserDict.UserDict):
         except KeyError:
             return None
 
-class URLNodeInfo(SCons.Node.NodeInfoBase):
+class UrlNodeInfo(SCons.Node.NodeInfoBase):
     current_version_id = 1
     field_list = ['csig']
     def str_to_node(self, s):
-        return default_uns.URL(s)
+        return default_uns.Url(s)
 
-class URLBuildInfo(SCons.Node.BuildInfoBase):
+class UrlBuildInfo(SCons.Node.BuildInfoBase):
     current_version_id = 1
 
-class URL(SCons.Node.Node):
+class Url(SCons.Node.Node):
 
-    NodeInfo = URLNodeInfo
-    BuildInfo = URLBuildInfo
+    NodeInfo = UrlNodeInfo
+    BuildInfo = UrlBuildInfo
 
     def __init__(self, url):
         SCons.Node.Node.__init__(self)
@@ -58,8 +59,8 @@ class URL(SCons.Node.Node):
     is_up_to_date = SCons.Node.Node.children_are_up_to_date
 
     def is_under(self, dir):
-        # Make URL nodes get built regardless of
-        # what directory scons was run from. URL nodes
+        # Make Url nodes get built regardless of
+        # what directory scons was run from. Url nodes
         # are outside the filesystem:
         return 1
 
@@ -70,7 +71,7 @@ class URL(SCons.Node.Node):
         return string.join(childsigs, '')
 
     def sconsign(self):
-        """An URL is not recorded in .sconsign files"""
+        """An Url is not recorded in .sconsign files"""
         pass
 
     #
@@ -119,32 +120,42 @@ class URL(SCons.Node.Node):
             res = True
         except urllib2.HTTPError, e:
             res = False
-            print "URL Error:",e.reason , self.name
+            print "Url Error:",e.reason , self.name
         except urllib2.URLError, e:
             res = False
-            print "URL Error:",e.reason , self.name
+            print "Url Error:",e.reason , self.name
         return res
 
     def write_to_file(self, io, filename, file_mode=''):
-        print 'downloading ' + self.name + '...'
-
+        size = 0
         with open(filename, "w" + file_mode) as local_file:
             local_file.write(io.read())
+            size = local_file.tell()
 
-        print 'done'
-
-
-
-    @staticmethod
-    def Download(target, source, env):
-        assert (len(target) == len(source))
-        for s,t in zip(source, target):
-            s.write_to_file(s.url, t.get_path(), file_mode='')
-        return None
+        racy.print_msg( 'Downloaded', self.name, size, 'bytes' )
 
 
 
+def Download(target, source, env):
+    assert (len(target) == len(source))
+    for s,t in zip(source, target):
+        s.write_to_file(s.url, t.get_path(), file_mode='')
+    return None
 
-default_uns = URLNameSpace()
+
+def DownloadString(target, source, env):
+    return 'Downloading %s' % source[0]
+
+
+def generate(env):
+    action = SCons.Action.Action(Download, DownloadString)
+    builder = env.Builder(action=action)
+
+    env.Append(BUILDERS = {'Download' : builder})
+    env.Url = Url
+
+
+default_uns = UrlNameSpace()
 
 SCons.Node.arg2nodes_lookups.append(default_uns.lookup)
+

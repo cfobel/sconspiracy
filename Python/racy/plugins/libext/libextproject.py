@@ -20,10 +20,8 @@ from racy.rutils   import cached_property, memoize, run_once
 class LibextError(racy.RacyProjectError):
     pass
 
-DOXYGEN_PLUGIN_PATH = os.path.dirname(__file__)
 
 class LibextProject(ConstructibleRacyProject):
-    doxygen_dir    = 'Dox'
     var_name = 'LIBEXT'
     LIBEXT    = ('libext', )
 
@@ -39,7 +37,7 @@ class LibextProject(ConstructibleRacyProject):
     def url_source (self):
         import racy.rscons.url
         url = self.conf['URL_SOURCE']
-        url = racy.rscons.url.URL(url)
+        url = self.env.Url(url)
         return url
 
     @cached_property
@@ -53,6 +51,11 @@ class LibextProject(ConstructibleRacyProject):
         path.append(fmt.format(self))
         return os.path.join(*path)
 
+    @cached_property
+    def extract_path (self):
+        path = [self.build_dir, 'sources']
+        return os.path.join(*path)
+
 
     @run_once
     def configure_env(self):
@@ -60,9 +63,12 @@ class LibextProject(ConstructibleRacyProject):
 
     def build(self, *a, **k):
         res = self.env.Download( 
-                self.env,
                 source = self.url_source ,
                 target = self.download_target
+                )
+        res = self.env.UnTar( 
+                source = res ,
+                target = self.env.Dir(self.extract_path)
                 )
         return res
 

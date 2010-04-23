@@ -19,15 +19,16 @@ KEYWORD = LibextProject.var_name
 class Plugin(racy.rplugins.Plugin):
     name = "Libext"
 
-    #options              = { KEYWORD : 'no' }
+    options              = { KEYWORD : {} }
     #allowed_values       = { KEYWORD : ['no', 'yes'] }
-    #allowed_values       = { KEYWORD : LibextProject.LIBEXT }
+    #allowed_values       = { KEYWORD : [] }
 #    commandline_opts     = [ KEYWORD ]
     #commandline_prj_opts = [ KEYWORD ]
-    #descriptions_opts    = { KEYWORD : 'enable/disable Doxygen Generation' }
+    descriptions_opts    = { KEYWORD : 'description of Libext Project' }
 
-    #def init():
-        
+    def init(self):
+        import racy.renv.configs.allowedvalues as allowed_values
+        allowed_values.TYPE += LibextProject.LIBEXT
 
 
     def has_replacement(self, prj):

@@ -5,8 +5,6 @@
 # published by the Open Source Initiative.  
 # ****** END LICENSE BLOCK ******
 
-import racy.rscons.url
-
 from SCons.Environment import Environment as Env
 from SCons import Action
 
@@ -33,6 +31,8 @@ class Environment(Env):
         from os.path           import abspath, dirname, join
 
         import racy
+        import racy.rscons.url
+        import racy.rscons.untar
         import racy.renv as renv
         import racy.rlog as rlog
 
@@ -56,7 +56,8 @@ class Environment(Env):
         act = self.Action( CopyBuilder, "Install file '$$SOURCE' as '$$TARGET'")
         self.__CopyBuilder__ = self.Builder(action = act)
 
-        self.Download = self.Builder(action = racy.rscons.url.URL.Download)
+        racy.rscons.url.generate(self)
+        racy.rscons.untar.generate(self)
 
         racy.rplugins.register.get_env_addons(self)
 
@@ -78,7 +79,6 @@ class Environment(Env):
         self.SetOption('num_jobs', num_jobs)
         
         # allow use of cached md5 after 600 sec (instead of 2 days).
-        # Speed up about a few seconds
         self.SetOption('max_drift', 600)
         
         sconsign_file = self.GetOption('file')

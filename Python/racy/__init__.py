@@ -182,8 +182,8 @@ def racy_msg (level, title, msg, wrap, width=MSG_WIDTH):
         ]
     return msg
 
-def print_msg( msg ):
-    print (msg)
+def print_msg( *msg ):
+    print (' '.join((str(m) for m in msg)))
 
 errors = []
 def print_error(title, error, wrap=True):

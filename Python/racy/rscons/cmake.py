@@ -36,9 +36,13 @@ def CMake(target, source, env):
     cmd.append(cmake_prj_path)
     cmd.append(env.subst('${OPTIONS}'))
 
+    environment = {}
+    for k,v in env['ENV']:
+        environment[k] = str(v)
+
     cmake = subprocess.Popen(cmd,
                              cwd = cmake_build_path,
-                             env = env['ENV']
+                             env = environment
                             )
 
     cmake.communicate()

@@ -59,7 +59,6 @@ def generate(env):
         merge_lists_of_dict(locals(), constants.COMMON_RELEASE)
 
         CXXFLAGS += ['/W3','/EHs','/Zm600','/MD','/Oi','/Ot','/Ob2','/TP']
-        #CXXFLAGS += [ '/O{0}'.format(env['OPTIMIZATIONLEVEL']) , ]
         CFLAGS += ['/MD']
     else :
         merge_lists_of_dict(locals(), constants.COMMON_DEBUG)

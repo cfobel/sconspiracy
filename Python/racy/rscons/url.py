@@ -125,7 +125,7 @@ class Url(SCons.Node.Node):
 
     def write_to_file(self, io, filename, file_mode=''):
         size = 0
-        with open(filename, "w" + file_mode) as local_file:
+        with open(filename, "wb" + file_mode) as local_file:
             local_file.write(io.read())
             size = local_file.tell()
 

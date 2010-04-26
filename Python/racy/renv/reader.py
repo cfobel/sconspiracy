@@ -17,14 +17,14 @@ class ConfigReader(object):
         self.__config_imported_modules__ = mods
 
 
-    def __call__(self, file, globals, locals):
-        globals.update(self.__config_imported_modules__)
-        execfile (file, globals, locals)
+    def __call__(self, _file, _globals, _locals):
+        _globals.update(self.__config_imported_modules__)
+        execfile (_file, _globals, _locals)
 
         import racy.renv.configs.default as defaults
-        defaults.check_deprecated(locals, file)
+        defaults.check_deprecated(_locals, _file)
 
-        return locals
+        return _locals
 
 
 read_config = ConfigReader()

@@ -6,22 +6,11 @@ import SCons.Node
 
 def UnTarEmitter(target, source, env):
     assert len(target) <= 1 # Until multiple target is managed
-    newTarget = []
 
-    root = ''
-    if target:
-        root = target[0].get_abspath()
-
-    for s in source:
-        extract_path = os.path.basename(s.get_abspath())
-        extract_path = os.path.splitext(extract_path)[0]
-        extract_path = os.path.join(root, extract_path)
-        newTarget.append(env.Dir(extract_path))
-
-    for node in newTarget:
+    for node in target:
         env.Clean(node, node)
 
-    return newTarget, source
+    return target, source
 
 
 def UnTar(target, source, env):
@@ -40,9 +29,9 @@ def UnTarString(target, source, env):
 def generate(env):
     action  = SCons.Action.Action(UnTar, UnTarString)
     builder = env.Builder(
-            action=action,
-            src_suffix='.tar.gz',
-            emitter=UnTarEmitter
+            action         = action,
+            emitter        = UnTarEmitter,
+            target_factory = env.Dir,
             )
 
     env.Append(BUILDERS = {'UnTar' : builder})

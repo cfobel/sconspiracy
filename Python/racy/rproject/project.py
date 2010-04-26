@@ -1,4 +1,3 @@
-# -*- coding: UTF8 -*-
 # ***** BEGIN LICENSE BLOCK *****
 # Sconspiracy - Copyright (C) IRCAD, 2004-2010.
 # Distributed under the terms of the BSD Licence as
@@ -127,7 +126,7 @@ class RacyProject(object):
     def __init__(self, build_options, prj_path=None,
             platform='', cxx='', debug='',
             config = None,
-            locals=None, globals=None, projects_db = {}):
+            projects_db = {}, **kw):
 
         build_options_is_dict = isinstance(build_options, dict)
 
@@ -155,16 +154,18 @@ class RacyProject(object):
         self._opts_source = build_options
         self._project_dir = prj_path
 
-        self.prj_locals = locals = locals if locals is not None else {}
-        globals = globals if globals is not None else {}
-        
+        self.prj_locals = kw.get('_locals' ,{})
+        _globals        = kw.get('_globals',{})
+        if self.prj_locals is None:
+            self.prj_locals = {}
+
         if build_options_is_dict:
-            locals.update(build_options)
+            self.prj_locals.update(build_options)
         else:
             get_config(os.path.basename(build_options),
                     path    = build_options_dir,
-                    locals  = locals,
-                    globals = globals,
+                    _locals  = self.prj_locals,
+                    _globals = _globals,
                     )
 
         # Check if one project config matches the global specified CONFIG
@@ -177,13 +178,15 @@ class RacyProject(object):
                 config = global_config
 
         if config:
-            locals = get_config(config,
+            config_locals = get_config(config,
                         path          = config_dir,
-                        locals        = locals,
-                        globals       = globals,
+                        _locals        = self.prj_locals,
+                        _globals       = _globals,
                         write_postfix = True,
                         read_default  = False,
                         )
+            if config_locals:
+                self.prj_locals.update(config_locals)
 
         self._platform  = platform
         self._compiler  = rutils.Version(cxx)
@@ -193,7 +196,7 @@ class RacyProject(object):
         self.base_name = self.prj_locals.get('NAME')
         if not self.base_name:
             self.base_name = os.path.basename(prj_path)
- 
+
 
         self.projects_db    = projects_db
         self.special_source = []

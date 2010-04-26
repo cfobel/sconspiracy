@@ -65,7 +65,7 @@ class Url(SCons.Node.Node):
         return 1
 
     def get_contents(self):
-        """The contents of an alias is the concatenation
+        """The contents of an url is the concatenation
         of the content signatures of all its sources."""
         childsigs = map(lambda n: n.get_csig(), self.children())
         return string.join(childsigs, '')
@@ -74,9 +74,6 @@ class Url(SCons.Node.Node):
         """An Url is not recorded in .sconsign files"""
         pass
 
-    #
-    #
-    #
 
     def changed_since_last_build(self, target, prev_ni):
         cur_csig = self.get_csig()
@@ -86,7 +83,7 @@ class Url(SCons.Node.Node):
             return 1
 
     def build(self):
-        """A "builder" for aliases."""
+        """A "builder" for Url."""
         pass
 
     def convert(self):
@@ -149,7 +146,9 @@ def DownloadString(target, source, env):
 
 def generate(env):
     action = SCons.Action.Action(Download, DownloadString)
-    builder = env.Builder(action=action)
+    builder = env.Builder(
+            action=action
+            )
 
     env.Append(BUILDERS = {'Download' : builder})
     env.Url = Url

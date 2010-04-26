@@ -33,6 +33,7 @@ class Environment(Env):
         import racy
         import racy.rscons.url
         import racy.rscons.untar
+        import racy.rscons.cmake
         import racy.renv as renv
         import racy.rlog as rlog
 
@@ -58,6 +59,7 @@ class Environment(Env):
 
         racy.rscons.url.generate(self)
         racy.rscons.untar.generate(self)
+        racy.rscons.cmake.generate(self)
 
         racy.rplugins.register.get_env_addons(self)
 

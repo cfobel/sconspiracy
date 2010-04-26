@@ -30,21 +30,22 @@ RACY_DEFAULTS_PATH = os.path.dirname(__file__)
 
 
 def get_config(name, 
-        path = None, locals = None, globals = None, 
+        path = None, _locals = None, _globals = None, 
         raise_on_not_found = True, write_postfix=False,
         read_default = True, include_defaults = True):
     """Get and returns variables defined in <name> file.
 
     If read_default is True, read DEFAULT_CONFIG first.
 
-    if locals or/and globals is given, put results in them.
+    if _locals or/and _globals is given, put results in them.
 
     if 'raise_on_not_found' is True, raise an ConfigVariantError exception if 
     the config file is not found.
 
-    if 'write_postfix' is True, put 'name' in locals['POSTFIX'] *before* 
+    if 'write_postfix' is True, put 'name' in _locals['POSTFIX'] *before* 
     reading config file.
     """
+
     if os.path.isabs(name) and path is None:
         path = os.path.dirname(name)
         name = os.path.basename(name)
@@ -56,8 +57,8 @@ def get_config(name,
     if not path:
         path = RACY_DEFAULTS_PATH
 
-    if globals is None: globals = {}
-    if locals is None:  locals  = {}
+    if _globals is None: _globals = {}
+    if _locals  is None:  _locals = {}
 
     config_file = os.path.join(path,name)
 
@@ -68,20 +69,20 @@ def get_config(name,
     else:
         # exec 'default' first if needed
         if read_default and name is not DEFAULT_CONFIG:
-            source = globals
+            source = _globals
             if include_defaults:
-                source = locals
-            get_config(DEFAULT_CONFIG, locals = source)
+                source = _locals
+            get_config(DEFAULT_CONFIG, _locals = source)
 
         if write_postfix:
-            if 'POSTFIX' in locals:
-                locals['POSTFIX'] += [name]
+            if 'POSTFIX' in _locals:
+                _locals['POSTFIX'] += [name]
             else:
-                locals['POSTFIX'] = [name]
+                _locals['POSTFIX'] = [name]
 
-        read_config(config_file, globals, locals)
+        read_config(config_file, _globals, _locals)
 
-    return locals
+    return _locals
 
 
 

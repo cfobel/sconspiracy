@@ -149,7 +149,7 @@ def get_commandline_prj_options(opt, prj, default, option_value=Undefined,
 def get_overrided_project_value(opt, config, default, option_value,
                                         prj=NotUsed):
     override = get_racy_default('OVERRIDE_PROJECT_VALUE', config)
-    res = override.get(opt, option_value 
+    res = override.get(opt, option_value
             if option_value is not Undefined and option_value else default)
     allowedvalues.check_value_with_msg(opt, res, config+":OVERRIDE_PROJECT_VALUE")
     return res

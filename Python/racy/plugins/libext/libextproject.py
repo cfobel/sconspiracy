@@ -22,6 +22,42 @@ from racy.rutils   import cached_property, memoize, run_once
 class LibextError(racy.RacyProjectError):
     pass
 
+class NodeHolder(object):
+
+    def __init__(self):
+        self._node = None
+
+    @property
+    def node(self):
+        node = self._node
+        if node is None:
+            raise LibextError, "Node uninitialized"
+        return node
+
+    @node.setter
+    def node(self, n):
+        self._node = n
+
+    @staticmethod
+    def unwrap(iterable):
+        def unwrap_filter(a):
+            if isinstance(a, NodeHolder):
+                return a.node
+            return a
+
+        def unwrap_dict_item(item):
+            k,v = item
+            return k, unwrap_filter(v)
+
+        if isinstance(iterable, dict):
+            res = dict(map(unwrap_dict_item, iterable.items()))
+        else:
+            res = map(unwrap_filter, iterable)
+
+        return res
+
+
+        
 
 class BuilderWrapper(object):
     _called_builders = {}
@@ -38,8 +74,10 @@ class BuilderWrapper(object):
         return self._called_builders[self.prj]
 
     def __call__(self, *args, **kwargs):
-        call = (self.builder_name, self.builder, args, kwargs)
+        nodewrap = NodeHolder()
+        call = (self.builder_name, self.builder, args, kwargs, nodewrap)
         self.called_builders.append(call)
+        return nodewrap
 
     def subscribe_to(self, dict):
         dict[self.builder_reg_name] = self
@@ -49,30 +87,30 @@ class BuilderWrapper(object):
         env = prj.env
         called_builders = BuilderWrapper._called_builders[prj]
         results = []
-        for (name, builder, call_args, call_kwargs) in called_builders:
+        for (name, builder, call_args, call_kwargs, ndwrap) in called_builders:
             if builder is None:
                 builder = getattr(env, name)
             if builder is None:
                 raise LibextError, "Builder " + name + "Not found"
             builder_args = []
-            builder_args.extend(call_args)
+            builder_args.extend(NodeHolder.unwrap(call_args))
             builder_args.extend(args)
             builder_kwargs = {}
-            builder_kwargs.update(call_kwargs)
+            builder_kwargs.update(NodeHolder.unwrap(call_kwargs))
             builder_kwargs.update(kwargs)
-            res = builder(*builder_args, **builder_kwargs)
-            results.append(res)
+            ndwrap.node = builder(*builder_args, **builder_kwargs)
+            results.append(ndwrap.node)
         return results
 
 
 class LibextProject(ConstructibleRacyProject):
-    var_name = 'LIBEXT'
     LIBEXT    = ('libext', )
 
     def __init__(self, *args, **kwargs):
 
         libext_builders = {}
         builder_wrappers = [
+                BuilderWrapper(self,'Download'),
                 BuilderWrapper(self,'UnTar'),
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
                 BuilderWrapper(self,'CMake'),
@@ -100,26 +138,10 @@ class LibextProject(ConstructibleRacyProject):
                 **kwargs
                 )
 
-
-    @cached_property
-    def conf (self):
-        return self.get(self.var_name)
-
-    @cached_property
-    def url_source (self):
-        import racy.rscons.url
-        url = self.conf['URL_SOURCE']
-        url = self.env.Url(url)
-        return url
-
-    @cached_property
-    def url_source_type (self):
-        return self.conf['SOURCE_TYPE']
-
     @cached_property
     def download_target (self):
         path = [racy.renv.dirs.build, 'LibextDownload']
-        fmt = "{0.name}_{0.version}.{0.url_source_type}"
+        fmt = "{0.name}_{0.version}"
         path.append(fmt.format(self))
         return os.path.join(*path)
 
@@ -140,16 +162,14 @@ class LibextProject(ConstructibleRacyProject):
 
     def build(self, *a, **k):
         env = self.env
+        download_target = env.Dir(self.download_target)
         extract_dir = env.Dir(self.extract_dir)
-        res = self.env.Download( 
-                source = self.url_source ,
-                target = self.download_target
-                )
-        previous = res
 
+        previous = []
         res = BuilderWrapper.apply_calls(
                     self                            ,
-                    DOWNLOADED_FILE = res           ,
+                    #DOWNLOADED_FILE = res           ,
+                    DOWNLOAD_DIR    = download_target,
                     EXTRACT_DIR     = extract_dir   ,
                     BUILD_DIR       = self.build_dir,
                     LOCAL_DIR       = self.local_dir,

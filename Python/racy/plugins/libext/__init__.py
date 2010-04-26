@@ -13,18 +13,16 @@ import racy
 from libextproject import LibextProject
 
 
-KEYWORD = LibextProject.var_name
-
 
 class Plugin(racy.rplugins.Plugin):
     name = "Libext"
 
-    options              = { KEYWORD : {} }
+    #options              = { KEYWORD : {} }
     #allowed_values       = { KEYWORD : ['no', 'yes'] }
     #allowed_values       = { KEYWORD : [] }
-#    commandline_opts     = [ KEYWORD ]
+    #commandline_opts     = [ KEYWORD ]
     #commandline_prj_opts = [ KEYWORD ]
-    descriptions_opts    = { KEYWORD : 'description of Libext Project' }
+    #descriptions_opts    = { KEYWORD : 'description of Libext Project' }
 
     def init(self):
         import racy.renv.configs.allowedvalues as allowed_values

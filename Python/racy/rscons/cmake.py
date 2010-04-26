@@ -37,7 +37,7 @@ def CMake(target, source, env):
     cmd.append(env.subst('${OPTIONS}'))
 
     environment = {}
-    for k,v in env['ENV']:
+    for k,v in env['ENV'].items():
         environment[k] = str(v)
 
     cmake = subprocess.Popen(cmd,

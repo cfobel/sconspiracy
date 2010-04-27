@@ -1,15 +1,13 @@
 # -*- coding: UTF8 -*-
 
 import os
-import subprocess
+import SCons
 
-import SCons.Node
-import SCons.Script
+from subprocessbuilder import SubProcessBuilder
 
-
-def find_cmake_path(dir):
+def find_cmake_path(_dir):
     path = None
-    for root, dirs, files in os.walk(dir):
+    for root, dirs, files in os.walk(_dir):
         if "CMakeLists.txt" in files:
             path = root
             break
@@ -23,31 +21,31 @@ def CMakeEmitter(target, source, env):
     return target, source
 
 
+
 def CMake(target, source, env):
     assert len(source) == 1
 
     cmake_prj_path   = find_cmake_path(source[0].get_abspath())
     cmake_build_path = target[0].get_abspath()
 
+    wasdir = target[0].isdir()
     env.Execute(SCons.Script.Mkdir(cmake_build_path))
 
-    cmd = [  env.WhereIs('cmake', path=os.environ['PATH']) ]
+    command = 'cmake'
+    args = []
+    args.append(cmake_prj_path)
+    args.append(env.subst('${OPTIONS}'))
+    pwd = cmake_build_path
 
-    cmd.append(cmake_prj_path)
-    cmd.append(env.subst('${OPTIONS}'))
+    try:
+        returncode = SubProcessBuilder(target, source, env, command, args, pwd)
+    except:
+        print "wasdir "  + str(wasdir)
+        if not wasdir:
+            env.Execute(SCons.Script.Delete(cmake_build_path))
 
-    environment = {}
-    for k,v in env['ENV'].items():
-        environment[k] = str(v)
 
-    cmake = subprocess.Popen(cmd,
-                             cwd = cmake_build_path,
-                             env = environment
-                            )
-
-    cmake.communicate()
-
-    return cmake.returncode
+    return returncode
 
 
 def CMakeString(target, source, env):

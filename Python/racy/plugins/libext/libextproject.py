@@ -115,6 +115,7 @@ class LibextProject(ConstructibleRacyProject):
                 BuilderWrapper(self,'UnTar'),
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
                 BuilderWrapper(self,'CMake'),
+                BuilderWrapper(self,'Make'),
                 ]
 
         for bld in builder_wrappers:

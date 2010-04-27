@@ -3,10 +3,15 @@
 import os
 import subprocess
 
-def SubProcessBuilder(target, source, env, command, args, pwd, path = None):
-    if path is None:
-        path = os.environ['PATH']
-    cmd = [  env.WhereIs(command, path=path) ]
+from racy.rutils import is_iterable
+
+def SubProcessBuilder(target, source, env, command, args, pwd, path = []):
+
+    if is_iterable(path):
+        path = os.pathsep.join(path)
+    path = os.pathsep.join([path, os.environ['PATH']])
+
+    cmd = [ env.WhereIs(command, path=path) ]
 
     cmd.extend(args)
 

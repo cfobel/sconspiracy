@@ -694,6 +694,8 @@ class RacyProject(object):
         inc = [lib.include_path for lib in self.source_rec_deps]
         if len(inc)>1:
             inc = reduce( lambda a,b : a+b, inc)
+        elif len(inc) == 1:
+            inc = inc[0]
         return inc
 
 

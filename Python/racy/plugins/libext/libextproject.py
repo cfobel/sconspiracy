@@ -103,6 +103,15 @@ class BuilderWrapper(object):
             results.append(ndwrap.node)
         return results
 
+class CMakeWrapper(BuilderWrapper):
+    def __call__(self, *args, **kwargs):
+        options = kwargs.get('OPTIONS', [])
+        options.insert(0,'-DCMAKE_INCLUDE_PATH:PATH=$LIBEXT_INCLUDE_PATH')
+        options.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=$LIBEXT_LIBRARY_PATH')
+        kwargs['OPTIONS']=options
+        super(CMakeWrapper, self).__call__(*args, **kwargs)
+
+
 
 class LibextProject(ConstructibleRacyProject):
     LIBEXT    = ('libext', )
@@ -114,7 +123,7 @@ class LibextProject(ConstructibleRacyProject):
                 BuilderWrapper(self,'Download'),
                 BuilderWrapper(self,'UnTar'),
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
-                BuilderWrapper(self,'CMake'),
+                CMakeWrapper  (self,'CMake'),
                 BuilderWrapper(self,'Make'),
                 ]
 
@@ -140,7 +149,6 @@ class LibextProject(ConstructibleRacyProject):
                 *args,
                 **kwargs
                 )
-
     @cached_property
     def download_target (self):
         path = [racy.renv.dirs.build, 'LibextDownload']
@@ -159,6 +167,27 @@ class LibextProject(ConstructibleRacyProject):
         return os.path.join(*path)
 
 
+    @cached_property
+    def include_path (self):
+        path = [self.local_dir, 'include']
+        return os.path.join(*path)
+
+
+    @cached_property
+    def lib_path (self):
+        path = [self.local_dir, 'lib']
+        return os.path.join(*path)
+
+    @cached_property
+    def deps_include_path (self):
+        inc = [lib.include_path for lib in self.source_rec_deps]
+        return inc
+
+    @cached_property
+    def deps_lib_path (self):
+        inc = [lib.lib_path for lib in self.source_rec_deps]
+        return inc
+
     @run_once
     def configure_env(self):
         super(LibextProject, self).configure_env()
@@ -170,14 +199,15 @@ class LibextProject(ConstructibleRacyProject):
 
         previous = []
         res = BuilderWrapper.apply_calls(
-                    self                            ,
-                    #DOWNLOADED_FILE = res           ,
-                    DOWNLOAD_DIR    = download_target,
-                    EXTRACT_DIR     = extract_dir   ,
-                    BUILD_DIR       = self.build_dir,
-                    LOCAL_DIR       = self.local_dir,
-                    NAME            = self.name     ,
-                    VERSION         = self.version  ,
+                    self,
+                    DOWNLOAD_DIR        = download_target,
+                    EXTRACT_DIR         = extract_dir    ,
+                    BUILD_DIR           = self.build_dir ,
+                    LOCAL_DIR           = self.local_dir ,
+                    NAME                = self.name      ,
+                    VERSION             = self.version   ,
+                    LIBEXT_INCLUDE_PATH = os.pathsep.join(self.deps_include_path),
+                    LIBEXT_LIBRARY_PATH = os.pathsep.join(self.deps_lib_path),
                     )
 
         for nodes in res:

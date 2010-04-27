@@ -176,7 +176,8 @@ class LibextProject(ConstructibleRacyProject):
                     EXTRACT_DIR     = extract_dir   ,
                     BUILD_DIR       = self.build_dir,
                     LOCAL_DIR       = self.local_dir,
-                    NAME            = self.name
+                    NAME            = self.name     ,
+                    VERSION         = self.version  ,
                     )
 
         for nodes in res:

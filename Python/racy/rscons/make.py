@@ -3,6 +3,7 @@
 import os
 import SCons
 
+
 from subprocessbuilder import SubProcessBuilder
 
 def find_make_path(_dir):
@@ -13,13 +14,19 @@ def find_make_path(_dir):
             break
     return path
 
+def guess_make_cmd():
+    import racy.renv as renv
+    if renv.is_windows():
+        return "nmake"
+    else:
+        return "make"
 
 def Make(target, source, env):
     assert len(source) == 1
 
     make_dir = find_make_path(source[0].get_abspath())
 
-    command = 'make'
+    command = env.subst('${MAKECOM}')
     args = []
     args.extend([t.value for t in target])
     args.append(env.subst('${OPTIONS}'))
@@ -45,6 +52,8 @@ def generate(env):
             target_factory = env.Value,
             source_factory = env.Dir,
             )
+
+    env['MAKECOM'] = guess_make_cmd()
 
     env.Append(BUILDERS = {'Make' : builder})
 

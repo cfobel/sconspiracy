@@ -29,12 +29,13 @@ def CMake(target, source, env):
     cmake_build_path = target[0].get_abspath()
 
     wasdir = target[0].isdir()
-    env.Execute(SCons.Script.Mkdir(cmake_build_path))
+    if not wasdir:
+        env.Execute(SCons.Script.Mkdir(cmake_build_path))
 
     command = 'cmake'
     args = []
+    args.extend(env.subst('${OPTIONS}').split())
     args.append(cmake_prj_path)
-    args.append(env.subst('${OPTIONS}'))
     pwd = cmake_build_path
 
     try:

@@ -108,6 +108,17 @@ class CMakeWrapper(BuilderWrapper):
         options = kwargs.get('OPTIONS', [])
         options.insert(0,'-DCMAKE_INCLUDE_PATH:PATH=$LIBEXT_INCLUDE_PATH')
         options.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=$LIBEXT_LIBRARY_PATH')
+        if racy.renv.is_windows():
+            options.insert(0,'"-GNMake Makefiles"')
+        else:                  
+            options.insert(0,'"-GUnix Makefiles"')
+        #options.insert(0,'-G')
+
+        #if racy.renv.is_windows():
+            #options.extend(['-G', '"NMake Makefiles"'])
+        #else:
+            #options.extend(['-G', '"Unix Makefiles"'])
+
         kwargs['OPTIONS']=options
         super(CMakeWrapper, self).__call__(*args, **kwargs)
 

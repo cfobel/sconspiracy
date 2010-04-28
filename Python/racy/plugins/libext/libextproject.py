@@ -8,6 +8,7 @@
 
 import os
 import SCons.Defaults
+import SCons.Node
 
 from os.path import join as opjoin
 
@@ -18,90 +19,10 @@ from racy.renv       import constants
 from racy.rproject   import ConstructibleRacyProject, LibName
 from racy.rutils     import cached_property, memoize, run_once
 
+from libexterror    import LibextError
+from nodeholder     import NodeHolder
+from builderwrapper import BuilderWrapper
 
-
-class LibextError(racy.RacyProjectError):
-    pass
-
-class NodeHolder(object):
-
-    def __init__(self):
-        self._node = None
-
-    @property
-    def node(self):
-        node = self._node
-        if node is None:
-            raise LibextError, "Node uninitialized"
-        return node
-
-    @node.setter
-    def node(self, n):
-        self._node = n
-
-    @staticmethod
-    def unwrap(iterable):
-        def unwrap_filter(a):
-            if isinstance(a, NodeHolder):
-                return a.node
-            return a
-
-        def unwrap_dict_item(item):
-            k,v = item
-            return k, unwrap_filter(v)
-
-        if isinstance(iterable, dict):
-            res = dict(map(unwrap_dict_item, iterable.items()))
-        else:
-            res = map(unwrap_filter, iterable)
-
-        return res
-
-
-        
-
-class BuilderWrapper(object):
-    _called_builders = {}
-
-    def __init__(self, prj, name, builder = None, reg_name = None):
-        self.prj                   = prj
-        self.builder_name          = name
-        self.builder_reg_name      = reg_name if reg_name else name
-        self.builder               = builder
-        self._called_builders[prj] = []
-
-    @property
-    def called_builders(self):
-        return self._called_builders[self.prj]
-
-    def __call__(self, *args, **kwargs):
-        nodewrap = NodeHolder()
-        call = (self.builder_name, self.builder, args, kwargs, nodewrap)
-        self.called_builders.append(call)
-        return nodewrap
-
-    def subscribe_to(self, dict):
-        dict[self.builder_reg_name] = self
-
-    @staticmethod
-    def apply_calls(prj, *args, **kwargs):
-        env = prj.env
-        called_builders = BuilderWrapper._called_builders[prj]
-        results = []
-        for (name, builder, call_args, call_kwargs, ndwrap) in called_builders:
-            if builder is None:
-                builder = getattr(env, name)
-            if builder is None:
-                raise LibextError, "Builder " + name + "Not found"
-            builder_args = []
-            builder_args.extend(NodeHolder.unwrap(call_args))
-            builder_args.extend(args)
-            builder_kwargs = {}
-            builder_kwargs.update(NodeHolder.unwrap(call_kwargs))
-            builder_kwargs.update(kwargs)
-            ndwrap.node = builder(*builder_args, **builder_kwargs)
-            results.append(ndwrap.node)
-        return results
 
 class CMakeWrapper(BuilderWrapper):
     def __call__(self, *args, **kwargs):
@@ -110,17 +31,27 @@ class CMakeWrapper(BuilderWrapper):
         options.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=$LIBEXT_LIBRARY_PATH')
         if racy.renv.is_windows():
             options.insert(0,'"-GNMake Makefiles"')
-        else:                  
+        else:
             options.insert(0,'"-GUnix Makefiles"')
-        #options.insert(0,'-G')
-
-        #if racy.renv.is_windows():
-            #options.extend(['-G', '"NMake Makefiles"'])
-        #else:
-            #options.extend(['-G', '"Unix Makefiles"'])
 
         kwargs['OPTIONS']=options
         super(CMakeWrapper, self).__call__(*args, **kwargs)
+
+
+class WaitDependenciesWrapper(BuilderWrapper):
+
+    def __init__(self, *args, **kwargs):
+        builder = self.WaitDependenciesBuilder
+        kwargs['name'] = 'WaitDependencies'
+        kwargs['builder'] = builder
+        super(WaitDependenciesWrapper, self).__init__(*args, **kwargs)
+
+    def WaitDependenciesBuilder(self, *args, **kwargs):
+        """Return return a node dependent on libext's dependencies"""
+        env = self.prj.env
+        alias = env.Alias('WaitDependencies_'+str(id(self)))
+        env.Depends(alias, self.prj.deps_nodes)
+        return alias
 
 
 
@@ -128,7 +59,6 @@ class LibextProject(ConstructibleRacyProject):
     LIBEXT    = ('libext', )
 
     def __init__(self, *args, **kwargs):
-
         libext_builders = {}
         builder_wrappers = [
                 BuilderWrapper(self,'Download'),
@@ -136,6 +66,7 @@ class LibextProject(ConstructibleRacyProject):
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
                 CMakeWrapper  (self,'CMake'),
                 BuilderWrapper(self,'Make'),
+                WaitDependenciesWrapper(self),
                 ]
 
         for bld in builder_wrappers:
@@ -145,8 +76,6 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['_globals'].update(libext_builders)
         kwargs['_globals']['Url'] = racy.rscons.url.Url
         super(LibextProject, self).__init__( *args, **kwargs )
-
-        self.prj_locals['generate']()
 
 
 
@@ -199,26 +128,40 @@ class LibextProject(ConstructibleRacyProject):
         inc = [lib.lib_path for lib in self.source_rec_deps]
         return inc
 
+    @cached_property
+    def deps_nodes (self):
+        inc = [lib.build() for lib in self.source_rec_deps]
+        return inc
+
     @run_once
     def configure_env(self):
         super(LibextProject, self).configure_env()
 
-    def build(self, *a, **k):
+
+    @memoize
+    def result(self, deps_results=True):
+        prj = self
         env = self.env
-        download_target = env.Dir(self.download_target)
-        extract_dir = env.Dir(self.extract_dir)
+
+        result = []
+        prj.configure_env()
+
+        prj.prj_locals['generate']()
+
+        download_target = env.Dir(prj.download_target)
+        extract_dir = env.Dir(prj.extract_dir)
 
         previous = []
         res = BuilderWrapper.apply_calls(
-                    self,
+                    prj,
                     DOWNLOAD_DIR        = download_target,
                     EXTRACT_DIR         = extract_dir    ,
-                    BUILD_DIR           = self.build_dir ,
-                    LOCAL_DIR           = self.local_dir ,
-                    NAME                = self.name      ,
-                    VERSION             = self.version   ,
-                    LIBEXT_INCLUDE_PATH = os.pathsep.join(self.deps_include_path),
-                    LIBEXT_LIBRARY_PATH = os.pathsep.join(self.deps_lib_path),
+                    BUILD_DIR           = prj.build_dir  ,
+                    LOCAL_DIR           = prj.local_dir  ,
+                    NAME                = prj.name       ,
+                    VERSION             = prj.version    ,
+                    LIBEXT_INCLUDE_PATH = os.pathsep.join(prj.deps_include_path),
+                    LIBEXT_LIBRARY_PATH = os.pathsep.join(prj.deps_lib_path),
                     )
 
         for nodes in res:
@@ -229,32 +172,19 @@ class LibextProject(ConstructibleRacyProject):
                 env.Depends( node, previous )
                 previous = node
 
+        result += nodes
+
         for node in [extract_dir]:
             env.Clean(node, node)
 
-        return res
-
-    @memoize
-    def result(self, deps_results=True):
-        prj = self
-        env = self.env
-
-        result = []
-        self.configure_env()
-
-        sources = []
-
-        for node in result:
-            env.Clean(node, node)
-
+        env.Clean(result[-1:], env.Dir(self.build_dir + '/local'))
         return result
 
 
-    #@cached_property
-    #def install_path(self):
-        #install_dir = racy.renv.dirs.install_doc
-        #return install_dir
-
+    def build(self,  build_deps = True):
+        """build_deps = False is not available"""
+        res = self.result()
+        return res[-1:]
 
     @memoize
     def install (self, opts = ['rc','deps']):

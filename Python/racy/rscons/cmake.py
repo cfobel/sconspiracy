@@ -40,10 +40,10 @@ def CMake(target, source, env):
 
     try:
         returncode = SubProcessBuilder(target, source, env, command, args, pwd)
-    except:
-        print "wasdir "  + str(wasdir)
+    except Exception, e:
         if not wasdir:
             env.Execute(SCons.Script.Delete(cmake_build_path))
+        raise e
 
 
     return returncode

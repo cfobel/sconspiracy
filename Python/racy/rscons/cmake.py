@@ -34,8 +34,11 @@ def CMake(target, source, env):
 
     command = 'cmake'
     args = []
-    args.extend(env.subst('${OPTIONS}').split())
+    print env['OPTIONS']
+    args.extend(env['OPTIONS'])
     args.append(cmake_prj_path)
+    args = map(env.subst, args)
+
     pwd = cmake_build_path
 
     try:

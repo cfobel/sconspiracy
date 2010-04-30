@@ -20,14 +20,23 @@ def SubProcessBuilder(target, source, env, command, args, pwd, path = []):
         environment[k] = str(v)
 
     cmd = filter(lambda x:x, cmd)
+
+    stdout = subprocess.PIPE
+
     process = subprocess.Popen(
                 cmd,
                 cwd = pwd,
+                stdout = stdout,
                 env = environment
                 )
 
     process.communicate()
 
     return process.returncode
+
+
+def SubProcessString(target, source, env):
+    return env.subst('${SUBPROCESSPREFIXSTR}')
+
 
 

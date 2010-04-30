@@ -24,11 +24,32 @@ from nodeholder     import NodeHolder
 from builderwrapper import BuilderWrapper
 
 
+class ConfigureWrapper(BuilderWrapper):
+    def __call__(self, *args, **kwargs):
+        options = kwargs.get('OPTIONS', [])
+        options.append('--prefix=${BUILD_DIR}/local')
+
+        kwargs['OPTIONS']=options
+
+        prj = self.prj
+        ENV = prj.env['ENV']
+        ENV['CXXFLAGS']  = ENV.get('CXXFLAGS','')
+        ENV['CFLAGS']    = ENV.get('CFLAGS','')
+        ENV['LINKFLAGS'] = ENV.get('LINKFLAGS','')
+        ENV['CXXFLAGS']  += ' -I'.join([''] + prj.deps_include_path)
+        ENV['CFLAGS']    += ' -I'.join([''] + prj.deps_include_path)
+        ENV['LINKFLAGS'] += ' -L'.join([''] + prj.deps_lib_path)
+
+        super(ConfigureWrapper, self).__call__(*args, **kwargs)
+
+
+
 class CMakeWrapper(BuilderWrapper):
     def __call__(self, *args, **kwargs):
         options = kwargs.get('OPTIONS', [])
         options.insert(0,'-DCMAKE_INCLUDE_PATH:PATH=$LIBEXT_INCLUDE_PATH')
         options.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=$LIBEXT_LIBRARY_PATH')
+        options.append('-DCMAKE_INSTALL_PREFIX:PATH=${BUILD_DIR}/local')
 
         if racy.renv.is_windows():
             options.insert(0,'NMake Makefiles')
@@ -68,6 +89,7 @@ class LibextProject(ConstructibleRacyProject):
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
                 CMakeWrapper  (self,'CMake'),
                 BuilderWrapper(self,'Make'),
+                ConfigureWrapper(self,'Configure'),
                 WaitDependenciesWrapper(self),
                 ]
 
@@ -91,6 +113,7 @@ class LibextProject(ConstructibleRacyProject):
                 *args,
                 **kwargs
                 )
+
     @cached_property
     def download_target (self):
         path = [racy.renv.dirs.build, 'LibextDownload']
@@ -164,6 +187,7 @@ class LibextProject(ConstructibleRacyProject):
                     VERSION             = prj.version    ,
                     LIBEXT_INCLUDE_PATH = os.pathsep.join(prj.deps_include_path),
                     LIBEXT_LIBRARY_PATH = os.pathsep.join(prj.deps_lib_path),
+                    SUBPROCESSPREFIXSTR = '[{0}]:'.format(self.name)
                     )
 
         for nodes in res:

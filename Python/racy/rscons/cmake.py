@@ -3,7 +3,7 @@
 import os
 import SCons
 
-from subprocessbuilder import SubProcessBuilder
+from subprocessbuilder import SubProcessBuilder, SubProcessString
 
 def find_cmake_path(_dir):
     path = None
@@ -34,8 +34,7 @@ def CMake(target, source, env):
 
     command = 'cmake'
     args = []
-    print env['OPTIONS']
-    args.extend(env['OPTIONS'])
+    args.extend(env.get('OPTIONS',[]))
     args.append(cmake_prj_path)
     args = map(env.subst, args)
 
@@ -54,7 +53,8 @@ def CMake(target, source, env):
 
 def CMakeString(target, source, env):
     """ Information string for CMake """
-    return env.subst('Cmake: $TARGET ${OPTIONS}') #% os.path.basename (str (source[0]))
+    prefix = SubProcessString(target, source, env)
+    return prefix + env.subst('Cmake: '+str(target)+' ${OPTIONS}')
 
 
 

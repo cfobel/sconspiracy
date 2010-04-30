@@ -4,7 +4,7 @@ import os
 import SCons
 
 
-from subprocessbuilder import SubProcessBuilder
+from subprocessbuilder import SubProcessBuilder, SubProcessString
 
 def find_make_path(_dir):
     path = None
@@ -29,7 +29,11 @@ def Make(target, source, env):
     command = env.subst('${MAKECOM}')
     args = []
     args.extend([t.value for t in target])
-    args.append(env.subst('${OPTIONS}'))
+
+    options = env.get('OPTIONS',[])
+    options = map(env.subst, options)
+    args.extend(options)
+
     pwd = make_dir
 
     returncode = SubProcessBuilder(target, source, env, command, args, pwd)
@@ -39,7 +43,8 @@ def Make(target, source, env):
 
 def MakeString(target, source, env):
     """ Information string for Make """
-    return env.subst('make: $TARGET ${OPTIONS}') #% os.path.basename (str (source[0]))
+    prefix = SubProcessString(target, source, env)
+    return prefix + env.subst('make: '+str(target)+' ${OPTIONS}')
 
 
 

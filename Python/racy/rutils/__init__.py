@@ -7,8 +7,9 @@
 
 
 
-import re
+import exceptions
 import os
+import re
 
 from os.path import join, isfile, normpath
 
@@ -136,13 +137,21 @@ def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
             action = shutil.copy
         else:
             src = linktarget
+            action = os.symlink
 
-        action = os.symlink
-        if os.path.exists(dst): os.unlink(dst)
+
+        if os.path.exists(dst): 
+            os.unlink(dst)
+
+        #hack to manage some symlinks errors
+        try:
+            action(src, dst)
+        except exceptions.OSError, e:
+            if not e.strerror == 'File exists':
+                raise e
     else:
-        action = shutil.copy
+        shutil.copy(src, dst)
 
-    action(src, dst)
 
 #------------------------------------------------------------------------------
 def get_first_existing_file(files):

@@ -151,7 +151,11 @@ def get_overrided_project_value(opt, config, default, option_value,
     override = get_racy_default('OVERRIDE_PROJECT_VALUE', config)
     res = override.get(opt, option_value
             if option_value is not Undefined and option_value else default)
-    allowedvalues.check_value_with_msg(opt, res, config+":OVERRIDE_PROJECT_VALUE")
+    prjname = ''
+    if prj:
+        prjname = ':' + prj.name
+        allowedvalues.check_value_with_msg(opt, res,
+                config+':OVERRIDE_PROJECT_VALUE' + prjname)
     return res
 
 
@@ -199,7 +203,6 @@ def get_option(opt, prj=None, default=None, option_value=Undefined, config=None)
             ]
 
     for f in funcs:
-        avant = kwargs['default']
         kwargs['default'] = f(**kwargs)
 
     res = kwargs['default']

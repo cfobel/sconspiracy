@@ -114,7 +114,8 @@ def get_opts_help():
             opt_def = getattr(default, opt, Undef)
             if opt_def is Undef:
                 import racy
-                raise racy.OptionError, '"{0}" has no default value'
+                msg = '"{0}" has no default value'
+                raise racy.OptionError, msg.format(opt)
             allowed = getattr(allowedvalues, opt, Undef)
             current = opts.get_option(opt)
             help.append(get_opt_help(opt, desc, opt_def, allowed, current))

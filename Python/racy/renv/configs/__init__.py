@@ -32,10 +32,11 @@ RACY_DEFAULTS_PATH = os.path.dirname(__file__)
 def get_config(name, 
         path = None, _locals = None, _globals = None, 
         raise_on_not_found = True, write_postfix=False,
-        read_default = True, include_defaults = True):
+        read_default = True, include_defaults = True,
+        default_config = DEFAULT_CONFIG, defs = None):
     """Get and returns variables defined in <name> file.
 
-    If read_default is True, read DEFAULT_CONFIG first.
+    If read_default is True, read default_config first.
 
     if _locals or/and _globals is given, put results in them.
 
@@ -44,6 +45,9 @@ def get_config(name,
 
     if 'write_postfix' is True, put 'name' in _locals['POSTFIX'] *before* 
     reading config file.
+
+    updates '_locals' with definitions in config
+    updates 'defs' with definitions in config
     """
 
     if os.path.isabs(name) and path is None:
@@ -68,11 +72,11 @@ def get_config(name,
             raise ConfigVariantError, msg
     else:
         # exec 'default' first if needed
-        if read_default and name is not DEFAULT_CONFIG:
+        if read_default and name is not default_config:
             source = _globals
             if include_defaults:
                 source = _locals
-            get_config(DEFAULT_CONFIG, _locals = source)
+            get_config(default_config, _locals = source)
 
         if write_postfix:
             if 'POSTFIX' in _locals:
@@ -80,7 +84,14 @@ def get_config(name,
             else:
                 _locals['POSTFIX'] = [name]
 
-        read_config(config_file, _globals, _locals)
+        res = {}
+        globals_env = dict(_globals)
+        globals_env.update(_locals)
+        read_config(config_file, globals_env, res)
+
+        _locals.update(res)
+        if defs is not None:
+            defs.update(res)
 
     return _locals
 

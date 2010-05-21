@@ -119,6 +119,7 @@ class RacyProject(object):
     _platform      = None
     _project_dir   = None
 
+    prj_def_vars   = None
     prj_locals     = None
     projects_db    = None
     special_source = None
@@ -157,18 +158,22 @@ class RacyProject(object):
         self._opts_source = build_options
         self._project_dir = prj_path
 
+        self.prj_def_vars = {}
         self.prj_locals = kw.get('_locals' ,{})
         _globals        = kw.get('_globals',{})
         if self.prj_locals is None:
             self.prj_locals = {}
 
+
         if build_options_is_dict:
             self.prj_locals.update(build_options)
+            self.prj_def_vars.update(build_options)
         else:
             get_config(os.path.basename(build_options),
-                    path    = build_options_dir,
+                    path     = build_options_dir,
                     _locals  = self.prj_locals,
                     _globals = _globals,
+                    defs     = self.prj_def_vars,
                     )
 
         # Check if one project config matches the global specified CONFIG
@@ -183,13 +188,12 @@ class RacyProject(object):
         if config:
             config_locals = get_config(config,
                         path          = config_dir,
-                        _locals        = self.prj_locals,
-                        _globals       = _globals,
+                        _locals       = self.prj_locals,
+                        _globals      = _globals,
                         write_postfix = True,
                         read_default  = False,
+                        defs          = self.prj_def_vars,
                         )
-            if config_locals:
-                self.prj_locals.update(config_locals)
 
         self._platform  = platform
         self._compiler  = rutils.Version(cxx)
@@ -224,15 +228,16 @@ class RacyProject(object):
         name = self.base_name
         kwargs['opt']          = opt
         kwargs['prj']          = self
-        kwargs['option_value'] = self.prj_locals.get(opt, None)
+        kwargs['option_value'] = self.prj_def_vars.get(opt, None)
         config = (self.config if self.config else "default")
         config = ''.join([name, ':', config])
         
-        allowedvalues.check_value_with_msg(
-                opt,
-                kwargs['option_value'],
-                config + " " + str(kwargs['prj'].opts_source)
-                )
+        if opt in self.prj_def_vars:
+            allowedvalues.check_value_with_msg(
+                    opt,
+                    kwargs['option_value'],
+                    config + " " + str(kwargs['prj'].opts_source)
+                    )
         res = renv.options.get_option( **kwargs )
         return res
 
@@ -939,10 +944,12 @@ class InstallableRacyProject(RacyProject):
         for dep in self.bin_rec_deps:
             bin_results.append( dep.install(opts) )
 
-        env.Depends(result, bin_results)
 
         result.sort(key=abspath_key)
         result = env.Alias ('install-' + self.full_name, result)
+
+        env.Depends(result, bin_results)
+
         return result
 
 
@@ -1172,8 +1179,8 @@ class ConstructibleRacyProject(InstallableRacyProject):
         """
 
         result = self.result(deps_results = build_deps)
-        result.sort(key=abspath_key)
-        result = self.env.Alias ('build-' + self.full_name, result)
+        #result.sort(key=abspath_key)
+        #result = self.env.Alias ('build-' + self.full_name, result)
         return result
 
 

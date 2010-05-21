@@ -25,6 +25,9 @@ from racy.renv         import constants
 from racy.rutils       import cached_property, memoize, run_once
 
 
+def abspath_key(r): 
+    return r.get_abspath()
+
 all = ['LibName', 'RacyProject', 'ConstructibleRacyProject']
 
 
@@ -565,6 +568,7 @@ class RacyProject(object):
                 def is_bin_prj(dep):
                     name = dep.register_name
                     if name not in db:
+                        #this will register name to db
                         libext = rlibext.register.get_lib_for_prj(name, self)
                     return db[name].is_bin
 
@@ -652,7 +656,7 @@ class RacyProject(object):
             deps = sum([list(getattr(self,attr)) for attr in attribs],[])
             for lib in self.source_deps:
                 deps += lib._get_rec_deps(callers, attribs)
-            deps = tuple(set(deps))
+            deps = tuple(sorted(set(deps), key=str))
             dbdeps[self] = deps
         callers.remove(self)
         return deps
@@ -679,7 +683,6 @@ class RacyProject(object):
         get all include path for example.
         """
         return self._get_rec_deps([], attribs = ['bin_deps'])
-
 
 
     @cached_property
@@ -733,11 +736,12 @@ class RacyProject(object):
         """Returns CXX source files of the project"""
         build_dirs = map(self.get_build_dir_for, self.src_path)
 
-        return rutils.DeepGlob(
+        sources = rutils.DeepGlob(
                 constants.CXX_SOURCE_EXT,
                 self.src_path,
                 build_dirs
                 ) + self.extra_sources + self.special_source
+        return sources
 
 
     @cached_property
@@ -934,8 +938,11 @@ class InstallableRacyProject(RacyProject):
         bin_results = []
         for dep in self.bin_rec_deps:
             bin_results.append( dep.install(opts) )
+
         env.Depends(result, bin_results)
 
+        result.sort(key=abspath_key)
+        result = env.Alias ('install-' + self.full_name, result)
         return result
 
 
@@ -995,6 +1002,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         need_rec_deps = self.is_exec or racy.renv.system() in ['windows','darwin']
         lib_dep = prj.lib_rec_deps if need_rec_deps else prj.source_libs_deps
+
         LIBPATH += [ self.env.Dir(lib.build_dir) for lib in lib_dep]
         LIBS = [ lib.full_name for lib in lib_dep ]
 
@@ -1079,7 +1087,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
             self.variant_dir(builddir, path)
 
         bin_deps = prj.bin_deps
-        rec_bin_deps = set(self.bin_rec_deps) - set(bin_deps)
+        rec_bin_deps = sorted(set(self.bin_rec_deps) - set(bin_deps), key=str)
 
         link_opts = []
         if self.is_exec:
@@ -1163,7 +1171,10 @@ class ConstructibleRacyProject(InstallableRacyProject):
         if build_deps is False, don't care about depencies existance
         """
 
-        return self.result(deps_results = build_deps)
+        result = self.result(deps_results = build_deps)
+        result.sort(key=abspath_key)
+        result = self.env.Alias ('build-' + self.full_name, result)
+        return result
 
 
 
@@ -1207,6 +1218,9 @@ class ConstructibleRacyProject(InstallableRacyProject):
             env.Depends(result, deps_results)
             env.Depends(result, bin_results)
 
+        result.sort(key=abspath_key)
+        alias = 'install-{prj.type}-{prj.full_name}'
+        result = env.Alias (alias.format(prj=self), result)
         return result
         
     def generate_pkg_files(self):

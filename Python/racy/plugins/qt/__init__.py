@@ -48,8 +48,8 @@ def includes(prj):
     return includes
 
 
-def inc_build_dir(self):
-    return map(prj.get_build_dir_for_path, prj.include_path)
+def inc_build_dir(prj):
+    return map(prj.get_build_dir_for, prj.include_path)
 
 def ui_sources(prj):
     """Returns ui source files of the project"""

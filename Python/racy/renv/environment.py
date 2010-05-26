@@ -31,11 +31,7 @@ class Environment(Env):
         from os.path           import abspath, dirname, join
 
         import racy
-        import racy.rscons.url
-        import racy.rscons.untar
-        import racy.rscons.cmake
-        import racy.rscons.make
-        import racy.rscons.configure
+
 
         import racy.renv as renv
         import racy.rlog as rlog
@@ -59,12 +55,6 @@ class Environment(Env):
 
         act = self.Action( CopyBuilder, "Install file '$$SOURCE' as '$$TARGET'")
         self.__CopyBuilder__ = self.Builder(action = act)
-
-        racy.rscons.url.generate(self)
-        racy.rscons.untar.generate(self)
-        racy.rscons.cmake.generate(self)
-        racy.rscons.make.generate(self)
-        racy.rscons.configure.generate(self)
 
         racy.rplugins.register.get_env_addons(self)
 

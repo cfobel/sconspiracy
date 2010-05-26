@@ -13,11 +13,13 @@ import SCons.Node
 from os.path import join as opjoin
 
 import racy
-import racy.rscons.url
 
 from racy.renv       import constants
 from racy.rproject   import ConstructibleRacyProject, LibName
 from racy.rutils     import cached_property, memoize, run_once
+
+import sconsnode
+import sconsnode.url
 
 from libexterror    import LibextError
 from nodeholder     import NodeHolder
@@ -98,7 +100,7 @@ class LibextProject(ConstructibleRacyProject):
 
         kwargs['_globals']=kwargs.get('_globals',{})
         kwargs['_globals'].update(libext_builders)
-        kwargs['_globals']['Url'] = racy.rscons.url.Url
+        kwargs['_globals']['Url'] = sconsnode.url.Url
         super(LibextProject, self).__init__( *args, **kwargs )
 
 

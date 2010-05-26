@@ -13,12 +13,12 @@ import racy
 
 class UrlNameSpace(UserDict.UserDict):
     def Url(self, name, **kw):
-        if isinstance(name, racy.rscons.url.Url):
+        if isinstance(name, Url):
             return name
         try:
             a = self[name]
         except KeyError:
-            a = apply(racy.rscons.url.Url, (name,), kw)
+            a = apply(Url, (name,), kw)
             self[name] = a
         return a
 

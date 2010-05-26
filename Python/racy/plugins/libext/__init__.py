@@ -54,5 +54,17 @@ class Plugin(racy.rplugins.Plugin):
         res = LibextProject( **kwargs )
         return [res]
 
+    #----------------------------------------
+    def has_env_addon(self, env):
+        return True
+
+    def get_env_addon(self, env):
+
+        from sconsbuilders import cmake, configure, make, untar, url
+
+        for builder in [cmake, configure, make, untar, url]:
+            builder.generate(env)
+
+        return []
 
 

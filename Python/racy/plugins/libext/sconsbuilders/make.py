@@ -21,20 +21,22 @@ def guess_make_cmd():
     else:
         return "make"
 
-def Make(target, source, env):
-    assert len(source) == 1
-
-    make_dir = find_make_path(source[0].get_abspath())
-
-    command = env.subst('${MAKECOM}')
+def MakeArgs(target, source, env):
     args = []
     args.extend([t.value for t in target])
-
     options = env.get('OPTIONS',[])
     options = map(env.subst, options)
     args.extend(options)
+    return args
 
-    pwd = make_dir
+def Make(target, source, env):
+    assert len(source) == 1
+
+    pwd = find_make_path(source[0].get_abspath())
+
+    command = env.subst('${MAKECOM}')
+
+    args = MakeArgs(target, source, env)
 
     returncode = SubProcessBuilder(target, source, env, command, args, pwd)
 
@@ -44,7 +46,9 @@ def Make(target, source, env):
 def MakeString(target, source, env):
     """ Information string for Make """
     prefix = SubProcessString(target, source, env)
-    return prefix + env.subst('make: '+str(target)+' ${OPTIONS}')
+    args = MakeArgs(target, source, env)
+    return prefix + env.subst('${MAKECOM} '+str(args))
+
 
 
 

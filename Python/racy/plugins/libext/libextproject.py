@@ -91,6 +91,7 @@ class LibextProject(ConstructibleRacyProject):
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
                 CMakeWrapper  (self,'CMake'),
                 BuilderWrapper(self,'Make'),
+                BuilderWrapper(self,'Patch'),
                 ConfigureWrapper(self,'Configure'),
                 WaitDependenciesWrapper(self),
                 ]
@@ -185,6 +186,7 @@ class LibextProject(ConstructibleRacyProject):
                     EXTRACT_DIR         = extract_dir    ,
                     BUILD_DIR           = prj.build_dir  ,
                     LOCAL_DIR           = prj.local_dir  ,
+                    RC_DIR              = prj.rc_path    ,
                     NAME                = prj.name       ,
                     VERSION             = prj.version    ,
                     LIBEXT_INCLUDE_PATH = os.pathsep.join(prj.deps_include_path),

@@ -26,7 +26,7 @@ def SubProcessBuilder(target, source, env, command, args, pwd, path = []):
     process = subprocess.Popen(
                 cmd,
                 cwd = pwd,
-                #stdout = stdout,
+                stdout = stdout,
                 env = environment
                 )
 

@@ -92,6 +92,7 @@ class LibextProject(ConstructibleRacyProject):
                 CMakeWrapper  (self,'CMake'),
                 BuilderWrapper(self,'Make'),
                 BuilderWrapper(self,'Patch'),
+                BuilderWrapper(self,'Command'),
                 ConfigureWrapper(self,'Configure'),
                 WaitDependenciesWrapper(self),
                 ]

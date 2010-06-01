@@ -61,8 +61,10 @@ class Plugin(racy.rplugins.Plugin):
     def get_env_addon(self, env):
 
         from sconsbuilders import cmake, configure, make, patch, untar, url
+        from sconsbuilders import command
 
-        for builder in [cmake, configure, make, patch, untar, url]:
+
+        for builder in [cmake, command, configure, make, patch, untar, url]:
             builder.generate(env)
 
         return []

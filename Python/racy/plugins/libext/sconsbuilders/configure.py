@@ -5,6 +5,7 @@ import SCons
 
 
 from subprocessbuilder import SubProcessBuilder, SubProcessString
+from command import CommandArgs
 
 def find_configure_path(_dir):
     path = None
@@ -20,10 +21,8 @@ def Configure(target, source, env):
     configure_dir = find_configure_path(source[0].get_abspath())
 
     command = 'configure'
-    args = []
-    args.extend([t.value for t in target])
-    args.extend(env.get('OPTIONS',[]))
-    args = map(env.subst, args)
+
+    args = CommandArgs(target, source, env)
 
     pwd = configure_dir
 
@@ -38,10 +37,8 @@ def Configure(target, source, env):
 def ConfigureString(target, source, env):
     """ Information string for Configure """
     prefix = SubProcessString(target, source, env)
-    return prefix + env.subst('configure: '+str(target)+' ${OPTIONS}')
-
-
-
+    args = CommandArgs(target, source, env)
+    return prefix + env.subst('configure '+str(args))
 
 
 

@@ -7,23 +7,29 @@ import SCons
 from subprocessbuilder import SubProcessBuilder, SubProcessString
 
 def CommandArgs(target, source, env):
-    args = ['-i', source[0].get_abspath()]
-    options = env.get('OPTIONS',['-p1'])
-    options = map(env.subst, options)
-    args.extend(options)
+    args = []
+    args.extend([t.value for t in target])
+    args.extend(env.get('OPTIONS',[]))
+    args = map(env.subst, args)
     return args
 
 
 def Command(target, source, env):
+    """Builder that execute an arbitrary command in the source dir The command
+    is the first item of target
+    """
     assert len(source) == 1
+    assert len(target) >= 1
 
-    pwd = os.path.abspath(target[0].value)
+    pwd = os.path.abspath(source[0].get_abspath())
 
-    command = env.subst('${COMMAND}')
+    #command = env.subst('${COMMAND}')
 
     args = CommandArgs(target, source, env)
 
-    returncode = SubProcessBuilder(target, source, env, command, args, pwd)
+    command = args[0]
+
+    returncode = SubProcessBuilder(target, source, env, command, args, pwd, [pwd])
 
     return returncode
 
@@ -34,7 +40,7 @@ def CommandString(target, source, env):
     prefix = SubProcessString(target, source, env)
     args = CommandArgs(target, source, env)
 
-    return prefix + env.subst('${COMMAND} '+str(args))
+    return prefix + env.subst(str(args))
 
 
 

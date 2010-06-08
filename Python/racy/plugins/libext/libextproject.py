@@ -117,6 +117,7 @@ class LibextProject(ConstructibleRacyProject):
         builder_wrappers = [
                 BuilderWrapper(self,'Download'),
                 BuilderWrapper(self,'UnTar'),
+                BuilderWrapper(self,'UnZip'),
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
                 CMakeWrapper  (self,'CMake'),
                 CommandWrapper(self,'Make'),

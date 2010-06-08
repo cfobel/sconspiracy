@@ -69,6 +69,7 @@ class Plugin(racy.rplugins.Plugin):
                 'make',
                 'patch',
                 'untar',
+                'unzip',
                 'url'
                 ]
 

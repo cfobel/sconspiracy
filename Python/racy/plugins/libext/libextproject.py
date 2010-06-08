@@ -131,7 +131,6 @@ class LibextProject(ConstructibleRacyProject):
 
         kwargs['_globals']=kwargs.get('_globals',{})
         kwargs['_globals'].update(libext_builders)
-        kwargs['_globals']['Url'] = sconsbuilders.url.Url
 
         super(LibextProject, self).__init__( *args, **kwargs )
 

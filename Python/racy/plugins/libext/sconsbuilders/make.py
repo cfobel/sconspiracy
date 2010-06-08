@@ -4,12 +4,13 @@ import os
 import SCons
 
 
-from subprocessbuilder import SubProcessBuilder, SubProcessString
+import command
 
-def find_make_path(_dir):
+def find_make_path(env, _dir):
     path = None
+    makefile = env['MAKEFILE']
     for root, dirs, files in os.walk(_dir):
-        if "Makefile" in files:
+        if makefile in files:
             path = root
             break
     return path
@@ -21,33 +22,23 @@ def guess_make_cmd():
     else:
         return "make"
 
-def MakeArgs(target, source, env):
-    args = []
-    args.extend([t.value for t in target])
-    options = env.get('OPTIONS',[])
-    options = map(env.subst, options)
-    args.extend(options)
-    return args
+#def MakeEmitter(target, source, env):
+    #return [env.Value(env.subst('${MAKECOM}'))] + target, source
 
 def Make(target, source, env):
     assert len(source) == 1
 
-    pwd = find_make_path(source[0].get_abspath())
+    make_pwd = find_make_path(env, source[0].get_abspath())
 
-    command = env.subst('${MAKECOM}')
-
-    args = MakeArgs(target, source, env)
-
-    returncode = SubProcessBuilder(target, source, env, command, args, pwd)
-
-    return returncode
+    return command.Command( target, source, env,
+                            pwd = make_pwd,
+                            command = env['MAKECOM'],
+                            lookup_path = [] )
 
 
 def MakeString(target, source, env):
     """ Information string for Make """
-    prefix = SubProcessString(target, source, env)
-    args = MakeArgs(target, source, env)
-    return prefix + env.subst('${MAKECOM} '+str(args))
+    return command.CommandString(target, source, env)
 
 
 
@@ -56,13 +47,14 @@ def MakeString(target, source, env):
 def generate(env):
     action  = SCons.Action.Action(Make, MakeString)
     builder = env.Builder(
-            action=action           ,
-            #emitter=MakeEmitter    ,
-            target_factory = env.Value,
-            source_factory = env.Dir,
+            action=action             ,
+            #emitter=MakeEmitter       ,
+            target_factory = env.File,
+            source_factory = env.Dir  ,
             )
 
     env['MAKECOM'] = guess_make_cmd()
+    env['MAKEFILE'] = 'Makefile'
 
     env.Append(BUILDERS = {'Make' : builder})
 

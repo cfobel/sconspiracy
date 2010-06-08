@@ -3,9 +3,7 @@
 import os
 import SCons
 
-
-from subprocessbuilder import SubProcessBuilder, SubProcessString
-from command import CommandArgs
+import command
 
 def find_configure_path(_dir):
     path = None
@@ -15,42 +13,30 @@ def find_configure_path(_dir):
             break
     return path
 
+
 def Configure(target, source, env):
     assert len(source) == 1
 
     configure_dir = find_configure_path(source[0].get_abspath())
 
-    command = 'configure'
-
-    args = CommandArgs(target, source, env)
-
-    pwd = configure_dir
-
-    returncode = SubProcessBuilder(
-            target, source, env, command, args, pwd,
-            path = configure_dir
-            )
-
-    return returncode
+    return command.Command( target, source, env,
+                            command = 'configure',
+                            pwd = configure_dir,
+                            lookup_path = [configure_dir] )
 
 
 def ConfigureString(target, source, env):
-    """ Information string for Configure """
-    prefix = SubProcessString(target, source, env)
-    args = CommandArgs(target, source, env)
-    return prefix + env.subst('configure '+str(args))
-
+    return 'configure ' + command.CommandString(target, source, env)
 
 
 def generate(env):
     action  = SCons.Action.Action(Configure, ConfigureString)
     builder = env.Builder(
-            action=action           ,
-            #emitter=ConfigureEmitter    ,
-            target_factory = env.Value,
-            source_factory = env.Dir,
+            action=action             ,
+            #emitter=ConfigureEmitter  ,
+            target_factory = env.File ,
+            source_factory = env.Dir  ,
             )
-
     env.Append(BUILDERS = {'Configure' : builder})
 
 

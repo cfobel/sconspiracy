@@ -4,55 +4,61 @@ import os
 import SCons
 
 
-from subprocessbuilder import SubProcessBuilder, SubProcessString
+from subprocessbuilder import SubProcessBuilder
 
-def CommandArgs(target, source, env):
+def CommandArgs(target, source, env, command=None):
     args = []
-    args.extend([t.value for t in target])
-    args.extend(env.get('OPTIONS',[]))
+    command = env.get('COMMAND', command)
+    if command:
+        args.append(command)
+    args.extend(env.get('ARGS',[]))
     args = map(env.subst, args)
     return args
 
 
-def Command(target, source, env):
-    """Builder that execute an arbitrary command in the source dir The command
-    is the first item of target
+def Command(target, source, env, command = None, pwd = None, lookup_path = None):
+    """Builder that execute an arbitrary command in the source dir.
+    The target file is a marker to help SCons to know about the command
+    execution state(failed, succes, last execution)
     """
     assert len(source) == 1
-    assert len(target) >= 1
+    assert len(target) == 1
 
-    pwd = os.path.abspath(source[0].get_abspath())
+    if pwd is None:
+        pwd = os.path.abspath(source[0].get_abspath())
 
-    #command = env.subst('${COMMAND}')
-
-    args = CommandArgs(target, source, env)
+    args = CommandArgs(target, source, env, command)
 
     command = args[0]
+    args = args[1:]
 
-    returncode = SubProcessBuilder(target, source, env, command, args, pwd, [pwd])
+    if lookup_path is None:
+        lookup_path = [pwd]
+
+    returncode = SubProcessBuilder(env, command, args, pwd, lookup_path)
+
+    if not returncode:
+        for t in target:
+            env.Execute(SCons.Script.Touch(t))
 
     return returncode
 
 
 def CommandString(target, source, env):
     """ Information string for Command """
-
-    prefix = SubProcessString(target, source, env)
     args = CommandArgs(target, source, env)
-
-    return prefix + env.subst(str(args))
-
+    return env.subst(' '.join(args))
 
 
 
 def generate(env):
     action  = SCons.Action.Action(Command, CommandString)
     builder = env.Builder(
-            action=action             ,
-            target_factory = env.Value,
-            source_factory = env.Dir,
+            action = action          ,
+            target_factory = env.File,
+            source_factory = env.Dir ,
             )
 
-    env.Append(BUILDERS = {'Command' : builder})
+    env.Append(BUILDERS = {'SysCommand' : builder})
 
 

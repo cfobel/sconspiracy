@@ -11,6 +11,7 @@ import SCons.Defaults
 import SCons.Node
 
 from os.path import join as opjoin
+from hashlib import md5
 
 import racy
 
@@ -25,14 +26,35 @@ from libexterror    import LibextError
 from nodeholder     import NodeHolder
 from builderwrapper import BuilderWrapper
 
+class CommandWrapper(BuilderWrapper):
 
-class ConfigureWrapper(BuilderWrapper):
+    def __init__(self, *args, **kwargs):
+        kwargs['builder'] = self.builder
+        super(CommandWrapper, self).__init__(*args, **kwargs)
+
+    def builder_args(self, options, pwd, **kwargs):
+        args = kwargs.setdefault('ARGS', [])
+        args.extend(options)
+        marker = '{dir}/{cmd}_{prj}_{hash}'
+        marker = marker.format(
+                dir  = '${BUILD_DIR}/',
+                cmd  = self.builder_name,
+                prj  = self.prj.full_name,
+                hash = md5(' '.join(options)).hexdigest(),
+                )
+        kwargs.setdefault('target', [marker])
+        kwargs.setdefault('source', [pwd])
+        return kwargs
+
+    def builder(self, options, pwd, **kwargs):
+        kwargs = self.builder_args(options, pwd, **kwargs)
+        scons_builder = getattr(self.prj.env, self.builder_name)
+        return scons_builder(**kwargs)
+
+
+class ConfigureWrapper(CommandWrapper):
+
     def __call__(self, *args, **kwargs):
-        options = kwargs.get('OPTIONS', [])
-        options.append('--prefix=${BUILD_DIR}/local')
-
-        kwargs['OPTIONS']=options
-
         prj = self.prj
         ENV = prj.env['ENV']
         ENV['CXXFLAGS']  = ENV.get('CXXFLAGS','')
@@ -42,39 +64,46 @@ class ConfigureWrapper(BuilderWrapper):
         ENV['CFLAGS']    += ' -I'.join([''] + prj.deps_include_path)
         ENV['LINKFLAGS'] += ' -L'.join([''] + prj.deps_lib_path)
 
+        ARGS = kwargs.setdefault('ARGS', [])
+        ARGS.append('--prefix=${BUILD_DIR}/local')
+
         super(ConfigureWrapper, self).__call__(*args, **kwargs)
 
 
-
-class CMakeWrapper(BuilderWrapper):
+class CMakeWrapper(CommandWrapper):
     def __call__(self, *args, **kwargs):
-        options = kwargs.get('OPTIONS', [])
-        options.insert(0,'-DCMAKE_INCLUDE_PATH:PATH=$LIBEXT_INCLUDE_PATH')
-        options.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=$LIBEXT_LIBRARY_PATH')
-        options.append('-DCMAKE_INSTALL_PREFIX:PATH=${BUILD_DIR}/local')
+        ARGS = kwargs.setdefault('ARGS', [])
+        ARGS.insert(0,'-DCMAKE_INCLUDE_PATH:PATH=$LIBEXT_INCLUDE_PATH')
+        ARGS.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=$LIBEXT_LIBRARY_PATH')
+        ARGS.append('-DCMAKE_INSTALL_PREFIX:PATH=${BUILD_DIR}/local')
 
         if racy.renv.is_windows():
-            options.insert(0,'NMake Makefiles')
+            ARGS.insert(0,'NMake Makefiles')
         else:
-            options.insert(0,'Unix Makefiles')
-        options.insert(0,'-G')
+            ARGS.insert(0,'Unix Makefiles')
+        ARGS.insert(0,'-G')
 
-        kwargs['OPTIONS']=options
         super(CMakeWrapper, self).__call__(*args, **kwargs)
+
+    def builder(self, options, source, builddir, **kwargs):
+        kwargs = self.builder_args(options, pwd=source, **kwargs)
+        kwargs['CMAKE_BUILD_PATH'] = builddir
+        return self.prj.env.CMake(**kwargs)
+
 
 
 class WaitDependenciesWrapper(BuilderWrapper):
 
     def __init__(self, *args, **kwargs):
-        builder = self.WaitDependenciesBuilder
+        builder = self.wait_dependencies_builder
         kwargs['name'] = 'WaitDependencies'
         kwargs['builder'] = builder
         super(WaitDependenciesWrapper, self).__init__(*args, **kwargs)
 
-    def WaitDependenciesBuilder(self, *args, **kwargs):
+    def wait_dependencies_builder(self, *args, **kwargs):
         """Return return a node dependent on libext's dependencies"""
         env = self.prj.env
-        alias = env.Alias('WaitDependencies_'+str(id(self)))
+        alias = env.Alias(str(self.prj)+ '_WaitDependencies')
         env.Depends(alias, self.prj.deps_nodes)
         return alias
 
@@ -90,10 +119,10 @@ class LibextProject(ConstructibleRacyProject):
                 BuilderWrapper(self,'UnTar'),
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
                 CMakeWrapper  (self,'CMake'),
-                BuilderWrapper(self,'Make'),
-                BuilderWrapper(self,'Patch'),
-                BuilderWrapper(self,'Command'),
-                ConfigureWrapper(self,'Configure'),
+                CommandWrapper(self,'Make'),
+                CommandWrapper(self,'Patch'),
+                CommandWrapper(self,'SysCommand', reg_name='Command'),
+                ConfigureWrapper(self, 'Configure'),
                 WaitDependenciesWrapper(self),
                 ]
 
@@ -103,6 +132,7 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['_globals']=kwargs.get('_globals',{})
         kwargs['_globals'].update(libext_builders)
         kwargs['_globals']['Url'] = sconsbuilders.url.Url
+
         super(LibextProject, self).__init__( *args, **kwargs )
 
 
@@ -110,7 +140,7 @@ class LibextProject(ConstructibleRacyProject):
     def DeleteBuilder(self, file, *args, **kwargs):
         env = self.env
         return env.Command(
-                env.Value("no target"),
+                env.Value("Delete " + file),
                 [],
                 [SCons.Defaults.Delete(file, must_exist=1)],
                 target_factory=env.Value,
@@ -208,14 +238,17 @@ class LibextProject(ConstructibleRacyProject):
         for node in [extract_dir]:
             env.Clean(node, node)
 
-        env.Clean(result[-1:], env.Dir(self.build_dir + '/local'))
+
+        alias = 'result-{prj.type}-{prj.full_name}'
+        result = env.Alias (alias.format(prj=self), result)
+        env.Clean(result, env.Dir(self.build_dir + '/local'))
         return result
 
 
     def build(self,  build_deps = True):
         """build_deps = False is not available"""
         res = self.result()
-        return res[-1:]
+        return res
 
     @memoize
     def install (self, opts = ['rc','deps']):

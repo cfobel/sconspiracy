@@ -145,13 +145,15 @@ def DownloadString(target, source, env):
 
 
 def generate(env):
+    env.Url = Url
+    SCons.Node.FS.get_default_fs().Url = Url
     action = SCons.Action.Action(Download, DownloadString)
     builder = env.Builder(
-            action=action
+            action=action ,
+            source_factory = Url,
             )
 
     env.Append(BUILDERS = {'Download' : builder})
-    env.Url = Url
 
 
 default_uns = UrlNameSpace()

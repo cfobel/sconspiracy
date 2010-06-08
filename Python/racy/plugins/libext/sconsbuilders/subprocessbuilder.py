@@ -5,7 +5,7 @@ import subprocess
 
 from racy.rutils import is_iterable
 
-def SubProcessBuilder(target, source, env, command, args, pwd, path = []):
+def SubProcessBuilder(env, command, args, pwd, path = []):
 
     if is_iterable(path):
         path = os.pathsep.join(path)
@@ -15,9 +15,7 @@ def SubProcessBuilder(target, source, env, command, args, pwd, path = []):
 
     cmd.extend(args)
 
-    environment = {}
-    for k,v in env['ENV'].items():
-        environment[k] = str(v)
+    environment = dict((k,str(v)) for k,v in env['ENV'].items())
 
     cmd = filter(lambda x:x, cmd)
 
@@ -26,7 +24,7 @@ def SubProcessBuilder(target, source, env, command, args, pwd, path = []):
     process = subprocess.Popen(
                 cmd,
                 cwd = pwd,
-                stdout = stdout,
+                #stdout = stdout,
                 env = environment
                 )
 

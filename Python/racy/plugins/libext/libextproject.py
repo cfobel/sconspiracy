@@ -168,7 +168,7 @@ class LibextProject(ConstructibleRacyProject):
     @cached_property
     def include_path (self):
         path = [self.local_dir, 'include']
-        return os.path.join(*path)
+        return [os.path.join(*path)]
 
 
     @cached_property
@@ -178,7 +178,9 @@ class LibextProject(ConstructibleRacyProject):
 
     @cached_property
     def deps_include_path (self):
-        inc = [lib.include_path for lib in self.source_rec_deps]
+        inc = []
+        for lib in self.source_rec_deps:
+            inc += lib.include_path
         return inc
 
     @cached_property
@@ -202,7 +204,7 @@ class LibextProject(ConstructibleRacyProject):
         env = self.env
 
         result = []
-        prj.configure_env()
+        #prj.configure_env()
 
         prj.prj_locals['generate']()
 

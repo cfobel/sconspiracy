@@ -212,7 +212,14 @@ class LibextProject(ConstructibleRacyProject):
         download_target = env.Dir(prj.download_target)
         extract_dir = env.Dir(prj.extract_dir)
 
-        previous = []
+
+        kwdeps = dict(
+                ('DEP_{0}'.format(p.name).upper(), p.local_dir)
+                for p in self.source_rec_deps
+                )
+        kwargs = {}
+        kwargs.update(kwdeps)
+
         res = BuilderWrapper.apply_calls(
                     prj,
                     DOWNLOAD_DIR        = download_target,
@@ -224,16 +231,18 @@ class LibextProject(ConstructibleRacyProject):
                     VERSION             = prj.version    ,
                     LIBEXT_INCLUDE_PATH = os.pathsep.join(prj.deps_include_path),
                     LIBEXT_LIBRARY_PATH = os.pathsep.join(prj.deps_lib_path),
-                    SUBPROCESSPREFIXSTR = '[{0}]:'.format(self.name)
+                    SUBPROCESSPREFIXSTR = '[{0}]:'.format(self.name),
+                    **kwargs
                     )
 
+        previous_node = []
         for nodes in res:
             for node in nodes:
                 #HACK: scons need a name attribute to manage dependencies
                 if not hasattr(node, "name"):
                     node.name = ''
-                env.Depends( node, previous )
-                previous = node
+                env.Depends( node, previous_node )
+                previous_node = node
 
         result += nodes
 

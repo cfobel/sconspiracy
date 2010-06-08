@@ -5,6 +5,7 @@
 # published by the Open Source Initiative.  
 # ****** END LICENSE BLOCK ******
 
+from racy import rutils
 from nodeholder     import NodeHolder
 
 class BuilderWrapper(object):
@@ -47,6 +48,8 @@ class BuilderWrapper(object):
             builder_kwargs.update(NodeHolder.unwrap(call_kwargs))
             builder_kwargs.update(kwargs)
             node = ndwrap.node = builder(*builder_args, **builder_kwargs)
+            if name == 'Download' and rutils.is_false(prj.get('CLEAN_DOWNLOADS')):
+                prj.env.NoClean(node)
             if node:
                 results.append(node)
         return results

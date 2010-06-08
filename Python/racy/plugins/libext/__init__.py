@@ -13,16 +13,18 @@ import racy
 from libextproject import LibextProject
 
 
+CLEAN_DOWNLOADS = 'CLEAN_DOWNLOADS'
 
 class Plugin(racy.rplugins.Plugin):
     name = "Libext"
 
-    #options              = { KEYWORD : {} }
-    #allowed_values       = { KEYWORD : ['no', 'yes'] }
-    #allowed_values       = { KEYWORD : [] }
-    #commandline_opts     = [ KEYWORD ]
-    #commandline_prj_opts = [ KEYWORD ]
-    #descriptions_opts    = { KEYWORD : 'description of Libext Project' }
+    options              = { CLEAN_DOWNLOADS : 'no' }
+    allowed_values       = { CLEAN_DOWNLOADS : ['no', 'yes'] }
+    commandline_opts     = [ CLEAN_DOWNLOADS ]
+    commandline_prj_opts = [ CLEAN_DOWNLOADS ]
+    descriptions_opts    = { CLEAN_DOWNLOADS :
+       'libext plugin : if no, downloaded files will not be removed on clean.'
+    }
 
     def init(self):
         import racy.renv.configs.allowedvalues as allowed_values

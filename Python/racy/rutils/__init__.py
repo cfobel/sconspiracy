@@ -49,7 +49,7 @@ def _match_any(v, values):
 
 
 #------------------------------------------------------------------------------
-def _is_false(v):
+def is_false(v):
     """Returns True if v is a value in ['no', 'false', 'off', 0, False, None]"""
     return _match_any(v, ['no', 'false', 'off', 0, False, None])
 

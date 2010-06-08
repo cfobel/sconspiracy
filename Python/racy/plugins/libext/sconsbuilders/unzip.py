@@ -16,7 +16,7 @@ def UnZipEmitter(target, source, env):
 def UnZip(target, source, env):
     # Code to build "target" from "source" here
     import zipfile
-    sourceZip = zipfile.open(source[0].get_abspath(),'r')
+    sourceZip = zipfile.ZipFile(source[0].get_abspath(),'r')
     sourceZip.extractall(path=target[0].get_abspath())
     sourceZip.close()
     return None

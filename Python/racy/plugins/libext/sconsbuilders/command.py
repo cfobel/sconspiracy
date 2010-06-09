@@ -35,7 +35,6 @@ def Command(target, source, env, command = None, pwd = None, lookup_path = None)
     if lookup_path is None:
         lookup_path = [pwd]
 
-    print env.Dump()
     returncode = SubProcessBuilder(env, command, args, pwd, lookup_path)
 
     if not returncode:

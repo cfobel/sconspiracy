@@ -1,4 +1,7 @@
 #! /usr/bin/env python
+# 
+# This file has been imported from scons and updated to run sconspiracy
+#
 #
 # SCons - a Software Constructor
 #
@@ -24,17 +27,17 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-__revision__  = "src/script/scons.py 3842 2008/12/20 22:59:52 scons"
+__revision__  = ""
 
-__version__   = "1.2.0"
+__version__   = "0.3 SConspiracy"
 
-__build__     = "r3842"
+__build__     = ""
 
-__buildsys__  = "scons-dev"
+__buildsys__  = "linux"
 
-__date__      = "2008/12/20 22:59:52"
+__date__      = "2010"
 
-__developer__ = "scons"
+__developer__ = "ircad"
 
 import os
 import os.path
@@ -161,7 +164,6 @@ sys.path = libs + sys.path + ['/opt/local/lib/scons-1.2.0/']
 ##############################################################################
 
 def main():
-    import SCons.Script
 
     # racy tricks
     racy_bin = sys.argv[0]
@@ -170,7 +172,7 @@ def main():
     racy_config_dir = os.path.join(racy_root_dir,'Config')
     racy_python_dir = os.path.join(racy_root_dir,'Python')
 
-    sys.path.append(racy_python_dir)
+    sys.path.insert(0, racy_python_dir)
     
     config_dir = os.environ.get('RACY_CONFIG_DIR',
                                 os.path.expanduser('~/.Racy'))
@@ -179,6 +181,7 @@ def main():
         
 
 
+    import SCons.Script
     import racy
     racy_module_path = os.path.dirname(racy.__file__)
     racy_rc_path     = os.path.join(racy_module_path, 'rc')

@@ -40,7 +40,7 @@ BUILDPKG          = "no"
 
 
 CXX               = ''
-MSVS_VERSION      = ''
+MSVC_VERSION      = ''
 
 USEVISIBILITY     = 'yes'
 CONSOLE           = 'no'
@@ -85,6 +85,7 @@ ALLOW_USER_OPTIONS        = True
 OVERRIDE_PROJECT_VALUE = {}
 
 DEPRECATED = {
+    'MSVS_VERSION': 'Use "MSVC_VERSION" instead',
     'PATHLIB'     : 'Use "STDLIBPATH" instead.',
     'STDPATHLIB'  : 'Use "STDLIBPATH" instead.',
     'CPPFLAGS'    : 'Use "CXXFLAGS" instead.'  ,

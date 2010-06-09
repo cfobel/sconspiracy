@@ -35,6 +35,16 @@ class RacyException(Exception):
         pass
 
 #------------------------------------------------------------------------------
+class ToolError(RacyException):
+    def init(self, tool, message):
+        self.tool = tool
+        self.msg = message
+    def __str__(self):
+        tool = self.tool
+        return '[{0}] : {1}'.format( tool, self.msg )
+
+
+#------------------------------------------------------------------------------
 class OptionError(RacyException):
     pass
 

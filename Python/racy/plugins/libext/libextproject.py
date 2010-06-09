@@ -101,11 +101,7 @@ class WaitDependenciesWrapper(BuilderWrapper):
         super(WaitDependenciesWrapper, self).__init__(*args, **kwargs)
 
     def wait_dependencies_builder(self, *args, **kwargs):
-        """Return return a node dependent on libext's dependencies"""
-        env = self.prj.env
-        alias = env.Alias(str(self.prj)+ '_WaitDependencies')
-        env.Depends(alias, self.prj.deps_nodes)
-        return alias
+        return self.prj
 
 
 
@@ -237,14 +233,20 @@ class LibextProject(ConstructibleRacyProject):
 
         previous_node = []
         for nodes in res:
-            for node in nodes:
-                #HACK: scons need a name attribute to manage dependencies
-                if not hasattr(node, "name"):
-                    node.name = ''
-                env.Depends( node, previous_node )
-                previous_node = node
+            if not isinstance(nodes, LibextProject):
+                for node in nodes:
+                    #HACK: scons need a name attribute to manage dependencies
+                    if not hasattr(node, "name"):
+                        node.name = ''
+                    env.Depends( node, previous_node )
+                    previous_node = node
+            else:
+                previous_node = [previous_node, nodes.deps_nodes]
 
-        result += nodes
+        if not isinstance(nodes, LibextProject):
+            result += nodes
+        else:
+            result += previous_node
 
         for node in [extract_dir]:
             env.Clean(node, node)
@@ -267,15 +269,5 @@ class LibextProject(ConstructibleRacyProject):
         env = self.env
 
         result = prj.build(build_deps='deps' in opts)
-
-        #if result:
-            #import shutil
-            #shutil.rmtree(env['ENV']['DOX_OUTPUTDIR'], ignore_errors=True)
-            #shutil.rmtree(opjoin(prj.install_path,prj.full_name), ignore_errors=True)
-            #result = env.Install(dir = prj.install_path, source = result)
-            #for node in result:
-                #env.Clean(node, node)
-        #else:
-            #result = []
 
         return result

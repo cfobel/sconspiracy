@@ -115,6 +115,8 @@ class LibextProject(ConstructibleRacyProject):
                 BuilderWrapper(self,'UnTar'),
                 BuilderWrapper(self,'UnZip'),
                 BuilderWrapper(self,'Delete',self.DeleteBuilder),
+                BuilderWrapper(self,'Copy',self.CopyBuilder),
+                BuilderWrapper(self,'Mkdir',self.MkdirBuilder),
                 CMakeWrapper  (self,'CMake'),
                 CommandWrapper(self,'Make'),
                 CommandWrapper(self,'Patch'),
@@ -133,16 +135,45 @@ class LibextProject(ConstructibleRacyProject):
 
 
 
-    def DeleteBuilder(self, file, *args, **kwargs):
+    def DeleteBuilder(self, file, **kwargs):
         env = self.env
+        sub = env.subst
         return env.Command(
-                env.Value("Delete " + file),
+                env.Value("Delete " + sub(file)),
                 [],
                 [SCons.Defaults.Delete(file, must_exist=1)],
                 target_factory=env.Value,
-                *args,
                 **kwargs
                 )
+
+
+    def CopyBuilder(self, source, to, **kwargs):
+        env = self.env
+        sub = env.subst
+        res = env.Command(
+                env.Value(sub("Copy {0} to {1}".format(source, to))),
+                [],
+                [SCons.Defaults.Copy(to, source)],
+                target_factory=env.Value,
+                **kwargs
+                )
+        env.Clean(res, to)
+        return res
+
+
+    def MkdirBuilder(self, dir, **kwargs):
+        env = self.env
+        sub = env.subst
+        res = env.Command(
+                dir, #env.Value(sub("Mkdir {0}".format(dir))),
+                [],
+                [SCons.Defaults.Mkdir(env.Dir(dir))],
+                #target_factory=env.Value,
+                **kwargs
+                )
+        env.Clean(res, dir)
+        return res
+
 
     @cached_property
     def download_target (self):
@@ -190,10 +221,39 @@ class LibextProject(ConstructibleRacyProject):
         inc = [lib.build() for lib in self.source_rec_deps]
         return inc
 
+    @cached_property
+    def environment(self):
+        prj = self
+        env = self.env
+        kwdeps = dict(
+                ('DEP_{0}'.format(p.name).upper(), p.local_dir)
+                for p in self.source_rec_deps
+                )
+
+        download_target = env.Dir(prj.download_target)
+        extract_dir = env.Dir(prj.extract_dir)
+        kwargs = {
+                    'DOWNLOAD_DIR'        : download_target,
+                    'EXTRACT_DIR'         : extract_dir    ,
+                    'BUILD_DIR'           : prj.build_dir  ,
+                    'LOCAL_DIR'           : prj.local_dir  ,
+                    'RC_DIR'              : prj.rc_path    ,
+                    'NAME'                : prj.name       ,
+                    'VERSION'             : prj.version    ,
+                    'LIBEXT_INCLUDE_PATH' : os.pathsep.join(prj.deps_include_path),
+                    'LIBEXT_LIBRARY_PATH' : os.pathsep.join(prj.deps_lib_path),
+                    'SUBPROCESSPREFIXSTR' : '[{0}]:'.format(self.name),
+                    }
+
+        kwargs.update(kwdeps)
+        return kwargs
+
     @run_once
     def configure_env(self):
-        super(LibextProject, self).configure_env()
-
+        prj = self
+        env = self.env
+        env.Append(**self.environment)
+        #super(LibextProject, self).configure_env()
 
     @memoize
     def result(self, deps_results=True):
@@ -201,35 +261,14 @@ class LibextProject(ConstructibleRacyProject):
         env = self.env
 
         result = []
-        #prj.configure_env()
+        prj.configure_env()
 
         prj.prj_locals['generate']()
 
-        download_target = env.Dir(prj.download_target)
-        extract_dir = env.Dir(prj.extract_dir)
+        kwargs = self.environment
 
-
-        kwdeps = dict(
-                ('DEP_{0}'.format(p.name).upper(), p.local_dir)
-                for p in self.source_rec_deps
-                )
-        kwargs = {}
-        kwargs.update(kwdeps)
-
-        res = BuilderWrapper.apply_calls(
-                    prj,
-                    DOWNLOAD_DIR        = download_target,
-                    EXTRACT_DIR         = extract_dir    ,
-                    BUILD_DIR           = prj.build_dir  ,
-                    LOCAL_DIR           = prj.local_dir  ,
-                    RC_DIR              = prj.rc_path    ,
-                    NAME                = prj.name       ,
-                    VERSION             = prj.version    ,
-                    LIBEXT_INCLUDE_PATH = os.pathsep.join(prj.deps_include_path),
-                    LIBEXT_LIBRARY_PATH = os.pathsep.join(prj.deps_lib_path),
-                    SUBPROCESSPREFIXSTR = '[{0}]:'.format(self.name),
-                    **kwargs
-                    )
+        res = [self.MkdirBuilder('${LOCAL_DIR}', **kwargs)]
+        res += BuilderWrapper.apply_calls( prj, **kwargs)
 
         previous_node = []
         for nodes in res:
@@ -248,13 +287,12 @@ class LibextProject(ConstructibleRacyProject):
         else:
             result += previous_node
 
-        for node in [extract_dir]:
+        for node in [prj.extract_dir]:
             env.Clean(node, node)
 
 
         alias = 'result-{prj.type}-{prj.full_name}'
         result = env.Alias (alias.format(prj=self), result)
-        env.Clean(result, env.Dir(self.build_dir + '/local'))
         return result
 
 

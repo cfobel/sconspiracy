@@ -41,7 +41,6 @@ def generate(env):
     if get_option('PLATFORM') == constants.LINUX:
         CPPDEFINES += [
                 '__linux' ,
-                'posix'   ,
                 ]
         LINKFLAGS += [
                 '-fpic'               ,

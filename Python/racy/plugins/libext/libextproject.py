@@ -139,6 +139,7 @@ class LibextProject(ConstructibleRacyProject):
 
         kwargs['_globals']=kwargs.get('_globals',{})
         kwargs['_globals'].update(libext_builders)
+        kwargs['_globals']['prj'] = self
 
         super(LibextProject, self).__init__( *args, **kwargs )
 
@@ -234,10 +235,23 @@ class LibextProject(ConstructibleRacyProject):
     def environment(self):
         prj = self
         env = self.env
-        kwdeps = dict(
+        deps = dict(
                 ('DEP_{0}'.format(p.name).upper(), p.local_dir)
                 for p in self.source_rec_deps
                 )
+        items = deps.items()
+        deps_include = dict(( k+'_INCLUDE' , v+'/include') for k,v in items)
+        deps_lib     = dict(( k+'_LIB'     , v+'/lib'    ) for k,v in items)
+        deps_bin     = dict(( k+'_BIN'     , v+'/bin'    ) for k,v in items)
+        kwdeps = {}
+        kwdeps.update(deps)
+        kwdeps.update(deps_include)
+        kwdeps.update(deps_lib)
+        kwdeps.update(deps_bin)
+        kwdeps['DEPS'] = os.pathsep.join(deps.values())
+        kwdeps['DEPS_INCLUDE'] = os.pathsep.join(deps_include.values())
+        kwdeps['DEPS_LIB'] = os.pathsep.join(deps_lib.values())
+        kwdeps['DEPS_BIN'] = os.pathsep.join(deps_bin.values())
 
         download_target = env.Dir(prj.download_target)
         extract_dir = env.Dir(prj.extract_dir)

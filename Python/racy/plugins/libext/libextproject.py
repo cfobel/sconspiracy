@@ -65,17 +65,32 @@ class ConfigureWrapper(CommandWrapper):
         ENV['LINKFLAGS'] += ' -L'.join([''] + prj.deps_lib_path)
 
         ARGS = kwargs.setdefault('ARGS', [])
-        ARGS.append('--prefix=${BUILD_DIR}/local')
+        ARGS.append('--prefix=${LOCAL_DIR}')
+
+        if prj.get('DEBUG') != 'release':
+            ARGS.append('--enable-debug')
+        else:
+            ARGS.append('--disable-debug')
 
         super(ConfigureWrapper, self).__call__(*args, **kwargs)
 
 
 class CMakeWrapper(CommandWrapper):
     def __call__(self, *args, **kwargs):
+        prj = self.prj
+
         ARGS = kwargs.setdefault('ARGS', [])
-        ARGS.insert(0,'-DCMAKE_INCLUDE_PATH:PATH=$LIBEXT_INCLUDE_PATH')
-        ARGS.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=$LIBEXT_LIBRARY_PATH')
-        ARGS.append('-DCMAKE_INSTALL_PREFIX:PATH=${BUILD_DIR}/local')
+        ARGS.insert(0,'-DCMAKE_INCLUDE_PATH:PATH=${DEPS_INCLUDE}')
+        ARGS.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=${DEPS_LIB}')
+        ARGS.append('-DCMAKE_INSTALL_PREFIX:PATH=${LOCAL_DIR}')
+
+        def build_type():
+            if prj.get('DEBUG') != 'release':
+                return 'Debug'
+            else:
+                return 'Release'
+
+        ARGS.append('-DCMAKE_BUILD_TYPE:STRING={0}'.format(build_type()))
 
         if racy.renv.is_windows():
             ARGS.insert(0,'NMake Makefiles')
@@ -253,6 +268,7 @@ class LibextProject(ConstructibleRacyProject):
         kwdeps['DEPS_LIB'] = os.pathsep.join(deps_lib.values())
         kwdeps['DEPS_BIN'] = os.pathsep.join(deps_bin.values())
 
+
         download_target = env.Dir(prj.download_target)
         extract_dir = env.Dir(prj.extract_dir)
         kwargs = {
@@ -263,12 +279,27 @@ class LibextProject(ConstructibleRacyProject):
                     'RC_DIR'              : prj.rc_path    ,
                     'NAME'                : prj.name       ,
                     'VERSION'             : prj.version    ,
-                    'LIBEXT_INCLUDE_PATH' : os.pathsep.join(prj.deps_include_path),
-                    'LIBEXT_LIBRARY_PATH' : os.pathsep.join(prj.deps_lib_path),
+                    #'LIBEXT_INCLUDE_PATH' : os.pathsep.join(prj.deps_include_path),
+                    #'LIBEXT_LIBRARY_PATH' : os.pathsep.join(prj.deps_lib_path),
                     'SUBPROCESSPREFIXSTR' : '[{0}]:'.format(self.name),
+                    'DEBUG_FLAG'          : '',
+                    'RELEASE_FLAG'        : '',
                     }
 
         kwargs.update(kwdeps)
+
+        kwargs
+        if self.get('DEBUG') != 'release':
+            BuildType = 'Debug'
+            kwargs['DEBUG_FLAG'] = 'd'
+        else:
+            BuildType = 'Release'
+            kwargs['RELEASE_FLAG'] = 'r'
+
+        kwargs['BuildType'] = BuildType
+        kwargs['BUILDTYPE'] = BuildType.upper()
+        kwargs['buildtype'] = BuildType.lower()
+
         return kwargs
 
     @run_once

@@ -1,7 +1,6 @@
 # -*- coding: UTF8 -*-
 
 import os
-#import SCons.Action
 import SCons.Node
 
 def UnZipEmitter(target, source, env):
@@ -14,7 +13,6 @@ def UnZipEmitter(target, source, env):
 
 
 def UnZip(target, source, env):
-    # Code to build "target" from "source" here
     import zipfile
     sourceZip = zipfile.ZipFile(source[0].get_abspath(),'r')
     sourceZip.extractall(path=target[0].get_abspath())

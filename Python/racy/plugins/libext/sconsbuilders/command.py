@@ -47,7 +47,7 @@ def Command(target, source, env, command = None, pwd = None, lookup_path = None)
 def CommandString(target, source, env):
     """ Information string for Command """
     args = CommandArgs(target, source, env)
-    return env.subst(' '.join(args))
+    return ' '.join(args)
 
 
 

@@ -1,7 +1,6 @@
 # -*- coding: UTF8 -*-
 
 import os
-#import SCons.Action
 import SCons.Node
 
 def UnTarEmitter(target, source, env):
@@ -14,7 +13,6 @@ def UnTarEmitter(target, source, env):
 
 
 def UnTar(target, source, env):
-    # Code to build "target" from "source" here
     import tarfile
     sourceTar = tarfile.open(source[0].get_abspath(),'r')
     sourceTar.extractall(path=target[0].get_abspath())

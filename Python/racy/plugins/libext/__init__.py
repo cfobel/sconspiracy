@@ -66,6 +66,7 @@ class Plugin(racy.rplugins.Plugin):
                 'cmake',
                 'command',
                 'configure',
+                'edit',
                 'make',
                 'patch',
                 'untar',

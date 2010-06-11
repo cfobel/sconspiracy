@@ -91,6 +91,14 @@ class CMakeWrapper(CommandWrapper):
         return self.prj.env.CMake(**kwargs)
 
 
+class EditWrapper(CommandWrapper):
+
+    def builder(self, expr, files, **kwargs):
+        kwargs = self.builder_args(files + expr, pwd=[], **kwargs)
+        return self.prj.env.Edit(FILES=files, EXPR=expr, **kwargs)
+
+
+
 
 class WaitDependenciesWrapper(BuilderWrapper):
 
@@ -111,16 +119,17 @@ class LibextProject(ConstructibleRacyProject):
     def __init__(self, *args, **kwargs):
         libext_builders = {}
         builder_wrappers = [
-                BuilderWrapper(self,'Download'),
-                BuilderWrapper(self,'UnTar'),
-                BuilderWrapper(self,'UnZip'),
-                BuilderWrapper(self,'Delete',self.DeleteBuilder),
-                BuilderWrapper(self,'Copy',self.CopyBuilder),
-                BuilderWrapper(self,'Mkdir',self.MkdirBuilder),
-                CMakeWrapper  (self,'CMake'),
-                CommandWrapper(self,'Make'),
-                CommandWrapper(self,'Patch'),
-                CommandWrapper(self,'SysCommand', reg_name='Command'),
+                BuilderWrapper  (self,'Download'),
+                BuilderWrapper  (self,'UnTar'),
+                BuilderWrapper  (self,'UnZip'),
+                BuilderWrapper  (self,'Delete',self.DeleteBuilder),
+                BuilderWrapper  (self,'Copy'  ,self.CopyBuilder),
+                BuilderWrapper  (self,'Mkdir' ,self.MkdirBuilder),
+                CMakeWrapper    (self,'CMake'),
+                EditWrapper     (self,'Edit'),
+                CommandWrapper  (self,'Make'),
+                CommandWrapper  (self,'Patch'),
+                CommandWrapper  (self,'SysCommand', reg_name='Command'),
                 ConfigureWrapper(self, 'Configure'),
                 WaitDependenciesWrapper(self),
                 ]

@@ -292,13 +292,17 @@ class LibextProject(ConstructibleRacyProject):
         if self.get('DEBUG') != 'release':
             BuildType = 'Debug'
             kwargs['DEBUG_FLAG'] = 'd'
+            kwargs['DEBUGONOFF'] = 'on'
         else:
             BuildType = 'Release'
             kwargs['RELEASE_FLAG'] = 'r'
+            kwargs['DEBUGONOFF'] = 'off'
 
         kwargs['BuildType'] = BuildType
         kwargs['BUILDTYPE'] = BuildType.upper()
         kwargs['buildtype'] = BuildType.lower()
+        kwargs['lower'] = str.upper
+        kwargs['upper'] = str.lower
 
         return kwargs
 

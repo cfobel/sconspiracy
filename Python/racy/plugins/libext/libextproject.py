@@ -26,6 +26,16 @@ from libexterror    import LibextError
 from nodeholder     import NodeHolder
 from builderwrapper import BuilderWrapper
 
+def marker(command, prj, options):
+    res = '{dir}/{cmd}_{prj}_{hash}'
+    res = res.format(
+            dir  = '${BUILD_DIR}/',
+            cmd  = command,
+            prj  = prj,
+            hash = md5(' '.join(options)).hexdigest(),
+            )
+    return res
+
 class CommandWrapper(BuilderWrapper):
 
     def __init__(self, *args, **kwargs):
@@ -35,14 +45,8 @@ class CommandWrapper(BuilderWrapper):
     def builder_args(self, options, pwd, **kwargs):
         args = kwargs.setdefault('ARGS', [])
         args.extend(options)
-        marker = '{dir}/{cmd}_{prj}_{hash}'
-        marker = marker.format(
-                dir  = '${BUILD_DIR}/',
-                cmd  = self.builder_name,
-                prj  = self.prj.full_name,
-                hash = md5(' '.join(options)).hexdigest(),
-                )
-        kwargs.setdefault('target', [marker])
+        target = marker(self.builder_name, self.prj.full_name, options)
+        kwargs.setdefault('target', [target])
         kwargs.setdefault('source', [pwd])
         return kwargs
 
@@ -188,14 +192,8 @@ class LibextProject(ConstructibleRacyProject):
 
     def MkdirBuilder(self, dir, **kwargs):
         env = self.env
-        sub = env.subst
-        res = env.Command(
-                dir, #env.Value(sub("Mkdir {0}".format(dir))),
-                [],
-                [SCons.Defaults.Mkdir(env.Dir(dir))],
-                #target_factory=env.Value,
-                **kwargs
-                )
+        args = [dir]
+        res = env.Mkdir([marker('Mkdir',self.full_name, args)], [], ARGS=args)
         env.Clean(res, dir)
         return res
 
@@ -305,6 +303,7 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['buildtype'] = BuildType.lower()
         kwargs['lower'] = str.upper
         kwargs['upper'] = str.lower
+        kwargs['_VERSION_'] = prj.version.replace('.','_')
 
         return kwargs
 
@@ -327,7 +326,12 @@ class LibextProject(ConstructibleRacyProject):
 
         kwargs = self.environment
 
-        res = [self.MkdirBuilder('${LOCAL_DIR}', **kwargs)]
+        res = [
+                self.MkdirBuilder('${LOCAL_DIR}', **kwargs),
+                self.MkdirBuilder('${LOCAL_DIR}/bin', **kwargs),
+                self.MkdirBuilder('${LOCAL_DIR}/lib', **kwargs),
+                self.MkdirBuilder('${LOCAL_DIR}/include', **kwargs),
+                ]
         res += BuilderWrapper.apply_calls( prj, **kwargs)
 
         previous_node = []

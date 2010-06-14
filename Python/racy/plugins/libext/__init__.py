@@ -68,6 +68,7 @@ class Plugin(racy.rplugins.Plugin):
                 'configure',
                 'edit',
                 'make',
+                'mkdir',
                 'patch',
                 'untar',
                 'unzip',

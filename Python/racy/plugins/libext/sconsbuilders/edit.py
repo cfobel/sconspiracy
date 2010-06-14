@@ -1,6 +1,8 @@
 # -*- coding: UTF8 -*-
 
+# imported for disponibility in builder's expressions
 import re
+
 import os
 import SCons.Node
 import StringIO

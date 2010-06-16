@@ -1069,7 +1069,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
             val = prj.get(opt)
             options[opt] = val
 
-        # ManageOption has been added by the ytool
+        # ManageOption has been added by the current rtool
         self.env.ManageOption(prj = self, options = options)
 
 

@@ -147,7 +147,8 @@ class CppUnitProject(ConstructibleRacyProject):
             env_var = env_var[racy.renv.system()]
 
             run_env.AppendENVPath(env_var, install_lib)
-            run_test = run_env.Alias('run'+self.name, res, res[0].abspath)
+            execpath = res[0].children()[0].abspath
+            run_test = run_env.Alias('run'+self.name, res, execpath)
             run_env.Depends(run_test, res[0])
             run_env.AlwaysBuild(run_test)
 

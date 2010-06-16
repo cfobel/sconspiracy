@@ -153,7 +153,7 @@ def get_overrided_project_value(opt, config, default, option_value,
             if option_value is not Undefined and option_value else default)
     prjname = ''
     if prj:
-        prjname = ':' + prj.name
+        prjname = ':' + prj.base_name
         allowedvalues.check_value_with_msg(opt, res,
                 config+':OVERRIDE_PROJECT_VALUE' + prjname)
     return res

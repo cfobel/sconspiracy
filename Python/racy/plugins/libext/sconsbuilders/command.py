@@ -4,7 +4,7 @@ import os
 import SCons
 
 
-from subprocessbuilder import SubProcessBuilder
+from subprocessbuilder import SubProcessBuilder, SubProcessString
 
 def CommandArgs(target, source, env, command=None):
     args = []
@@ -47,7 +47,7 @@ def Command(target, source, env, command = None, pwd = None, lookup_path = None)
 def CommandString(target, source, env):
     """ Information string for Command """
     args = CommandArgs(target, source, env)
-    return ' '.join(args)
+    return ' '.join([SubProcessString(target, source, env) , ' '.join(args)])
 
 
 

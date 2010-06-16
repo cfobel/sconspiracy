@@ -71,7 +71,7 @@ class ConfigureWrapper(CommandWrapper):
         ARGS = kwargs.setdefault('ARGS', [])
         ARGS.append('--prefix=${LOCAL_DIR}')
 
-        if prj.get('DEBUG') != 'release':
+        if prj.is_debug:
             ARGS.append('--enable-debug')
         else:
             ARGS.append('--disable-debug')
@@ -84,12 +84,11 @@ class CMakeWrapper(CommandWrapper):
         prj = self.prj
 
         ARGS = kwargs.setdefault('ARGS', [])
-        ARGS.insert(0,'-DCMAKE_INCLUDE_PATH:PATH=${DEPS_INCLUDE}')
-        ARGS.insert(0,'-DCMAKE_LIBRARY_PATH:PATH=${DEPS_LIB}')
+        ARGS.insert(0,'-DCMAKE_PREFIX_PATH:PATH=${winpathsep(DEPS)}')
         ARGS.append('-DCMAKE_INSTALL_PREFIX:PATH=${LOCAL_DIR}')
 
         def build_type():
-            if prj.get('DEBUG') != 'release':
+            if prj.is_debug:
                 return 'Debug'
             else:
                 return 'Release'
@@ -135,6 +134,8 @@ class WaitDependenciesWrapper(BuilderWrapper):
 class LibextProject(ConstructibleRacyProject):
     LIBEXT    = ('libext', )
 
+    ENV       = None
+
     def __init__(self, *args, **kwargs):
         libext_builders = {}
         builder_wrappers = [
@@ -159,6 +160,7 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['_globals']=kwargs.get('_globals',{})
         kwargs['_globals'].update(libext_builders)
         kwargs['_globals']['prj'] = self
+        self.ENV = kwargs['_globals']['ENV'] = {}
 
         super(LibextProject, self).__init__( *args, **kwargs )
 
@@ -248,23 +250,36 @@ class LibextProject(ConstructibleRacyProject):
     def environment(self):
         prj = self
         env = self.env
-        deps = dict(
-                ('DEP_{0}'.format(p.name).upper(), p.local_dir)
-                for p in self.source_rec_deps
+        direct_deps = self.source_deps
+        all_deps    = self.source_rec_deps
+        indirect_deps = set(all_deps) - set(self.source_deps)
+
+        keys_deps = (
+                ('DIRECT_DEP'  , direct_deps),
+                ('INDIRECT_DEP', indirect_deps),
+                ('DEP'         , all_deps),
                 )
-        items = deps.items()
-        deps_include = dict(( k+'_INCLUDE' , v+'/include') for k,v in items)
-        deps_lib     = dict(( k+'_LIB'     , v+'/lib'    ) for k,v in items)
-        deps_bin     = dict(( k+'_BIN'     , v+'/bin'    ) for k,v in items)
+
         kwdeps = {}
-        kwdeps.update(deps)
-        kwdeps.update(deps_include)
-        kwdeps.update(deps_lib)
-        kwdeps.update(deps_bin)
-        kwdeps['DEPS'] = os.pathsep.join(deps.values())
-        kwdeps['DEPS_INCLUDE'] = os.pathsep.join(deps_include.values())
-        kwdeps['DEPS_LIB'] = os.pathsep.join(deps_lib.values())
-        kwdeps['DEPS_BIN'] = os.pathsep.join(deps_bin.values())
+        for prefix, dependencies in keys_deps:
+            deps = dict(
+                    ('{0}_{1}'.format(prefix, p.name).upper(), p.local_dir)
+                    for p in dependencies
+                    )
+            items = deps.items()
+            deps_include = dict((k+'_INCLUDE', v+'/include') for k,v in items)
+            deps_lib     = dict((k+'_LIB'    , v+'/lib'    ) for k,v in items)
+            deps_bin     = dict((k+'_BIN'    , v+'/bin'    ) for k,v in items)
+            if prefix == 'DEP':
+                kwdeps.update(deps)
+                kwdeps.update(deps_include)
+                kwdeps.update(deps_lib)
+                kwdeps.update(deps_bin)
+            join = os.pathsep.join
+            kwdeps['{0}S'.format(prefix)]         = join(deps.values())
+            kwdeps['{0}S_INCLUDE'.format(prefix)] = join(deps_include.values())
+            kwdeps['{0}S_LIB'.format(prefix)]     = join(deps_lib.values())
+            kwdeps['{0}S_BIN'.format(prefix)]     = join(deps_bin.values())
 
 
         download_target = env.Dir(prj.download_target)
@@ -287,7 +302,7 @@ class LibextProject(ConstructibleRacyProject):
         kwargs.update(kwdeps)
 
         kwargs
-        if self.get('DEBUG') != 'release':
+        if self.is_debug:
             BuildType = 'Debug'
             kwargs['DEBUG_FLAG'] = 'd'
             kwargs['DEBUGONOFF'] = 'on'
@@ -303,6 +318,8 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['buildtype'] = BuildType.lower()
         kwargs['lower'] = str.upper
         kwargs['upper'] = str.lower
+        kwargs['winpathsep']  = lambda s:s.replace(os.pathsep,';')
+        kwargs['unixpathsep'] = lambda s:s.replace(os.pathsep,':')
         kwargs['_VERSION_'] = prj.version.replace('.','_')
 
         return kwargs
@@ -322,17 +339,16 @@ class LibextProject(ConstructibleRacyProject):
         result = []
         prj.configure_env()
 
+        self.ENV.update(self.environment)
         prj.prj_locals['generate']()
 
-        kwargs = self.environment
-
         res = [
-                self.MkdirBuilder('${LOCAL_DIR}', **kwargs),
-                self.MkdirBuilder('${LOCAL_DIR}/bin', **kwargs),
-                self.MkdirBuilder('${LOCAL_DIR}/lib', **kwargs),
-                self.MkdirBuilder('${LOCAL_DIR}/include', **kwargs),
+                self.MkdirBuilder('${LOCAL_DIR}'),
+                self.MkdirBuilder('${LOCAL_DIR}/bin'),
+                self.MkdirBuilder('${LOCAL_DIR}/lib'),
+                self.MkdirBuilder('${LOCAL_DIR}/include'),
                 ]
-        res += BuilderWrapper.apply_calls( prj, **kwargs)
+        res += BuilderWrapper.apply_calls( prj, **self.ENV )
 
         previous_node = []
         for nodes in res:

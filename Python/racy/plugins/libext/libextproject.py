@@ -130,6 +130,18 @@ class WaitDependenciesWrapper(BuilderWrapper):
         return self.prj
 
 
+class WhereIsWrapper(object):
+    def __init__(self, prj):
+        self.prj = prj
+    def __call__(self, *args, **kwargs):
+        return self.prj.env.WhereIs(*args, **kwargs)
+
+class AppendENVPathWrapper(object):
+    def __init__(self, prj):
+        self.prj = prj
+    def __call__(self, *args, **kwargs):
+        return self.prj.env.AppendENVPath(*args, **kwargs)
+
 
 class LibextProject(ConstructibleRacyProject):
     LIBEXT    = ('libext', )
@@ -137,7 +149,7 @@ class LibextProject(ConstructibleRacyProject):
     ENV       = None
 
     def __init__(self, *args, **kwargs):
-        libext_builders = {}
+        generate_functions = {}
         builder_wrappers = [
                 BuilderWrapper  (self,'Download'),
                 BuilderWrapper  (self,'UnTar'),
@@ -155,10 +167,16 @@ class LibextProject(ConstructibleRacyProject):
                 ]
 
         for bld in builder_wrappers:
-            bld.subscribe_to(libext_builders)
+            bld.subscribe_to(generate_functions)
+
+        functions = {
+                'WhereIs' : WhereIsWrapper(self),
+                'AppendENVPath' : AppendENVPathWrapper(self),
+                }
+        generate_functions.update(functions)
 
         kwargs['_globals']=kwargs.get('_globals',{})
-        kwargs['_globals'].update(libext_builders)
+        kwargs['_globals'].update(generate_functions)
         kwargs['_globals']['prj'] = self
         self.ENV = kwargs['_globals']['ENV'] = {}
 
@@ -260,6 +278,14 @@ class LibextProject(ConstructibleRacyProject):
                 ('DEP'         , all_deps),
                 )
 
+
+        if self.compiler.startswith('cl'):
+            inc_opt = ' /I'
+            lib_opt = ' /L'
+        else:
+            inc_opt = ' -I'
+            lib_opt = ' -L'
+
         kwdeps = {}
         for prefix, dependencies in keys_deps:
             deps = dict(
@@ -276,11 +302,19 @@ class LibextProject(ConstructibleRacyProject):
                 kwdeps.update(deps_lib)
                 kwdeps.update(deps_bin)
             join = os.pathsep.join
-            kwdeps['{0}S'.format(prefix)]         = join(deps.values())
-            kwdeps['{0}S_INCLUDE'.format(prefix)] = join(deps_include.values())
-            kwdeps['{0}S_LIB'.format(prefix)]     = join(deps_lib.values())
-            kwdeps['{0}S_BIN'.format(prefix)]     = join(deps_bin.values())
 
+            vars = {
+            '{0}S'        : join(deps.values()),
+            '{0}S_INCLUDE': join(deps_include.values()),
+            '{0}S_LIB'    : join(deps_lib.values()),
+            '{0}S_BIN'    : join(deps_bin.values()),
+
+            '{0}S_INCLUDE_FLAGS' : inc_opt.join([''] + deps_include.values()),
+            '{0}S_LIB_FLAGS'     : lib_opt.join([''] + deps_lib.values()),
+            }
+
+            for k, v in vars.items():
+                kwdeps[k.format(prefix)] = v
 
         download_target = env.Dir(prj.download_target)
         extract_dir = env.Dir(prj.extract_dir)
@@ -320,6 +354,7 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['upper'] = str.lower
         kwargs['winpathsep']  = lambda s:s.replace(os.pathsep,';')
         kwargs['unixpathsep'] = lambda s:s.replace(os.pathsep,':')
+
         kwargs['_VERSION_'] = prj.version.replace('.','_')
 
         return kwargs

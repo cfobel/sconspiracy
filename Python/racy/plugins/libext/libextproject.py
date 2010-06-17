@@ -85,8 +85,6 @@ class CMakeWrapper(CommandWrapper):
 
         ARGS = kwargs.setdefault('ARGS', [])
         ARGS.insert(0,'-DCMAKE_PREFIX_PATH:PATH=${winpathsep(DEPS)}')
-        ARGS.append('-DCMAKE_CXX_FLAGS:PATH=${INDIRECT_DEPS_INCLUDE_FLAGS}')
-        #ARGS.append('-DCMAKE_EXE_LINKER_FLAGS:PATH=${INDIRECT_DEPS_INCLUDE_FLAGS}')
         ARGS.append('-DCMAKE_INSTALL_PREFIX:PATH=${LOCAL_DIR}')
         def build_type():
             if prj.is_debug:

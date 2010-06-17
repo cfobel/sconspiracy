@@ -135,13 +135,19 @@ class WhereIsWrapper(object):
     def __init__(self, prj):
         self.prj = prj
     def __call__(self, *args, **kwargs):
-        return self.prj.env.WhereIs(*args, **kwargs)
+        subst = self.prj.env.subst
+        for k,v in kwargs.items():
+            kwargs[k] = subst(v)
+        return self.prj.env.WhereIs(*subst(args), **kwargs)
 
 class AppendENVPathWrapper(object):
     def __init__(self, prj):
         self.prj = prj
     def __call__(self, *args, **kwargs):
-        return self.prj.env.AppendENVPath(*args, **kwargs)
+        subst = self.prj.env.subst
+        for k,v in kwargs.items():
+            kwargs[k] = subst(v)
+        return self.prj.env.AppendENVPath(*subst(args), **kwargs)
 
 
 class LibextProject(ConstructibleRacyProject):

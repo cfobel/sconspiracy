@@ -112,15 +112,14 @@ class Url(SCons.Node.Node):
         return csig
 
     def exists(self):
+        res = False
         try:
             self.url = urllib2.urlopen(self.name)
             res = True
         except urllib2.HTTPError, e:
-            res = False
-            print "Url Error:",e.reason , self.name
+            raise e
         except urllib2.URLError, e:
-            res = False
-            print "Url Error:",e.reason , self.name
+            raise e
         return res
 
     def write_to_file(self, io, filename, file_mode=''):

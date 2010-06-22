@@ -359,6 +359,10 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['upper'] = str.lower
         kwargs['winpathsep']  = lambda s:s.replace(os.pathsep,';')
         kwargs['unixpathsep'] = lambda s:s.replace(os.pathsep,':')
+        kwargs['winsep']  = lambda s:s.replace(os.sep,'\\')
+        kwargs['unixsep'] = lambda s:s.replace(os.sep,'/')
+        kwargs['winlinesep']  = lambda s:s.replace(os.linesep,'\r\n')
+        kwargs['unixlinesep'] = lambda s:s.replace(os.linesep,'\n')
 
         kwargs['_VERSION_'] = prj.version.replace('.','_')
 

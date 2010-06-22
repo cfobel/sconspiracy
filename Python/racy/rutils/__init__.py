@@ -296,6 +296,17 @@ class ListFromStr(list):
        return lst
 
 
+#------------------------------------------------------------------------------
+def uniq(iterable):
+    """Return a list from iterable without duplicates, keep the order of
+    appearance of the iterable elements"""
+    seen = set()
+    add  = seen.add
+    return [x for x in iterable if not (x in seen or add(x))]
+
+#------------------------------------------------------------------------------
+
+
 class Version(str):
     """This class provide a way to compare/normalize versions strings.
     Version format is [name]v1<sep>v2<sep>...<sep>vn where :

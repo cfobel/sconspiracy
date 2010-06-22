@@ -19,17 +19,13 @@ class GccFlags(common.Flags):
                         '-pipe',
                         '-Winvalid-pch',
                         '-Wunknown-pragmas',
-                        '-m${ARCH}',
                        ]
-    CXXFLAGS_RELEASE = []
     CXXFLAGS_DEBUG   = ['-O0']
 
-    CFLAGS           = ['-pipe', '-m${ARCH}']
+    CFLAGS           = ['-pipe']
     CFLAGS_DEBUG     = ['-O0']
 
-    CPPDEFINES       = []
-
-    LINKFLAGS          = ['-m${ARCH}']
+    ARCH_FLAGS         = ['-m${ARCH}']
 
     WARNINGSASERRORS_FLAGS = ['-Werror']
     OPTIMIZATION_FLAGS     = ['-O${OPTIMIZATIONLEVEL}']

@@ -27,6 +27,8 @@ class Flags(object):
     CPPDEFINES_RELEASE = ['NDEBUG']
     CPPDEFINES_DEBUG   = ['DEBUG', '_DEBUG']
 
+    ARCH_FLAGS         = []
+
     LINKFLAGS          = []
     LINKFLAGS_RELEASE  = []
     LINKFLAGS_DEBUG    = []
@@ -130,7 +132,16 @@ class Flags(object):
 def get_flags(bases):
     return type("CompilerFlags", tuple(bases), {})
 
-def merge_flags(env, flags, names = ['CPPDEFINES', 'LINKFLAGS', 'CXXFLAGS', 'CFLAGS']):
+def merge_flags(env, flags, 
+        names = [
+            'CPPDEFINES',
+            'LINKFLAGS',
+            'CXXFLAGS',
+            'CFLAGS',
+            ('ARCH_FLAGS', 'CXXFLAGS'),
+            ('ARCH_FLAGS', 'LINKFLAGS'),
+            ('ARCH_FLAGS', 'CFLAGS'),
+            ]):
     is_debug = env.get('DEBUG') != 'release'
     for name in names:
         if isinstance(name, tuple):

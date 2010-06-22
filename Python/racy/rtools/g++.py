@@ -62,14 +62,14 @@ class GccFlagsOsX(GccFlags):
             '-dynamic',
             '-nostartfiles',
             '-install_name',
-            '@executable_path/../Bundles/${PRJ.versioned_name}/lib${PRJ.full_name}.dylib'
+            '@executable_path/../Bundles/${PRJ.versioned_name}/lib${PRJ.full_name}.dylib',
             '-multiply_defined','suppress',
             ]
     LINKFLAGS_SHARED = [
             '-dynamic',
             '-nostartfiles',
             '-install_name',
-            '@executable_path/../Libraries/lib${PRJ.full_name}.dylib'
+            '@executable_path/../Libraries/lib${PRJ.full_name}.dylib',
             '-multiply_defined','suppress',
             ]
 

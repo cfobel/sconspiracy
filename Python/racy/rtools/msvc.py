@@ -13,8 +13,7 @@ import os
 import racy
 from racy.renv   import constants
 from racy.renv.options import get_option
-from racy.rtools import get_tool
-from racy.rtools import common
+from racy.rtools import common, get_tool
 
 import SCons
 msvc = get_tool('SCons.Tool.msvc')

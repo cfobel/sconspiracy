@@ -1093,15 +1093,16 @@ class ConstructibleRacyProject(InstallableRacyProject):
         for builddir, path in builddirs:
             self.variant_dir(builddir, path)
 
-        bin_deps = prj.bin_deps
-        rec_bin_deps = sorted(set(self.bin_rec_deps) - set(bin_deps), key=str)
+        direct_bin_deps = prj.bin_deps
+        indirect_bin_deps = set(self.bin_rec_deps) - set(direct_bin_deps)
+        indirect_bin_deps = sorted(indirect_bin_deps, key=str)
 
         link_opts = []
         if self.is_exec:
             link_opts += ['forcelink']
 
-        rlibext.register.configure(prj, rec_bin_deps, opts=['nolink'])
-        rlibext.register.configure(prj, bin_deps    , opts=link_opts)
+        rlibext.register.configure(prj, indirect_bin_deps, opts=['nolink'])
+        rlibext.register.configure(prj, direct_bin_deps  , opts=link_opts)
 
         env.Prepend(**self.options)
 

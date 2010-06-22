@@ -8,6 +8,7 @@ import SCons.Node
 import SCons.Util
 
 import urllib2
+from urlparse import urlparse
 
 import racy
 
@@ -113,14 +114,10 @@ class Url(SCons.Node.Node):
 
     def exists(self):
         res = False
-        try:
-            self.url = urllib2.urlopen(self.name)
-            res = True
-        except urllib2.HTTPError, e:
-            raise Exception, "Url Error: {0} [{1}]".format(e.reason , self.name)
-        except urllib2.URLError, e:      
-            raise Exception, "Url Error: {0} [{1}]".format(e.reason , self.name)
-        return res
+        pieces = urlparse(self.name)
+        if not all([pieces.scheme, pieces.netloc]):
+            raise Exception, 'Malformed Url: {0}'.format(self.name)
+        return True
 
     def write_to_file(self, io, filename, file_mode=''):
         size = 0
@@ -133,9 +130,13 @@ class Url(SCons.Node.Node):
 
 
 def Download(target, source, env):
-    assert (len(target) == len(source))
+    if not len(target) == len(source):
+        raise Exception, ("Number of target ({0}) must be equal to the number "
+                          "of sources ({1})".format(len(target), len(sources)))
     for s,t in zip(source, target):
-        s.write_to_file(s.url, t.get_path(), file_mode='')
+        stream = urllib2.urlopen(s.name)
+        s.write_to_file(stream, t.get_path(), file_mode='')
+        stream.close()
     return None
 
 

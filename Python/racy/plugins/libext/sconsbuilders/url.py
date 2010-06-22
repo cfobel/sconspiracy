@@ -117,9 +117,9 @@ class Url(SCons.Node.Node):
             self.url = urllib2.urlopen(self.name)
             res = True
         except urllib2.HTTPError, e:
-            raise e
-        except urllib2.URLError, e:
-            raise e
+            raise Exception, "Url Error: {0} [{1}]".format(e.reason , self.name)
+        except urllib2.URLError, e:      
+            raise Exception, "Url Error: {0} [{1}]".format(e.reason , self.name)
         return res
 
     def write_to_file(self, io, filename, file_mode=''):

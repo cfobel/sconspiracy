@@ -27,7 +27,7 @@ exists = msvc.exists
 class MsvcFlags(common.Flags):
     CXXFLAGS         = ['/GR']
     CXXFLAGS_RELEASE = ['/W3','/EHs','/Zm600','/MD','/Oi','/Ot','/Ob2','/TP']
-    CXXFLAGS_DEBUG   = [ '/W3','/EHsc','/MDd','/Od' ]
+    CXXFLAGS_DEBUG   = ['/W3','/EHsc','/MDd','/Od']
     CFLAGS           = []
     CFLAGS_RELEASE   = ['/MD']
     CFLAGS_DEBUG     = ['/MDd']
@@ -66,11 +66,11 @@ class MsvcFlags(common.Flags):
             ('_TEMPL_API_IMPORT', r'export/**/"C++"'),
                 ]
 
-class Msvc71(MSVCFLAGS):
+class Msvc71(MsvcFlags):
     CXXFLAGS_RELEASE = ['/Og','/Gi']
     CXXFLAGS_DEBUG   = ['/Z7','/Wp64']
 
-class Msvc9(MSVCFLAGS):
+class Msvc9(MsvcFlags):
     CXXFLAGS_RELEASE = ['/Z7']
     CXXFLAGS_DEBUG =   ['/Z7']
 

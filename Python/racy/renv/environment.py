@@ -50,6 +50,8 @@ class Environment(Env):
         kwargs['tools'] += env_tools
         kwargs.update(env_vars)
 
+        kwargs['ARCH'] = get_option('ARCH')
+
         Env.__init__(self, *args, **kwargs)
 
 

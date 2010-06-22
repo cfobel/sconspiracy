@@ -8,12 +8,80 @@
 
 from racy.renv         import constants
 from racy.renv.options import get_option
-from racy.rtools       import get_tool
-from racy.rutils       import merge_lists_of_dict, is_true
+from racy.rtools       import common, get_tool
 
 gplusplus = get_tool('SCons.Tool.g++')
 
 exists = gplusplus.exists
+
+class GccFlags(common.Flags):
+    CXXFLAGS         = [
+                        '-pipe',
+                        '-Winvalid-pch',
+                        '-Wunknown-pragmas',
+                        '-m${ARCH}',
+                       ]
+    CXXFLAGS_RELEASE = []
+    CXXFLAGS_DEBUG   = ['-O0']
+
+    CFLAGS           = ['-pipe', '-m${ARCH}']
+    CFLAGS_DEBUG     = ['-O0']
+
+    CPPDEFINES       = []
+
+    LINKFLAGS          = ['-m${ARCH}']
+
+    WARNINGSASERRORS_FLAGS = ['-Werror']
+    OPTIMIZATION_FLAGS     = ['-O${OPTIMIZATIONLEVEL}']
+
+    CXXFLAGS_RACY_VISIBILITY = [
+                '-fvisibility=hidden',
+                '-fvisibility-inlines-hidden',
+                '-fvisibility-ms-compat',
+                ]
+    CPPDEFINES_RACY_VISIBILITY = [
+            ('_API_EXPORT'      , r'__attribute__\(\(visibility\(\"default\"\)\)\)'),
+            ('_CLASS_API_EXPORT', r'__attribute__\(\(visibility\(\"default\"\)\)\)'),
+
+            ('_API_IMPORT'      , ''),
+            ('_CLASS_API_IMPORT', ''),
+
+            ('_TEMPL_API_EXPORT', ''),
+            ('_TEMPL_API_IMPORT', r'extern\/\*\*\/\"C++\"'),
+                ]
+
+class GccFlagsOsX(GccFlags):
+    CFLAGS_DEBUG  = ['-ggdb2']
+    CPPDEFINES    = ['__MACOSX__']
+    LINKFLAGS     = [
+                     '-no-cpp-precomp',
+                     '-headerpad_max_install_names',
+                    ]
+
+    LINKFLAGS_BUNDLE = [
+            '-dynamic',
+            '-nostartfiles',
+            '-install_name',
+            '@executable_path/../Bundles/${PRJ.versioned_name}/lib${PRJ.full_name}.dylib'
+            '-multiply_defined','suppress',
+            ]
+    LINKFLAGS_SHARED = [
+            '-dynamic',
+            '-nostartfiles',
+            '-install_name',
+            '@executable_path/../Libraries/lib${PRJ.full_name}.dylib'
+            '-multiply_defined','suppress',
+            ]
+
+class GccFlagsLinux(GccFlags):
+    CFLAGS_DEBUG  = ['-ggdb3']
+    CPPDEFINES    = ['__linux']
+    LINKFLAGS     = [
+                     '-fpic',
+                     '-fno-stric-aliasing',
+                     '-fno-common',
+                    ]
+
 
 
 def generate(env):
@@ -26,126 +94,21 @@ def generate(env):
     env.__class__.ManageOption = manage_options
     env.__class__.InstallFileFilter = install_file_filter
 
-    CFLAGS = [
-            '-pipe',
-            ]
-    CXXFLAGS = [
-            '-pipe'             ,
-            '-Winvalid-pch'     ,
-            '-Wunknown-pragmas' ,
-            ]
-
-    CPPDEFINES = []
-    LINKFLAGS  = []
-    
     if get_option('PLATFORM') == constants.LINUX:
-        CPPDEFINES += [
-                '__linux' ,
-                ]
-        LINKFLAGS += [
-                '-fpic'               ,
-                '-fno-stric-aliasing' ,
-                '-fno-common'         ,
-                ]
-
+        FlagsGenerator = GccFlagsLinux
     elif get_option('PLATFORM') == constants.MACOSX:
-        LINKFLAGS += [
-                '-no-cpp-precomp'              ,
-                '-headerpad_max_install_names' ,
-                ]
+        FlagsGenerator = GccFlagsOsX
 
-        CPPDEFINES += [
-                '__MACOSX__' ,
-                ]
-
-    if env.get('DEBUG') == 'release' :
-        merge_lists_of_dict(locals(), constants.COMMON_RELEASE)
-    else :
-        merge_lists_of_dict(locals(), constants.COMMON_DEBUG)
-
-        gdb_level = 'gdb3'
-        if get_option('PLATFORM') == constants.MACOSX:
-            gdb_level = 'gdb2'
-        CXXFLAGS  += [ '-O0', '-g' + gdb_level ]
-        CFLAGS  += [ '-O0', '-g' + gdb_level ]
+    flags = env.__class__.Flags = FlagsGenerator()
+    common.merge_flags(env, flags)
 
     env['TOOLINFO'] = {}
     env['TOOLINFO']['NAME']    = 'gcc'
     env['TOOLINFO']['VERSION'] = env['CXXVERSION']
 
 
-    if get_option('ARCH') == '32':
-        arch_option = ['-m32']
-    elif get_option('ARCH') == '64':
-        arch_option = ['-m64']
-
-    CFLAGS    += arch_option
-    CXXFLAGS  += arch_option
-    LINKFLAGS += arch_option
-    
-    CPPDEFINES += [ ('__ARCH__' , r'\"{0}\"'.format(get_option('ARCH'))) ]
-
-
-    names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS', 'CFLAGS']
-    attrs = [locals()[n] for n in names]
-    env.MergeFlags(dict(zip(names,attrs)), unique=True)
-
-
 def manage_options(env, prj, options):
-    CPPDEFINES = []
-    CXXFLAGS   = []
-    CFLAGS   = []
-
-    if is_true(options.get('WARNINGSASERRORS', 'no')):
-        CXXFLAGS += ['-Werror']
-
-    if 'OPTIMIZATIONLEVEL' in options:
-        CXXFLAGS += ['-O{0}'.format(options['OPTIMIZATIONLEVEL'])]
-        CFLAGS += ['-O{0}'.format(options['OPTIMIZATIONLEVEL'])]
-
-    if options.get('USEVISIBILITY') == 'racy':
-        CPPDEFINES += [
-            ('_API_EXPORT'      , r'__attribute__\(\(visibility\(\"default\"\)\)\)'),
-            ('_CLASS_API_EXPORT', r'__attribute__\(\(visibility\(\"default\"\)\)\)'),
-
-            ('_API_IMPORT'      , ''),
-            ('_CLASS_API_IMPORT', ''),
-
-            ('_TEMPL_API_EXPORT', ''),
-            ('_TEMPL_API_IMPORT', r'extern\/\*\*\/\"C++\"'),
-                ]
-        CXXFLAGS += [
-                '-fvisibility=hidden'        ,
-                '-fvisibility-inlines-hidden',
-                '-fvisibility-ms-compat'     ,
-                ]
-
-    env.Append(CPPDEFINES = CPPDEFINES,
-               CXXFLAGS   = CXXFLAGS,
-               CFLAGS     = CFLAGS
-               )
-
-    if get_option('PLATFORM') == constants.MACOSX:
-        if prj.is_bundle or prj.is_shared:
-            import os
-            libname = ''.join(['lib',prj.full_name,'.dylib'])
-            if prj.is_bundle:
-                install_path = os.path.join('@executable_path', '..',
-                                        'Bundles', prj.versioned_name, libname)
-            else:
-                install_path = os.path.join('@executable_path', '..',
-                                        'Libraries', libname)
-
-            
-            flags = [
-                    '-dynamic',
-                    '-nostartfiles',
-                    '-install_name', install_path,
-                    '-multiply_defined','suppress',
-#                    '/usr/lib/dylib1.o', #??
-                    ]
-            env.Append(SHLINKFLAGS = flags)
-
+    common.manage_options(env, prj, options)
 
 def install_file_filter(env, f):
     return hasattr(f,"get_path")

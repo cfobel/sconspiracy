@@ -23,16 +23,6 @@ VCS_DIRS = ['CVS', '.svn', '.hg']
 
 LIBNAME_SEP = "_"
 
-
-COMMON_RELEASE = { 
-                  'CPPDEFINES' : [ 'NDEBUG' , ],
-                 }
-COMMON_DEBUG   = { 
-                  'CPPDEFINES' : [ 'DEBUG', '_DEBUG' ],
-                  'CXXFLAGS'   : [ '-UNDEBUG' ],
-                 }
-
-
 BIN_PATH     = 'bin'
 INCLUDE_PATH = 'include'
 LIB_PATH     = 'lib'

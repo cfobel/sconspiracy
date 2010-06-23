@@ -32,7 +32,7 @@ def qressources(prj):
     qrc = rutils.DeepGlob(
             ['qrc'],
             prj.src_path,
-            prj.build_dir,
+            src_build_dir(prj),
             )
     return qrc
 
@@ -47,6 +47,9 @@ def includes(prj):
             )
     return includes
 
+
+def src_build_dir(prj):
+    return map(prj.get_build_dir_for, prj.src_path)
 
 def inc_build_dir(prj):
     return map(prj.get_build_dir_for, prj.include_path)
@@ -79,9 +82,9 @@ class Plugin(racy.rplugins.Plugin):
         env['QT4_RCCCOM']   = '$QT4_RCC $QT4_QRCFLAGS $SOURCE -o $TARGET -name ${SOURCE.filebase}'
         env['QT4_AUTOSCAN'] = 0
 
-        uic = [ env.Uic4(ui)  for  ui in ui_sources(prj) ]
+        uic = [ env.Uic4(ui)  for ui  in ui_sources(prj) ]
         moc = [ env.Moc4(inc) for inc in includes(prj)   ]
-        qrc = [ env.Qrc(rc)   for rc in qressources(prj) ]
+        qrc = [ env.Qrc(rc)   for rc  in qressources(prj) ]
 
         sources = rutils.DeepGlob(
                 constants.CXX_SOURCE_EXT, 

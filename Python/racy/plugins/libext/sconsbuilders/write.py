@@ -35,7 +35,7 @@ def WriteString(target, source, env):
     files = WriteArgs(target, source, env)[0]
     files = ' '.join(files)
     s = ' '.join(['Writing file(s)', files])
-    return '[${CURRENT_PROJECT}]:' + s
+    return env.subst('[${CURRENT_PROJECT}]:') + s
 
 
 def generate(env):

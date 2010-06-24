@@ -297,6 +297,12 @@ class LibextProject(ConstructibleRacyProject):
         inc = [lib.build() for lib in self.source_rec_deps]
         return inc
 
+
+    @cached_property
+    def deps_install_nodes (self):
+        inc = [lib.install() for lib in self.source_rec_deps]
+        return inc
+
     @cached_property
     def environment(self):
         prj = self
@@ -432,7 +438,7 @@ class LibextProject(ConstructibleRacyProject):
                         node.name = ''
                     env.Depends( node, previous_node )
                     previous_node = node
-            else:
+            elif deps_results:
                 previous_node = [previous_node, nodes.deps_build_nodes]
 
         if not isinstance(nodes, LibextProject):
@@ -451,7 +457,7 @@ class LibextProject(ConstructibleRacyProject):
 
     def build(self,  build_deps = True):
         """build_deps = False is not available"""
-        res = self.result()
+        res = self.result(build_deps)
         return res
 
     @memoize
@@ -459,7 +465,8 @@ class LibextProject(ConstructibleRacyProject):
         prj = self
         env = self.env
 
-        result = prj.build(build_deps='deps' in opts)
+        install_deps = 'deps' in opts
+        result = prj.build(build_deps=install_deps)
 
         initmodel = opjoin(prj.rc_path,'__init__.py')
         if os.path.isfile(initmodel):
@@ -473,6 +480,10 @@ class LibextProject(ConstructibleRacyProject):
 
 
         alias = 'install-{prj.type}-{prj.full_name}'
-        result = env.Alias (alias.format(prj=self), result)
+        result = env.Alias (alias.format(prj=prj), result)
+
+        if install_deps:
+            env.Depends(result, prj.deps_install_nodes)
+
         return result
 

@@ -66,13 +66,15 @@ class Plugin(racy.rplugins.Plugin):
                 'cmake',
                 'command',
                 'configure',
+                'copy',
                 'edit',
                 'make',
                 'mkdir',
                 'patch',
                 'untar',
                 'unzip',
-                'url'
+                'url',
+                'write',
                 ]
 
         import sconsbuilders

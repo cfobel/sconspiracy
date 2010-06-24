@@ -21,7 +21,8 @@ def UnTar(target, source, env):
 
 def UnTarString(target, source, env):
     """ Information string for UnTar """
-    return 'Extracting %s' % os.path.basename (str (source[0]))
+    s = 'Extracting %s' % os.path.basename (str (source[0]))
+    return env.subst('[${CURRENT_PROJECT}]: ') + s
 
 
 def generate(env):

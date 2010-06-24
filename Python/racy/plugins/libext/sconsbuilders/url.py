@@ -141,7 +141,8 @@ def Download(target, source, env):
 
 
 def DownloadString(target, source, env):
-    return 'Downloading %s' % source[0]
+    s = ' Downloading %s' % source[0]
+    return env.subst('[${CURRENT_PROJECT}]: ') + s
 
 
 def generate(env):

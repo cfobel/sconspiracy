@@ -21,7 +21,8 @@ def UnZip(target, source, env):
 
 def UnZipString(target, source, env):
     """ Information string for UnZip """
-    return 'Extracting %s' % os.path.basename (str (source[0]))
+    s = 'Extracting %s' % os.path.basename (str (source[0]))
+    return env.subst('[${CURRENT_PROJECT}]: ') + s
 
 
 def generate(env):

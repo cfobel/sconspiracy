@@ -67,7 +67,8 @@ def EditString(target, source, env):
     files, expr = EditArgs(target, source, env)
     files = ' '.join(files)
     expr = ' '.join(expr)
-    return ' '.join(['Editing file(s)', files, '<<', expr, '>>'])
+    s = ' '.join(['Editing file(s)', files, '<<', expr, '>>'])
+    return env.subst('[${CURRENT_PROJECT}]: ') + s
 
 
 def generate(env):

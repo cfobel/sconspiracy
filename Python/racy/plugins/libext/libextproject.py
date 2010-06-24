@@ -7,6 +7,8 @@
 
 
 import os
+import time
+
 import SCons.Defaults
 import SCons.Node
 
@@ -15,6 +17,7 @@ from hashlib import md5
 
 import racy
 
+from racy            import rutils
 from racy.renv       import constants
 from racy.rproject   import ConstructibleRacyProject, LibName
 from racy.rutils     import cached_property, memoize, run_once
@@ -202,17 +205,23 @@ class LibextProject(ConstructibleRacyProject):
 
 
     def CopyBuilder(self, source, to, **kwargs):
+        #env = self.env
+        #sub = env.subst
+        #res = env.Command(
+                #env.Value(sub("Copy {0} to {1}".format(source, to))),
+                #[],
+                #[SCons.Defaults.Copy(to, source)],
+                #target_factory=env.Value,
+                #**kwargs
+                #)
+        #env.Clean(res, to)
+        #return res
         env = self.env
-        sub = env.subst
-        res = env.Command(
-                env.Value(sub("Copy {0} to {1}".format(source, to))),
-                [],
-                [SCons.Defaults.Copy(to, source)],
-                target_factory=env.Value,
-                **kwargs
-                )
+        args = [source, to]
+        res = env.Copy([marker('Copy',self.full_name, args)], [], ARGS=args)
         env.Clean(res, to)
         return res
+
 
 
     def MkdirBuilder(self, dir, **kwargs):
@@ -220,6 +229,18 @@ class LibextProject(ConstructibleRacyProject):
         args = [dir]
         res = env.Mkdir([marker('Mkdir',self.full_name, args)], [], ARGS=args)
         env.Clean(res, dir)
+        return res
+
+    def WriteBuilder(self, file, content, **kwargs):
+        env = self.env
+        args = [file, content]
+        res = env.Write(
+                [marker('Write',self.full_name, args)],
+                [],
+                FILES    = [file],
+                CONTENTS = [env.subst(content)],
+                )
+        env.Clean(res, file)
         return res
 
 
@@ -265,7 +286,14 @@ class LibextProject(ConstructibleRacyProject):
         return inc
 
     @cached_property
-    def deps_nodes (self):
+    def install_pkg_path(self):
+        install_dir = racy.renv.dirs.install_binpkg
+        install_dir = opjoin(install_dir, self.full_name)
+        return install_dir
+
+
+    @cached_property
+    def deps_build_nodes (self):
         inc = [lib.build() for lib in self.source_rec_deps]
         return inc
 
@@ -333,24 +361,23 @@ class LibextProject(ConstructibleRacyProject):
                     'VERSION'             : prj.version    ,
                     #'LIBEXT_INCLUDE_PATH' : os.pathsep.join(prj.deps_include_path),
                     #'LIBEXT_LIBRARY_PATH' : os.pathsep.join(prj.deps_lib_path),
-                    'SUBPROCESSPREFIXSTR' : '[{0}]:'.format(self.name),
-                    'DEBUG_FLAG'          : '',
-                    'RELEASE_FLAG'        : '',
+                    'CURRENT_PROJECT'     : self.name      ,
                     }
 
         kwargs.update(kwdeps)
 
-        kwargs
         if self.is_debug:
             BuildType = 'Debug'
+            kwargs['IS_DEBUG']   = True
             kwargs['DEBUG_FLAG'] = 'd'
             kwargs['DEBUGONOFF'] = 'on'
             kwargs['DEBUGYESNO'] = 'yes'
         else:
             BuildType = 'Release'
+            kwargs['IS_DEBUG']     = False
             kwargs['RELEASE_FLAG'] = 'r'
-            kwargs['DEBUGONOFF'] = 'off'
-            kwargs['DEBUGYESNO'] = 'no'
+            kwargs['DEBUGONOFF']   = 'off'
+            kwargs['DEBUGYESNO']   = 'no'
 
         kwargs['BuildType'] = BuildType
         kwargs['BUILDTYPE'] = BuildType.upper()
@@ -365,6 +392,9 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['unixlinesep'] = lambda s:s.replace(os.linesep,'\n')
 
         kwargs['_VERSION_'] = prj.version.replace('.','_')
+        kwargs['SYSTEM']    = racy.renv.platform()
+        kwargs['COMPILER']  = str(prj.compiler)
+        kwargs['NOW']     = time.ctime()
 
         return kwargs
 
@@ -372,7 +402,8 @@ class LibextProject(ConstructibleRacyProject):
     def configure_env(self):
         prj = self
         env = self.env
-        env.Append(**self.environment)
+        self.ENV.update(self.environment)
+        env.Append(**self.ENV)
         #super(LibextProject, self).configure_env()
 
     @memoize
@@ -382,8 +413,6 @@ class LibextProject(ConstructibleRacyProject):
 
         result = []
         prj.configure_env()
-
-        self.ENV.update(self.environment)
         prj.prj_locals['generate']()
 
         res = [
@@ -404,7 +433,7 @@ class LibextProject(ConstructibleRacyProject):
                     env.Depends( node, previous_node )
                     previous_node = node
             else:
-                previous_node = [previous_node, nodes.deps_nodes]
+                previous_node = [previous_node, nodes.deps_build_nodes]
 
         if not isinstance(nodes, LibextProject):
             result += nodes
@@ -432,4 +461,18 @@ class LibextProject(ConstructibleRacyProject):
 
         result = prj.build(build_deps='deps' in opts)
 
+        initmodel = opjoin(prj.rc_path,'__init__.py')
+        if os.path.isfile(initmodel):
+            content  = rutils.get_file_content(initmodel)
+            initfile = opjoin(prj.local_dir, '__init__.py')
+            write = prj.WriteBuilder(initfile, content)
+            copy  = prj.CopyBuilder('${LOCAL_DIR}', prj.install_pkg_path)
+            env.Depends(copy, write)
+            env.Depends(write, result)
+            result = copy
+
+
+        alias = 'install-{prj.type}-{prj.full_name}'
+        result = env.Alias (alias.format(prj=self), result)
         return result
+

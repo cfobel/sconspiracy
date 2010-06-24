@@ -26,7 +26,7 @@ def MkdirString(target, source, env):
     """ Information string for Mkdir """
     args = MkdirArgs(target, source, env)
 
-    return 'mkdir ' + ' '.join(args)
+    return '[${CURRENT_PROJECT}]: mkdir ' + ' '.join(args)
 
 
 def generate(env):

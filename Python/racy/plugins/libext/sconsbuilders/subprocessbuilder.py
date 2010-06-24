@@ -34,7 +34,7 @@ def SubProcessBuilder(env, command, args, pwd, path = []):
 
 
 def SubProcessString(target, source, env):
-    return env.subst('${SUBPROCESSPREFIXSTR}')
+    return env.subst('[${CURRENT_PROJECT}]:')
 
 
 

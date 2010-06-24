@@ -34,7 +34,8 @@ def WriteString(target, source, env):
     """ Information string for Write """
     files = WriteArgs(target, source, env)[0]
     files = ' '.join(files)
-    return ' '.join(['Writing file(s)', files])
+    s = ' '.join(['Writing file(s)', files])
+    return '[${CURRENT_PROJECT}]:' + s
 
 
 def generate(env):

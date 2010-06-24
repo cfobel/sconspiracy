@@ -473,10 +473,11 @@ class LibextProject(ConstructibleRacyProject):
             content  = rutils.get_file_content(initmodel)
             initfile = opjoin(prj.local_dir, '__init__.py')
             write = prj.WriteBuilder(initfile, content)
-            copy  = prj.CopyBuilder('${LOCAL_DIR}', prj.install_pkg_path)
-            env.Depends(copy, write)
+            #copy  = prj.CopyBuilder('${LOCAL_DIR}', prj.install_pkg_path)
+            #env.Depends(copy, write)
             env.Depends(write, result)
-            result = copy
+            #result = copy
+            result = write
 
 
         alias = 'install-{prj.type}-{prj.full_name}'

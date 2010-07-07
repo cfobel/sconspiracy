@@ -97,4 +97,7 @@ class Plugin(racy.rplugins.Plugin):
 
         env.Depends(sources, uic)
         env.Append(CPPPATH = inc_build_dir(prj))
+
+        env.Append(CPPDEFINES=['QT_SHARED','QT_WEBKIT_LIB','QT_GUI_LIB','QT_CORE_LIB',
+            '_REENTRANT', 'QT_NO_DEBUG'])
         return []

@@ -9,7 +9,7 @@ import racy
 import racy.rlog as rlog
 #import racy.rlibext as rlibext
 
-EnsureSConsVersion(1, 2, 0)
+EnsureSConsVersion(1, 3, 0)
 EnsurePythonVersion(2, 6)
 
 # Empty the Default tools list, avoid useless lookup into it.  

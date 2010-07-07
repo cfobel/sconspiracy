@@ -9,16 +9,18 @@ def CopyArgs(target, source, env):
     args = []
     args.extend(env.get('ARGS',[]))
     args = map(env.subst, args)
-    return args
+    return args[:-1], args[-1]
 
 
 def Copy(target, source, env):
 
-    args = CopyArgs(target, source, env)
+    src, dst = CopyArgs(target, source, env)
 
-    dst = args[-1]
-    for src in args[:-1]:
-        env.Execute(SCons.Script.Copy(dst, src))
+    if os.path.exists(dst):
+        env.Execute(SCons.Script.Delete(dst)) 
+
+    for s in src:
+        env.Execute(SCons.Script.Copy(dst, s))
 
     for t in target:
         env.Execute(SCons.Script.Touch(t))
@@ -27,9 +29,7 @@ def Copy(target, source, env):
 
 def CopyString(target, source, env):
     """ Information string for Copy """
-    args = CopyArgs(target, source, env)
-    dst = args[-1]
-    src = args[:-1]
+    src, dst = CopyArgs(target, source, env)
     s = '[${CURRENT_PROJECT}]: copying '+' '.join(src)+' to '+dst
     return env.subst(s)
 

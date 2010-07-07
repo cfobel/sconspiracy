@@ -30,7 +30,7 @@ def CopyString(target, source, env):
     args = CopyArgs(target, source, env)
     dst = args[-1]
     src = args[:-1]
-    s = '[${CURRENT_PROJECT}]: copy '+' '.join(src)+' to '+dst
+    s = '[${CURRENT_PROJECT}]: copying '+' '.join(src)+' to '+dst
     return env.subst(s)
 
 
@@ -41,6 +41,6 @@ def generate(env):
             target_factory = env.File,
             )
 
-    env.Append(BUILDERS = {'Copy' : builder})
+    env.Append(BUILDERS = {'CopyFile' : builder})
 
 

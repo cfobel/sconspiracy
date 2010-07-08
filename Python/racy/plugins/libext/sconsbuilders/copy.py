@@ -16,7 +16,7 @@ def Copy(target, source, env):
 
     src, dst = CopyArgs(target, source, env)
 
-    if os.path.exists(dst):
+    if len(src) == len(dst) and os.path.exists(dst):
         env.Execute(SCons.Script.Delete(dst)) 
 
     for s in src:
@@ -41,6 +41,6 @@ def generate(env):
             target_factory = env.File,
             )
 
-    env.Append(BUILDERS = {'CopyFile' : builder})
+    env.Append(BUILDERS = {'LibextCopyFile' : builder})
 
 

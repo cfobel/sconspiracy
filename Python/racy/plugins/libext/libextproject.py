@@ -205,17 +205,6 @@ class LibextProject(ConstructibleRacyProject):
 
 
     def CopyBuilder(self, source, to, **kwargs):
-        #env = self.env
-        #sub = env.subst
-        #res = env.Command(
-                #env.Value(sub("Copy {0} to {1}".format(source, to))),
-                #[],
-                #[SCons.Defaults.Copy(to, source)],
-                #target_factory=env.Value,
-                #**kwargs
-                #)
-        #env.Clean(res, to)
-        #return res
         env = self.env
         args = [source, to]
         res = env.LibextCopyFile([marker('Copy',self.full_name, args)], [], ARGS=args)

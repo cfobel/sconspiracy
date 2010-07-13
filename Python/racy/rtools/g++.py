@@ -47,7 +47,8 @@ class GccFlags(common.Flags):
                 ]
 
 class GccFlagsOsX(GccFlags):
-    CFLAGS_DEBUG  = ['-ggdb2']
+    CFLAGS_DEBUG    = ['-ggdb2']
+    CXXFLAGS_DEBUG  = ['-ggdb2']
     CPPDEFINES    = ['__MACOSX__']
     LINKFLAGS     = [
                      '-no-cpp-precomp',
@@ -70,7 +71,8 @@ class GccFlagsOsX(GccFlags):
             ]
 
 class GccFlagsLinux(GccFlags):
-    CFLAGS_DEBUG  = ['-ggdb3']
+    CFLAGS_DEBUG    = ['-ggdb3']
+    CXXFLAGS_DEBUG  = ['-ggdb3']
     CPPDEFINES    = ['__linux']
     LINKFLAGS     = [
                      '-fpic',

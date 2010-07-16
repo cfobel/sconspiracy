@@ -243,6 +243,7 @@ class LibExt(object):
                     attr = self.get_abs_path(attr)
                 conf[name] = attr
 
+
         if self.parse_configs:
             try :
                 for config in self.parse_configs:

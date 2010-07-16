@@ -334,6 +334,10 @@ class Version(str):
         return self.separator.sub('-', self)
 
     @property
+    def underscored (self):
+        return self.separator.sub('_', self)
+
+    @property
     def normalized (self):
         return self.dashed
 

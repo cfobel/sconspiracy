@@ -877,10 +877,10 @@ class InstallableRacyProject(RacyProject):
 
         regex = '|'.join(matches)
 
+        res = []
         if regex:
-            res = self.install_files(self.lib_path, self.install_path, regex)
-        else:
-            res = []
+            for path in libext.ABS_LIBPATH:
+                res += self.install_files(path, self.install_path, regex)
 
         return res
 

@@ -303,12 +303,21 @@ class LibextProject(ConstructibleRacyProject):
         all_deps    = self.source_rec_deps
         indirect_deps = set(all_deps) - set(self.source_deps)
 
+        ld_var = {
+               "linux"  : 'LD_LIBRARY_PATH'  ,
+               "darwin" : 'DYLD_LIBRARY_PATH',
+               "windows": 'PATH'             ,
+               }
+        ld_var = ld_var[racy.renv.system()]
+
+        env.PrependENVPath('PATH', [ opjoin(dep.local_dir, 'bin') for dep in all_deps ])
+        env.PrependENVPath(ld_var, [ opjoin(dep.local_dir, 'lib') for dep in all_deps ])
+
         keys_deps = (
                 ('DIRECT_DEP'  , direct_deps),
                 ('INDIRECT_DEP', indirect_deps),
                 ('DEP'         , all_deps),
                 )
-
 
         if self.compiler.startswith('cl'):
             inc_opt = ' /I'
@@ -360,6 +369,7 @@ class LibextProject(ConstructibleRacyProject):
                     'VERSION_DASHED'      : prj.version.dashed      ,
                     'VERSION_DOTTED'      : prj.version.dotted      ,
                     'VERSION_UNDERSCORED' : prj.version.underscored ,
+                    '_VERSION_'           : prj.version.underscored ,
                     #'LIBEXT_INCLUDE_PATH' : os.pathsep.join(prj.deps_include_path),
                     #'LIBEXT_LIBRARY_PATH' : os.pathsep.join(prj.deps_lib_path),
                     'CURRENT_PROJECT'     : self.name      ,
@@ -392,7 +402,6 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['winlinesep']  = lambda s:s.replace(os.linesep,'\r\n')
         kwargs['unixlinesep'] = lambda s:s.replace(os.linesep,'\n')
 
-        kwargs['_VERSION_'] = prj.version.replace('.','_')
         kwargs['SYSTEM']    = racy.renv.platform()
         kwargs['COMPILER']  = str(prj.compiler)
         kwargs['NOW']     = time.ctime()

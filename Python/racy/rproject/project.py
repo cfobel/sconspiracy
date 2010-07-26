@@ -785,7 +785,10 @@ class RacyProject(object):
         if self.type in TYPE_ALLEXEC:
             install_dir = renv.dirs.install_bin
         elif self.type in TYPE_ALLLIB + BINLIBEXT:
-            install_dir = renv.dirs.install_lib
+            if racy.renv.system() == "windows":
+                install_dir = renv.dirs.install_bin
+            else:
+                install_dir = renv.dirs.install_lib
         elif self.type in TYPE_ALLBUNDLE:
             install_dir = pathjoin(renv.dirs.install_bundle,
                     self.versioned_name)
@@ -1229,6 +1232,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
         result.sort(key=abspath_key)
         alias = 'install-{prj.type}-{prj.full_name}'
         result = env.Alias (alias.format(prj=self), result)
+
         return result
         
     def generate_pkg_files(self):
@@ -1282,11 +1286,20 @@ class ConstructibleRacyProject(InstallableRacyProject):
     def install_pkg(self):
         env = self.env
         res = super(ConstructibleRacyProject,self).install_pkg()
-        libs = self.result(deps_results=False)
+        alllibs = self.result(deps_results=False)
+
+        libs = alllibs
+        bins = alllibs
+
+        if racy.renv.system() == "windows":
+            libs = [ lib for lib in alllibs if lib.get_path().endswith('.lib')]
+        bins = [lib for lib in alllibs if lib not in libs]
 
         pkg_path = self.install_pkg_path
         lib      = pathjoin(pkg_path, constants.LIB_PATH)
+        bin      = pathjoin(pkg_path, constants.BIN_PATH)
         res     += env.Install(dir = lib, source = libs)
+        res     += env.Install(dir = bin, source = bins)
         res     += self.generate_pkg_files()
         return res
 

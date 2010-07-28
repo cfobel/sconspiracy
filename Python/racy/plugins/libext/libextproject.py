@@ -70,9 +70,15 @@ class ConfigureWrapper(CommandWrapper):
         ENV['CXXFLAGS']  += ' ' + kwargs.get('CXXFLAGS','')
         ENV['CFLAGS']    += ' ' + kwargs.get('CFLAGS','')
         ENV['LINKFLAGS'] += ' ' + kwargs.get('LINKFLAGS','')
-        ENV['CXXFLAGS']  += ' -I'.join([''] + prj.deps_include_path)
-        ENV['CFLAGS']    += ' -I'.join([''] + prj.deps_include_path)
-        ENV['LINKFLAGS'] += ' -L'.join([''] + prj.deps_lib_path)
+        ENV['CXXFLAGS']  += '${DEPS_INCLUDE_FLAGS}'
+        ENV['CFLAGS']    += '${DEPS_INCLUDE_FLAGS}'
+        ENV['LINKFLAGS'] += '${DEPS_LIB_FLAGS}'
+        #ENV['CXXFLAGS']  += ' -I'.join([''] + prj.deps_include_path)
+        #ENV['CFLAGS']    += ' -I'.join([''] + prj.deps_include_path)
+        #ENV['LINKFLAGS'] += ' -L'.join([''] + prj.deps_lib_path)
+        ENV['CXXFLAGS']  = prj.env.subst(ENV['CXXFLAGS'])
+        ENV['CFLAGS']    = prj.env.subst(ENV['CFLAGS'])
+        ENV['LINKFLAGS'] = prj.env.subst(ENV['LINKFLAGS'])
 
         ARGS = kwargs.setdefault('ARGS', [])
         ARGS.append('--prefix=${LOCAL_DIR}')

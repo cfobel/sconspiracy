@@ -8,29 +8,3 @@
 #    'fwData'           : 'trace',
 #}
 
-class Overider(object):
-    def __init__(self,level='trace',specific_values={}):
-        self.level = level
-        self.specific_values = specific_values
-
-    def __getitem__(self, item):
-        return self.specific_values.get(item,self.level)
-    def get(self,item, default=None):
-        return self.specific_values.get(item,self.level)
-    def has_key(self,*args):
-        return true
-
-#LOGLEVEL = Overider('trace')
-#LOGLEVEL = Overider('warning')
-
-#LOGLEVEL = {
-#    'ARSurgCtrl'       : 'trace',
-#    'fwData'           : 'warning',
-#    'fwTools'          : 'warning',
-#    'videoModelRender' : 'trace',
-#    'vtkNegato'        : 'trace',
-#    'vtkVR'            : 'info',
-#}
-
-#disable every User's defined LOGLEVELs
-#del LOGLEVEL

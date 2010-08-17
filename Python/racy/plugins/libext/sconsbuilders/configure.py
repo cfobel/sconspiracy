@@ -5,6 +5,9 @@ import SCons
 
 import command
 
+class ConfigureNotFound(SCons.Warnings.Warning):
+    pass
+
 def find_configure_path(_dir):
     path = None
     for root, dirs, files in os.walk(_dir):
@@ -18,6 +21,11 @@ def Configure(target, source, env):
     assert len(source) == 1
 
     configure_dir = find_configure_path(source[0].get_abspath())
+    if not configure_dir:
+        msg = "Could not find configure script in {0} dir."
+        raise SCons.Errors.StopError(
+            ConfigureNotFound, msg.format(source[0].get_abspath()) )
+
 
     return command.Command( target, source, env,
                             command = 'configure',

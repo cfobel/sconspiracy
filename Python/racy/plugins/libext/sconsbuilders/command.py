@@ -16,13 +16,21 @@ def CommandArgs(target, source, env, command=None):
     return args
 
 
-def Command(target, source, env, command = None, pwd = None, lookup_path = None):
+def Command(target, source, env, **kwargs
+        #command = None, pwd = None, lookup_path = None,
+        #stdout = 'STDOUT'
+        ):
     """Builder that execute an arbitrary command in the source dir.
     The target file is a marker to help SCons to know about the command
     execution state(failed, succes, last execution)
     """
     assert len(source) == 1
     assert len(target) == 1
+
+    command     = kwargs.get('command',None)
+    pwd         = kwargs.get('pwd',None)
+    lookup_path = kwargs.get('lookup_path',None)
+    stdout      = env.get('stdoutfile','STDOUT')
 
     if pwd is None:
         pwd = os.path.abspath(source[0].get_abspath())
@@ -35,7 +43,8 @@ def Command(target, source, env, command = None, pwd = None, lookup_path = None)
     if lookup_path is None:
         lookup_path = [pwd]
 
-    returncode = SubProcessBuilder(env, command, args, pwd, lookup_path)
+    returncode = SubProcessBuilder(env, command, args,
+            pwd, lookup_path, stdout)
 
     if not returncode:
         for t in target:

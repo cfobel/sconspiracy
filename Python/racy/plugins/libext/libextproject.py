@@ -56,6 +56,9 @@ class CommandWrapper(BuilderWrapper):
     def builder(self, options, pwd, **kwargs):
         kwargs = self.builder_args(options, pwd, **kwargs)
         scons_builder = getattr(self.prj.env, self.builder_name)
+        if not pwd:
+            msg = "{0}: missing or invalid pwd."
+            racy.RacyPluginError, msg.format(self.__class__.__name__)
         return scons_builder(**kwargs)
 
 

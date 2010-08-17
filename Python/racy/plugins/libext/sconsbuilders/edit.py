@@ -6,6 +6,7 @@ import re
 import os
 import SCons.Node
 import StringIO
+import functools
 
 def apply_expression(expr, source, target):
     # inspired from http://code.activestate.com/recipes/437932/
@@ -42,7 +43,7 @@ def EditArgs(target, source, env):
     files = map(env.subst, files)
     expr = []
     expr.extend(env.get('EXPR',[]))
-    expr = map(env.subst, expr)
+    expr = map(functools.partial(env.subst, raw=1), expr)
     return files, expr
 
 def Edit(target, source, env):

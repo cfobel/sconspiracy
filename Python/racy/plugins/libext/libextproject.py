@@ -312,13 +312,7 @@ class LibextProject(ConstructibleRacyProject):
         all_deps    = self.source_rec_deps
         indirect_deps = set(all_deps) - set(self.source_deps)
 
-        ld_var = {
-               "linux"  : 'LD_LIBRARY_PATH'  ,
-               "darwin" : 'DYLD_LIBRARY_PATH',
-               "windows": 'PATH'             ,
-               }
-        ld_var = ld_var[racy.renv.system()]
-
+        ld_var = racy.renv.LD_VAR
         env.PrependENVPath('PATH', [ opjoin(dep.local_dir, 'bin') for dep in all_deps ])
         env.PrependENVPath(ld_var, [ opjoin(dep.local_dir, 'lib') for dep in all_deps ])
 

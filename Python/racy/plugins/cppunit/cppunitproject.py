@@ -139,14 +139,7 @@ class CppUnitProject(ConstructibleRacyProject):
             dirs = racy.renv.dirs
             install_lib = opjoin(dirs.install,"lib")
 
-            env_var = {
-                    "linux"  : 'LD_LIBRARY_PATH'  ,
-                    "darwin" : 'DYLD_LIBRARY_PATH',
-                    "windows": 'PATH'             ,
-                    }
-            env_var = env_var[racy.renv.system()]
-
-            run_env.AppendENVPath(env_var, install_lib)
+            run_env.AppendENVPath(racy.renv.LD_VAR, install_lib)
             execpath = res[0].children()[0].abspath
             run_test = run_env.Alias('run'+self.name, res, execpath)
             run_env.Depends(run_test, res[0])

@@ -13,6 +13,7 @@ import racy
 from racy.renv import constants
 from racy      import renv
 from racy      import rutils
+from racy      import rlibext
 
 
 import re
@@ -98,6 +99,20 @@ class Plugin(racy.rplugins.Plugin):
         env.Depends(sources, uic)
         env.Append(CPPPATH = inc_build_dir(prj))
 
-        env.Append(CPPDEFINES=['QT_SHARED','QT_WEBKIT_LIB','QT_GUI_LIB','QT_CORE_LIB',
-            '_REENTRANT', 'QT_NO_DEBUG'])
+        #env.Append(CPPDEFINES=[
+            #'QT_SHARED',
+            #'QT_WEBKIT_LIB',
+            #'QT_GUI_LIB',
+            #'QT_CORE_LIB',
+            #'_REENTRANT',
+            #'QT_NO_DEBUG',
+            #])
+
+        zlib = rlibext.register.get_lib_for_prj('z', prj)
+
+        lib_path = zlib.ABS_BINPATH if racy.renv.is_windows() else zlib.ABS_LIBPATH
+        env.PrependENVPath(
+                racy.renv.LD_VAR,
+                [ os.path.join(*dir) for dir in lib_path ]
+                )
         return []

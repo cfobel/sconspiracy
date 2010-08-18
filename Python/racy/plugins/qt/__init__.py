@@ -83,6 +83,11 @@ class Plugin(racy.rplugins.Plugin):
         env['QT4_RCCCOM']   = '$QT4_RCC $QT4_QRCFLAGS $SOURCE -o $TARGET -name ${SOURCE.filebase}'
         env['QT4_AUTOSCAN'] = 0
 
+        zlib = rlibext.register.get_lib_for_prj('z', prj)
+
+        lib_path = zlib.ABS_LIBPATH
+        env.PrependENVPath( racy.renv.LD_VAR, lib_path, )
+
         uic = [ env.Uic4(ui)  for ui  in ui_sources(prj) ]
         moc = [ env.Moc4(inc) for inc in includes(prj)   ]
         qrc = [ env.Qrc(rc)   for rc  in qressources(prj) ]
@@ -108,11 +113,5 @@ class Plugin(racy.rplugins.Plugin):
             #'QT_NO_DEBUG',
             #])
 
-        zlib = rlibext.register.get_lib_for_prj('z', prj)
 
-        lib_path = zlib.ABS_BINPATH if racy.renv.is_windows() else zlib.ABS_LIBPATH
-        env.PrependENVPath(
-                racy.renv.LD_VAR,
-                [ os.path.join(*dir) for dir in lib_path ]
-                )
         return []

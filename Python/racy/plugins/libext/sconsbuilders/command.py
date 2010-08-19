@@ -16,10 +16,7 @@ def CommandArgs(target, source, env, command=None):
     return args
 
 
-def Command(target, source, env, **kwargs
-        #command = None, pwd = None, lookup_path = None,
-        #stdout = 'STDOUT'
-        ):
+def Command(target, source, env, **kwargs):
     """Builder that execute an arbitrary command in the source dir.
     The target file is a marker to help SCons to know about the command
     execution state(failed, succes, last execution)

@@ -88,6 +88,8 @@ def generate(env):
     # print [v.version for v in vs.get_installed_visual_studios()]
     versions_list = vc.cached_get_installed_vcs()
     if MSVC_VERSION not in versions_list:
+        MSVC_VERSION += 'Exp'
+    if MSVC_VERSION not in versions_list:
         msg = ('VC version {ver} not installed.'
               ' Availables versions are : {list}')
         msg = msg.format(ver = MSVC_VERSION, list=versions_list)
@@ -112,7 +114,7 @@ def generate(env):
 
     env['TOOLINFO'] = {}
     env['TOOLINFO']['NAME']    = 'cl'
-    env['TOOLINFO']['VERSION'] = MSVC_VERSION
+    env['TOOLINFO']['VERSION'] = MSVC_VERSION.replace('Exp','')
 
 
 

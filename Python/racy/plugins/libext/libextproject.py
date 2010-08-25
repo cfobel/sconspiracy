@@ -427,6 +427,11 @@ class LibextProject(ConstructibleRacyProject):
         result = []
         prj.configure_env()
         prj.prj_locals['generate']()
+        
+        #import defined strings and functions from generate method
+        for k,v in self.ENV.items():
+            if isinstance(v, basestring) or callable(v):
+                env[k] = v
 
         res = [
                 self.MkdirBuilder('${LOCAL_DIR}'),

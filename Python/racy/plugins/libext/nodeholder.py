@@ -41,3 +41,8 @@ class NodeHolder(object):
             res = map(unwrap_filter, iterable)
 
         return res
+
+    def __getattr__(self, attr):
+        assert len(self._node) == 1
+        attr = getattr(self._node[0], attr)
+        return attr

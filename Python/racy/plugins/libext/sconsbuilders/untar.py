@@ -14,9 +14,10 @@ def UnTarEmitter(target, source, env):
 
 def UnTar(target, source, env):
     import tarfile
-    sourceTar = tarfile.open(source[0].get_abspath(),'r')
-    sourceTar.extractall(path=target[0].get_abspath())
-    sourceTar.close()
+    for s in source:
+        sourceTar = tarfile.open(s.get_abspath(),'r')
+        sourceTar.extractall(path=target[0].get_abspath())
+        sourceTar.close()
     return None
 
 def UnTarString(target, source, env):

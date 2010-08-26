@@ -3,6 +3,8 @@
 import os
 import SCons.Node
 
+from racy.rutils import is_iterable
+
 def UnZipEmitter(target, source, env):
     assert len(target) <= 1 # Until multiple target is managed
 
@@ -14,9 +16,10 @@ def UnZipEmitter(target, source, env):
 
 def UnZip(target, source, env):
     import zipfile
-    sourceZip = zipfile.ZipFile(source[0].get_abspath(),'r')
-    sourceZip.extractall(path=target[0].get_abspath())
-    sourceZip.close()
+    for s in source:
+        sourceZip = zipfile.ZipFile(s.get_abspath(),'r')
+        sourceZip.extractall(path=target[0].get_abspath())
+        sourceZip.close()
     return None
 
 def UnZipString(target, source, env):

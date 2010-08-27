@@ -211,7 +211,7 @@ class LibextProject(ConstructibleRacyProject):
         functions = {
                 'WhereIs'         : WhereIsWrapper(self),
                 'AppendENVPath'   : AppendENVPathWrapper(self),
-                'PreprendENVPath' : PreprendENVPathWrapper(self),
+                'PreprendENVPath' : PrependENVPathWrapper(self),
                 'SetENVPath'      : SetENVPathWrapper(self),
                 }
         generate_functions.update(functions)

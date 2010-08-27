@@ -178,7 +178,8 @@ class SetENVPathWrapper(object):
         self.prj = prj
     def __call__(self, name, newpath):
         subst = self.prj.env.subst
-        return self.prj.env['ENV'][name] = subst(newpath)
+        self.prj.env['ENV'][name] = subst(newpath)
+        return None
 
 
 class LibextProject(ConstructibleRacyProject):

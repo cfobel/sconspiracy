@@ -163,6 +163,24 @@ class AppendENVPathWrapper(object):
         return self.prj.env.AppendENVPath(*subst(args), **kwargs)
 
 
+class PrependENVPathWrapper(object):
+    def __init__(self, prj):
+        self.prj = prj
+    def __call__(self, *args, **kwargs):
+        subst = self.prj.env.subst
+        for k,v in kwargs.items():
+            kwargs[k] = subst(v)
+        return self.prj.env.PrependENVPath(*subst(args), **kwargs)
+
+
+class SetENVPathWrapper(object):
+    def __init__(self, prj):
+        self.prj = prj
+    def __call__(self, name, newpath):
+        subst = self.prj.env.subst
+        return self.prj.env['ENV'][name] = subst(newpath)
+
+
 class LibextProject(ConstructibleRacyProject):
     LIBEXT    = ('libext', )
 
@@ -190,8 +208,10 @@ class LibextProject(ConstructibleRacyProject):
             bld.subscribe_to(generate_functions)
 
         functions = {
-                'WhereIs' : WhereIsWrapper(self),
-                'AppendENVPath' : AppendENVPathWrapper(self),
+                'WhereIs'         : WhereIsWrapper(self),
+                'AppendENVPath'   : AppendENVPathWrapper(self),
+                'PreprendENVPath' : PreprendENVPathWrapper(self),
+                'SetENVPath'      : SetENVPathWrapper(self),
                 }
         generate_functions.update(functions)
 

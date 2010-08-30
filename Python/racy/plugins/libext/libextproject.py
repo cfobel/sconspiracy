@@ -82,6 +82,7 @@ class ConfigureWrapper(CommandWrapper):
         ENV['CXXFLAGS']  = prj.env.subst(ENV['CXXFLAGS'])
         ENV['CFLAGS']    = prj.env.subst(ENV['CFLAGS'])
         ENV['LINKFLAGS'] = prj.env.subst(ENV['LINKFLAGS'])
+        ENV['LDFLAGS'] = ENV['LINKFLAGS']
 
         ARGS = kwargs.setdefault('ARGS', [])
         ARGS.append('--prefix=${LOCAL_DIR}')

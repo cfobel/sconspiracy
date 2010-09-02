@@ -3,9 +3,7 @@
 import os
 import SCons.Node
 
-def write(content, filename):
-    with open(filename, 'w') as f:
-        f.write(content)
+import utils
 
 def WriteArgs(target, source, env):
     files = []
@@ -23,10 +21,11 @@ def Write(target, source, env):
     files, contents = WriteArgs(target, source, env)
 
     for f, c in zip(files, contents):
-        write(c, f)
+        utils.write(c, f)
 
+    assert len(target) == 1
     for t in target:
-        env.Execute(SCons.Script.Touch(t))
+        utils.write_marker(env, t)
 
     return None
 

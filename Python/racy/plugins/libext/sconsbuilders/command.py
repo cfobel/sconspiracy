@@ -3,6 +3,7 @@
 import os
 import SCons
 
+import utils
 
 from subprocessbuilder import SubProcessBuilder, SubProcessString
 
@@ -44,8 +45,9 @@ def Command(target, source, env, **kwargs):
             pwd, lookup_path, stdout)
 
     if not returncode:
+        assert len(target) == 1
         for t in target:
-            env.Execute(SCons.Script.Touch(t))
+            utils.write_marker(env, t)
 
     return returncode
 

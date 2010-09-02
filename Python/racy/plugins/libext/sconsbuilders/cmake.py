@@ -4,6 +4,8 @@ import os
 import SCons
 
 import command
+import utils
+
 from subprocessbuilder import SubProcessBuilder, SubProcessString
 
 def find_cmake_path(_dir):

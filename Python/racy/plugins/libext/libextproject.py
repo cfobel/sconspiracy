@@ -13,7 +13,6 @@ import SCons.Defaults
 import SCons.Node
 
 from os.path import join as opjoin
-from hashlib import md5
 
 import racy
 
@@ -22,22 +21,12 @@ from racy.renv       import constants
 from racy.rproject   import ConstructibleRacyProject, LibName
 from racy.rutils     import cached_property, memoize, run_once
 
-import sconsbuilders
-import sconsbuilders.url
+from sconsbuilders.utils import marker
 
 from libexterror    import LibextError
 from nodeholder     import NodeHolder
 from builderwrapper import BuilderWrapper
 
-def marker(command, prj, options):
-    res = '{dir}/{cmd}_{prj}_{hash}'
-    res = res.format(
-            dir  = '${BUILD_DIR}/',
-            cmd  = command,
-            prj  = prj,
-            hash = md5(' '.join(options)).hexdigest(),
-            )
-    return res
 
 class CommandWrapper(BuilderWrapper):
 
@@ -406,13 +395,15 @@ class LibextProject(ConstructibleRacyProject):
 
         if self.is_debug:
             BuildType = 'Debug'
-            kwargs['IS_DEBUG']   = True
-            kwargs['DEBUG_FLAG'] = 'd'
-            kwargs['DEBUGONOFF'] = 'on'
-            kwargs['DEBUGYESNO'] = 'yes'
+            kwargs['IS_DEBUG']     = True
+            kwargs['DEBUG_FLAG']   = 'd'
+            kwargs['RELEASE_FLAG'] = ''
+            kwargs['DEBUGONOFF']   = 'on'
+            kwargs['DEBUGYESNO']   = 'yes'
         else:
             BuildType = 'Release'
             kwargs['IS_DEBUG']     = False
+            kwargs['DEBUG_FLAG']   = ''
             kwargs['RELEASE_FLAG'] = 'r'
             kwargs['DEBUGONOFF']   = 'off'
             kwargs['DEBUGYESNO']   = 'no'

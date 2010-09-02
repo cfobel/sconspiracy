@@ -4,6 +4,7 @@ import os
 import SCons.Node
 import shutil
 
+import utils
 
 def CopyArgs(target, source, env):
     args = []
@@ -22,8 +23,9 @@ def Copy(target, source, env):
     for s in src:
         env.Execute(SCons.Script.Copy(dst, s))
 
+    assert len(target) == 1
     for t in target:
-        env.Execute(SCons.Script.Touch(t))
+        utils.write_marker(env, t)
 
     return None
 

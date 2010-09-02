@@ -2,11 +2,13 @@
 
 # imported for disponibility in builder's expressions
 import re
-
 import os
+
 import SCons.Node
 import StringIO
 import functools
+
+import utils
 
 def apply_expression(expr, source, target, mode='eval'):
     # inspired from http://code.activestate.com/recipes/437932/
@@ -36,7 +38,7 @@ def apply_expression(expr, source, target, mode='eval'):
                 'num'   : numz + 1,
                 'words' : [w for w in line.strip().split(' ') if w],
                 })
-            result = callback(codeobj, globals(), locals_vars)
+            result = callback(codeobj, {'os':os, 're':re}, locals_vars)
             if result is None or result is False:
                 continue
             elif isinstance(result, list) or isinstance(result, tuple):
@@ -74,8 +76,9 @@ def Edit(target, source, env):
         for e in expr:
             apply_expression(e, f, f)
 
+    assert len(target) == 1
     for t in target:
-        env.Execute(SCons.Script.Touch(t))
+        utils.write_marker(env, t)
 
     return None
 

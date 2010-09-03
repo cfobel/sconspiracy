@@ -74,7 +74,7 @@ def Edit(target, source, env):
 
     for f in files:
         for e in expr:
-            apply_expression(e, f, f)
+            apply_expression(e, f, f, mode)
 
     assert len(target) == 1
     for t in target:

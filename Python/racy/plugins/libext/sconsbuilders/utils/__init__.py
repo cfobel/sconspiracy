@@ -17,7 +17,7 @@ markers = {}
 def marker(command, prj, options):
     res      = '{dir}/{file}'
     cmd      = '{cmd}_{prj}_{hash}'
-    info     = '{prj}\n{cmd} {opt}'
+    info     = '{prj}\n\n{cmd} {opt}'
     options  = ' '.join(options)
     digest   = md5(options).hexdigest()
     filename = cmd.format(
@@ -40,9 +40,10 @@ def marker(command, prj, options):
 
 def write_marker(env, filename):
     content = '{info}\n\n---ENV---\n{env}\n---------'
+    info = markers.get(filename.name, 'Unknown ??')
     content = content.format(
-            info = markers.get(filename.name, 'Unknown ??'),
-            env = pprint.pformat(env.Dictionary())
+            info = env.subst(info, raw=1),
+            env  = pprint.pformat(env.Dictionary())
             )
     write(content, filename.get_abspath())
     #env.Execute(SCons.Script.Touch(filename))

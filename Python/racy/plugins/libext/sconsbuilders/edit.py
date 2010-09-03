@@ -7,11 +7,13 @@ import os
 import SCons.Node
 import StringIO
 import functools
+import textwrap
 
 import utils
 
 def apply_expression(expr, source, target, mode='eval'):
     # inspired from http://code.activestate.com/recipes/437932/
+    expr = textwrap.dedent(expr)
     codeobj = compile(expr, 'EditBuilder', mode)
     output = StringIO.StringIO()
 

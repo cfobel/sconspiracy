@@ -487,6 +487,19 @@ class LibextProject(ConstructibleRacyProject):
         res = self.result(build_deps)
         return res
 
+    @cached_property
+    def install_nodes(self):
+        prj = self
+        env = self.env
+        initmodel = opjoin(prj.rc_path,'__init__.py')
+        if os.path.isfile(initmodel):
+            content  = rutils.get_file_content(initmodel)
+            initfile = opjoin(prj.local_dir, '__init__.py')
+            write    = prj.WriteBuilder(initfile, content)
+            copy  = prj.CopyBuilder('${LOCAL_DIR}', prj.install_pkg_path)
+            env.Depends(copy, write)
+        return [copy, write]
+
     @memoize
     def install (self, opts = ['rc','deps']):
         prj = self
@@ -495,17 +508,9 @@ class LibextProject(ConstructibleRacyProject):
         install_deps = 'deps' in opts
         result = prj.build(build_deps=install_deps)
 
-        initmodel = opjoin(prj.rc_path,'__init__.py')
-        if os.path.isfile(initmodel):
-            content  = rutils.get_file_content(initmodel)
-            initfile = opjoin(prj.local_dir, '__init__.py')
-            write    = prj.WriteBuilder(initfile, content)
-            copy  = prj.CopyBuilder('${LOCAL_DIR}', prj.install_pkg_path)
-            env.Depends(copy, write)
-            env.Depends(write, result)
-            result = copy
-            #result = write
-
+        nodes = self.install_nodes
+        env.Depends(nodes, result)
+        result = nodes
 
         alias = 'install-{prj.type}-{prj.full_name}'
         result = env.Alias (alias.format(prj=prj), result)

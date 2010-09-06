@@ -413,12 +413,12 @@ class LibextProject(ConstructibleRacyProject):
         kwargs['buildtype'] = BuildType.lower()
         kwargs['lower'] = str.upper
         kwargs['upper'] = str.lower
-        kwargs['winpathsep']  = lambda s:s.replace(os.pathsep,';')
-        kwargs['unixpathsep'] = lambda s:s.replace(os.pathsep,':')
-        kwargs['winsep']  = lambda s:s.replace(os.sep,'\\')
-        kwargs['unixsep'] = lambda s:s.replace(os.sep,'/')
-        kwargs['winlinesep']  = lambda s:s.replace(os.linesep,'\r\n')
-        kwargs['unixlinesep'] = lambda s:s.replace(os.linesep,'\n')
+        kwargs['winpathsep']  = lambda s:s.replace(':',';')
+        kwargs['unixpathsep'] = lambda s:s.replace(';',':')
+        kwargs['winsep']      = lambda s:s.replace('/','\\')
+        kwargs['unixsep']     = lambda s:s.replace('\\','/')
+        kwargs['winlinesep']  = lambda s:s.replace('\n','\r\n')
+        kwargs['unixlinesep'] = lambda s:s.replace('\r\n','\n')
 
         kwargs['SYSTEM']    = racy.renv.platform()
         kwargs['COMPILER']  = str(prj.compiler)

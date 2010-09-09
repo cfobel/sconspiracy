@@ -1,6 +1,7 @@
 
 import SCons
 import pprint
+import os
 
 from hashlib import md5
 
@@ -38,7 +39,7 @@ def marker(command, prj, options):
 
 ###############################################################################
 
-def write_marker(env, filename, **kwargs):
+def write_marker(env, filename, fileprefix=None, **kwargs):
     separator = '='*79 + '\n'
     content = [ 
             '{info}',
@@ -58,5 +59,12 @@ def write_marker(env, filename, **kwargs):
             sep  = separator,
             **kwargs
             )
-    write(content, filename.get_abspath())
+    filepath = filename.get_abspath()
+
+    if fileprefix:
+        filedir = os.path.dirname(filepath)
+        filebase = os.path.basename(filepath)
+        filepath = os.path.join(filedir, fileprefix + filepath)
+
+    write(content, filepath)
 

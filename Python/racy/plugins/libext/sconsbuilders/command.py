@@ -45,9 +45,14 @@ def Command(target, source, env, **kwargs):
 
     assert len(target) == 1
     marker_file = target[0]
+
+    marker_extra = {
+            'stdout' : stdout,
+            'stderr' : stderr,
+            }
     if returncode:
-        marker_file = "error.{0}.{1}".format(returncode, marker_file)
-    utils.write_marker(env, marker_file, stdout=stdout, stderr=stderr)
+        marker_extra['fileprefix'] = "error.{0}".format(returncode)
+    utils.write_marker(env, marker_file, **marker_extra)
 
     return returncode
 

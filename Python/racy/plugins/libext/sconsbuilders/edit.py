@@ -93,8 +93,8 @@ def Edit(target, source, env):
         marker_extra['diff'] = ('-'*79 + '\n').join(diffs)
         
     except Exception, e:
-        marker_file = "error.{0}".format(marker_file)
-        marker_extra['exception'] = str(e)
+        marker_extra['fileprefix'] = "error."
+        marker_extra['exception']  = str(e)
     finally:
         utils.write_marker(env, marker_file, **marker_extra)
 

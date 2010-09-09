@@ -64,7 +64,7 @@ def write_marker(env, filename, fileprefix=None, **kwargs):
     if fileprefix:
         filedir = os.path.dirname(filepath)
         filebase = os.path.basename(filepath)
-        filepath = os.path.join(filedir, fileprefix + filepath)
+        filepath = os.path.join(filedir, fileprefix + filebase)
 
     write(content, filepath)
 

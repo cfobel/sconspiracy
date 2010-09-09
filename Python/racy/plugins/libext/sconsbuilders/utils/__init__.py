@@ -38,13 +38,25 @@ def marker(command, prj, options):
 
 ###############################################################################
 
-def write_marker(env, filename):
-    content = '{info}\n\n---ENV---\n{env}\n---------'
-    info = markers.get(filename.name, 'Unknown ??')
+def write_marker(env, filename, **kwargs):
+    separator = '='*79 + '\n'
+    content = [ 
+            '{info}',
+            '{sep}ENV:\n{sep}{env}',
+            ]
+    content.extend([''.join(['{sep}',k,':\n{sep}{',k,'}']) for k in kwargs])
+    content = '\n\n'.join(content)
+
+    for k,v in kwargs.items():
+        if not v:
+            kwargs[k] = '<empty>'
+
+    info = markers.get(filename.name, '<No informations available>')
     content = content.format(
             info = env.subst(info, raw=1),
-            env  = pprint.pformat(env.Dictionary())
+            env  = pprint.pformat(env.Dictionary()),
+            sep  = separator,
+            **kwargs
             )
     write(content, filename.get_abspath())
-    #env.Execute(SCons.Script.Touch(filename))
 

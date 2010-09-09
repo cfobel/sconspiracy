@@ -8,6 +8,7 @@ import SCons.Node
 import StringIO
 import functools
 import textwrap
+import difflib
 
 import utils
 
@@ -25,7 +26,8 @@ def apply_expression(expr, source, target, mode='eval'):
         return eval(_codeobj, _globals, _locals)
 
     with open(source, 'rb') as f:
-        input = enumerate(f)
+        input_lines = list(f)
+        input = enumerate(input_lines)
 
         write = output.write
         locals_vars = {}
@@ -52,9 +54,12 @@ def apply_expression(expr, source, target, mode='eval'):
                 write('\n')
 
     output.seek(0)
+    output_lines = output.readlines()
     with open(target, 'wb') as f:
-        f.writelines(output.readlines())
+        f.writelines(output_lines)
 
+    return difflib.context_diff(input_lines, output_lines,
+            fromfile=source, tofile='<Edited> '+source)
 
 def EditArgs(target, source, env):
     files = []
@@ -71,16 +76,27 @@ def Edit(target, source, env):
     # builder on the same source/target (or the source may be the target), 
     # that's not possible for scons
     
-
-    files, expr, mode = EditArgs(target, source, env)
-
-    for f in files:
-        for e in expr:
-            apply_expression(e, f, f, mode)
-
     assert len(target) == 1
-    for t in target:
-        utils.write_marker(env, t)
+    marker_file = target[0]
+    marker_extra = {}
+
+    try:
+        files, expr, mode = EditArgs(target, source, env)
+        diffs = []
+
+        diff_fmt = '{0}\n--\n{1}\n--\n{2}'
+        for f in files:
+            for e in expr:
+                diff = apply_expression(e, f, f, mode)
+                diffs.append(diff_fmt.format(f,e,''.join(list(diff))))
+
+        marker_extra['diff'] = ('-'*79 + '\n').join(diffs)
+        
+    except Exception, e:
+        marker_file = "error.{0}".format(marker_file)
+        marker_extra['exception'] = str(e)
+    finally:
+        utils.write_marker(env, marker_file, **marker_extra)
 
     return None
 

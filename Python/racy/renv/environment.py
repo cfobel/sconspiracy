@@ -55,7 +55,7 @@ class Environment(Env):
         Env.__init__(self, *args, **kwargs)
 
 
-        act = self.Action( CopyBuilder, "Install file '$$SOURCE' as '$$TARGET'")
+        act = self.Action( CopyBuilder, "Install '$$SOURCE' as '$$TARGET'")
         self.__CopyBuilder__ = self.Builder(action = act)
 
         racy.rplugins.register.get_env_addons(self)

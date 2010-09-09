@@ -6,8 +6,6 @@ import SCons
 import command
 import utils
 
-from subprocessbuilder import SubProcessBuilder, SubProcessString
-
 def find_cmake_path(_dir):
     path = None
     for root, dirs, files in os.walk(_dir):

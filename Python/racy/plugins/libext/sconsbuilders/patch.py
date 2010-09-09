@@ -3,9 +3,7 @@
 import os
 import SCons
 
-
 import command
-from subprocessbuilder import SubProcessBuilder, SubProcessString
 
 
 def Patch(target, source, env):

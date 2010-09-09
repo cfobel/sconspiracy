@@ -28,7 +28,6 @@ def Command(target, source, env, **kwargs):
     command     = kwargs.get('command',None)
     pwd         = kwargs.get('pwd',None)
     lookup_path = kwargs.get('lookup_path',None)
-    stdout      = env.get('stdoutfile','STDOUT')
 
     if pwd is None:
         pwd = os.path.abspath(source[0].get_abspath())
@@ -41,13 +40,14 @@ def Command(target, source, env, **kwargs):
     if lookup_path is None:
         lookup_path = [pwd]
 
-    returncode = SubProcessBuilder(env, command, args,
-            pwd, lookup_path, stdout)
+    returncode, stdout, stderr = SubProcessBuilder(env, command, args,
+            pwd, lookup_path)
 
-    if not returncode:
-        assert len(target) == 1
-        for t in target:
-            utils.write_marker(env, t)
+    assert len(target) == 1
+    marker_file = target[0]
+    if returncode:
+        marker_file = "error.{0}.{1}".format(returncode, marker_file)
+    utils.write_marker(env, marker_file, stdout=stdout, stderr=stderr)
 
     return returncode
 

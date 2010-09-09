@@ -13,7 +13,7 @@ class CommandNotFound(SCons.Warnings.Warning):
 
 ###############################################################################
 
-def SubProcessBuilder(env, command, args, pwd, path = [], stdout = 'STDOUT'):
+def SubProcessBuilder(env, command, args, pwd, path = []):
 
     if is_iterable(path):
         path = os.pathsep.join(path)
@@ -31,14 +31,10 @@ def SubProcessBuilder(env, command, args, pwd, path = [], stdout = 'STDOUT'):
 
     environment = dict((k,str(v)) for k,v in env['ENV'].items())
 
-    stdout_is_file = False
-    popen_kwargs   = {}
-    if stdout is None:
-        popen_kwargs['stdout'] = subprocess.PIPE
-    elif stdout is not None and stdout is not 'STDOUT':
-        stdout_is_file = True
-        #exceptions catched by scons
-        popen_kwargs['stdout'] = open(env.subst(stdout), 'w')
+    popen_kwargs = {
+            'stdout' : subprocess.PIPE,
+            'stderr' : subprocess.PIPE,
+            }
 
     process = subprocess.Popen(
                 cmd,
@@ -47,12 +43,9 @@ def SubProcessBuilder(env, command, args, pwd, path = [], stdout = 'STDOUT'):
                 **popen_kwargs
                 )
 
-    process.communicate()
+    stdout, stderr = process.communicate()
 
-    if stdout_is_file:
-        popen_kwargs['stdout'].close()
-
-    return process.returncode
+    return process.returncode, stdout, stderr
 
 
 ###############################################################################

@@ -68,3 +68,21 @@ def write_marker(env, filename, fileprefix=None, **kwargs):
 
     write(content, filepath)
 
+
+def marker_decorator(func):
+    def decorated(target, source, env, **kwargs):
+        assert len(target) == 1
+        marker_file  = target[0]
+        marker_extra = {}
+        if 'marker_extra' in func.func_code.co_varnames:
+            kwargs['marker_extra'] = marker_extra
+        try:
+            return func(target, source, env, **kwargs)
+        except Exception, e:
+            marker_extra['fileprefix'] = 'error.'
+            marker_extra['exception']  = str(e)
+            raise e
+        finally:
+            write_marker(env, marker_file, **marker_extra)
+
+    return decorated

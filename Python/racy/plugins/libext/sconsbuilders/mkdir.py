@@ -12,14 +12,11 @@ def MkdirArgs(target, source, env):
     return args
 
 
+@utils.marker_decorator
 def Mkdir(target, source, env):
 
     for d in MkdirArgs(target, source, env):
         env.Execute(SCons.Script.Mkdir(env.Dir(d)))
-
-    assert len(target) == 1
-    for t in target:
-        utils.write_marker(env, t)
 
     return None
 

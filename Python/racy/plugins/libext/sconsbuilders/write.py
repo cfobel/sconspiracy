@@ -14,6 +14,8 @@ def WriteArgs(target, source, env):
     contents = map(env.subst, contents)
     return files, contents
 
+
+@utils.marker_decorator
 def Write(target, source, env):
     # we don't use target and source as usual : we may apply several times this
     # builder on the same source/target (or the source may be the target), 
@@ -22,10 +24,6 @@ def Write(target, source, env):
 
     for f, c in zip(files, contents):
         utils.write(c, f)
-
-    assert len(target) == 1
-    for t in target:
-        utils.write_marker(env, t)
 
     return None
 

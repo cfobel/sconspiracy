@@ -71,32 +71,24 @@ def EditArgs(target, source, env):
     mode = env.get('MODE','eval')
     return files, expr, mode
 
-def Edit(target, source, env):
+
+@utils.marker_decorator
+def Edit(target, source, env, marker_extra = {}):
     # we don't use target and source as usual : we may apply several times this
     # builder on the same source/target (or the source may be the target), 
     # that's not possible for scons
     
-    assert len(target) == 1
-    marker_file = target[0]
-    marker_extra = {}
 
-    try:
-        files, expr, mode = EditArgs(target, source, env)
-        diffs = []
+    files, expr, mode = EditArgs(target, source, env)
+    diffs = []
 
-        diff_fmt = '{0}\n--\n{1}\n--\n{2}'
-        for f in files:
-            for e in expr:
-                diff = apply_expression(e, f, f, mode)
-                diffs.append(diff_fmt.format(f,e,''.join(list(diff))))
+    diff_fmt = '{0}\n--\n{1}\n--\n{2}'
+    for f in files:
+        for e in expr:
+            diff = apply_expression(e, f, f, mode)
+            diffs.append(diff_fmt.format(f,e,''.join(list(diff))))
 
-        marker_extra['diff'] = ('-'*79 + '\n').join(diffs)
-        
-    except Exception, e:
-        marker_extra['fileprefix'] = "error."
-        marker_extra['exception']  = str(e)
-    finally:
-        utils.write_marker(env, marker_file, **marker_extra)
+    marker_extra['diff'] = ('-'*79 + '\n').join(diffs)
 
     return None
 

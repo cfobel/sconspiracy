@@ -13,6 +13,7 @@ def CopyArgs(target, source, env):
     return args[:-1], args[-1]
 
 
+@utils.marker_decorator
 def Copy(target, source, env):
 
     src, dst = CopyArgs(target, source, env)
@@ -22,10 +23,6 @@ def Copy(target, source, env):
 
     for s in src:
         env.Execute(SCons.Script.Copy(dst, s))
-
-    assert len(target) == 1
-    for t in target:
-        utils.write_marker(env, t)
 
     return None
 

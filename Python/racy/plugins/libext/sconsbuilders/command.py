@@ -17,7 +17,8 @@ def CommandArgs(target, source, env, command=None):
     return args
 
 
-def Command(target, source, env, **kwargs):
+@utils.marker_decorator
+def Command(target, source, env, marker_extra = {}, **kwargs):
     """Builder that execute an arbitrary command in the source dir.
     The target file is a marker to help SCons to know about the command
     execution state(failed, succes, last execution)
@@ -29,37 +30,26 @@ def Command(target, source, env, **kwargs):
     pwd         = kwargs.get('pwd',None)
     lookup_path = kwargs.get('lookup_path',None)
 
-    try:
-        if pwd is None:
-            pwd = os.path.abspath(source[0].get_abspath())
+    if pwd is None:
+        pwd = os.path.abspath(source[0].get_abspath())
 
-        args = CommandArgs(target, source, env, command)
+    args = CommandArgs(target, source, env, command)
 
-        command = args[0]
-        args = args[1:]
+    command = args[0]
+    args = args[1:]
 
-        if lookup_path is None:
-            lookup_path = [pwd]
+    if lookup_path is None:
+        lookup_path = [pwd]
 
-        returncode, stdout, stderr = SubProcessBuilder(env, command, args,
-                pwd, lookup_path)
+    returncode, stdout, stderr = SubProcessBuilder(env, command, args,
+            pwd, lookup_path)
 
-        assert len(target) == 1
-        marker_file = target[0]
-
-        marker_extra = {
-                'stdout' : stdout,
-                'stderr' : stderr,
-                }
-        if returncode:
-            marker_extra['fileprefix'] = "error.{0}.".format(returncode)
-
-    except Exception, e:
-        marker_extra['fileprefix'] = "error."
-        raise e
-
-    finally:
-        utils.write_marker(env, marker_file, **marker_extra)
+    marker_extra.update({
+            'stdout' : stdout,
+            'stderr' : stderr,
+            })
+    if returncode:
+        marker_extra['fileprefix'] = "error.{0}.".format(returncode)
 
     return returncode
 

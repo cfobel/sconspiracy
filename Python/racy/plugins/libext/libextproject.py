@@ -88,16 +88,16 @@ class CMakeWrapper(CommandWrapper):
     def __call__(self, *args, **kwargs):
         prj = self.prj
 
-        ARGS = kwargs.setdefault('ARGS', [])
-        ARGS.insert(0,'-DCMAKE_PREFIX_PATH:PATH=${winpathsep(DEPS)}')
-        ARGS.append('-DCMAKE_INSTALL_PREFIX:PATH=${LOCAL_DIR}')
         def build_type():
             if prj.is_debug:
                 return 'Debug'
             else:
                 return 'Release'
 
-        ARGS.append('-DCMAKE_BUILD_TYPE:STRING={0}'.format(build_type()))
+        ARGS = kwargs.setdefault('ARGS', [])
+        ARGS.insert(0,'-DCMAKE_BUILD_TYPE:STRING={0}'.format(build_type()))
+        ARGS.insert(0,'-DCMAKE_PREFIX_PATH:PATH=${winpathsep(DEPS)}')
+        ARGS.append('-DCMAKE_INSTALL_PREFIX:PATH=${LOCAL_DIR}')
 
         if racy.renv.is_windows():
             ARGS.insert(0,'NMake Makefiles')

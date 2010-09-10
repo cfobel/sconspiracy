@@ -41,7 +41,7 @@ scons_patterns = [
         ([cerror, cfile, cerror] , ['^.*?', '[^:\] ]+', '[:\]].*(interrupted|failed).*$']),
         ([cerror]                , ['^Build failed$']),
         ([cscons, cfile]         , ['^Removed', ' .*']),
-        ([cscons, cfile, cscons, cfile, cscons] , ['^Install file.+?[\'"]', '.*?', '[\'"].*?[\'"]', '.*?', '[\'"].*$']),
+        ([cscons, cfile, cscons, cfile, cscons] , ['^Install .+?[\'"]', '.*?', '[\'"].*?[\'"]', '.*?', '[\'"].*$']),
 
         # exception header : +-[Error]: PRJError =========
         ([yellow, red, yellow, magenta, yellow], ['^\+-\[', '[^\]]+', '\]: ', '\w+', '.*$']),

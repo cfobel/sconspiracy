@@ -16,6 +16,26 @@ from os.path import join, isfile, normpath
 
 #------------------------------------------------------------------------------
 
+def buffer_generator(file_src, size):
+    """Return a generator returning buffers of 'size' size from file_src
+    stream.
+    """
+    while True:
+        buf = file_src.read(size)
+        if not buf:
+            break
+        yield buf
+
+
+#------------------------------------------------------------------------------
+
+def buffered_copy(file_src, file_dst, buffer_size = 4*1024*1024):
+    for chunk in buffer_generator(file_src, buffer_size):
+        file_dst.write(chunk)
+
+
+#------------------------------------------------------------------------------
+
 def decorator(_decorator):
     """This decorator can be used to turn simple functions
     into well-behaved decorators, so long as the decorators

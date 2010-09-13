@@ -122,7 +122,7 @@ class Url(SCons.Node.Node):
     def write_to_file(self, io, filename, file_mode=''):
         size = 0
         with open(filename, "wb" + file_mode) as local_file:
-            local_file.write(io.read())
+            racy.rutils.buffered_copy(io, local_file)
             size = local_file.tell()
 
         racy.print_msg( 'Downloaded', self.name, size, 'bytes' )
@@ -134,7 +134,7 @@ def Download(target, source, env):
         raise Exception, ("Number of target ({0}) must be equal to the number "
                           "of sources ({1})".format(len(target), len(sources)))
     for s,t in zip(source, target):
-        stream = urllib2.urlopen(s.name)
+        stream = urllib2.urlopen(s.name, timeout=10)
         s.write_to_file(stream, t.get_path(), file_mode='')
         stream.close()
     return None

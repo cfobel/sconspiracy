@@ -14,6 +14,34 @@ import re
 from os.path import join, isfile, normpath
 
 
+#------------------------------------------------------------------------------
+
+def decorator(_decorator):
+    """This decorator can be used to turn simple functions
+    into well-behaved decorators, so long as the decorators
+    are fairly simple. If a decorator expects a function and
+    returns a function (no descriptors), and if it doesn't
+    modify function attributes or docstring, then it is
+    eligible to use this. Simply apply @simple_decorator to
+    your decorator and it will automatically preserve the
+    docstring and function attributes of functions to which
+    it is applied."""
+
+    def copy_attributes(src, dst):
+        if not isinstance(dst, property):
+            dst.__name__ = src.__name__
+            dst.__doc__  = src.__doc__
+            dst.__dict__.update(src.__dict__)
+
+    def new_decorator(f):
+        g = _decorator(f)
+        copy_attributes(f,g)
+        return g
+
+    copy_attributes(_decorator ,new_decorator)
+    return new_decorator
+
+
 
 #------------------------------------------------------------------------------
 def get_re_from_extensions(extensions):
@@ -175,6 +203,7 @@ def tupleize(iterable):
 
 
 #------------------------------------------------------------------------------
+@decorator
 def memoize(f, cache={}):
     """Memoization decorator. Store the computed values in 'cache'. If cache is
     not specified, every results will be store in the same dict (the one in the
@@ -187,10 +216,10 @@ def memoize(f, cache={}):
         if key not in cache:
             cache[key] = f(*args, **kwargs)
         return cache[key]
-    g.__name__ = "@memoize({0})".format(f.__name__)
     return g
 
 
+@decorator
 def cached_property(f):
     """Returns a cached property that is computed by function f. Be carefull
     with setter and deleter uses (they shouldn't be used with a
@@ -208,11 +237,12 @@ def cached_property(f):
 
     func.__name__ = f.__name__
     #p = property(memoize(f)) 
-    # do not memoized anymore for property -> optimized
+    # not memoized anymore for property -> optimized
     p = property(func)
     return p
 
 
+@decorator
 def run_once(f):
     """This decorator ensure that an instance method is executed once
     and return ever the same result, without any regards on arguments
@@ -229,6 +259,7 @@ def run_once(f):
     return func
 
 #------------------------------------------------------------------------------
+@decorator
 def time_it(func):
     """Internal use, class method timing decorator"""
     import time

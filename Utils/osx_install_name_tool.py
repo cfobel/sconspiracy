@@ -48,20 +48,24 @@ def main():
     import sys
 
     usage = "usage: %prog [options] binary_or_dir ..."
+    epilog = """Updates the install names of executable or shared libraries
+    found in argument list (binary_or_dir).
+    """
     parser = OptionParser(usage=usage, epilog="ooo")
     parser.add_option("-e", "--executable-path", dest="exec_path",
-                    help="executable path", metavar="DIR")
+                    help=("specifies the executable path to which the install "
+                        "names will be relocated"), metavar="DIR")
     #parser.add_option("-L", "--library-path", 
     #                action="append", dest="libpath",
     #                help="libraries path", metavar="DIR")
 
     parser.add_option("-p", "--progress",
                   action="store_true", dest="progress", default=False,
-                  help="display progress")
+                  help="show progress")
 
-    parser.add_option("-i", "--list-ignored",
-                  action="store_true", dest="list_ignored", default=False,
-                  help="display ignored libraries")
+    parser.add_option("-i", "--show-ignored",
+                  action="store_true", dest="show_ignored", default=False,
+                  help="show libraries that have not been relocated")
 
     parser.add_option("-v", "--verbose",
                   action="store_true", dest="verbose", default=False,
@@ -123,7 +127,7 @@ def main():
                     verbose(res)
     progress_print('')
 
-    if options.list_ignored:
+    if options.show_ignored:
         ignored = sorted([''] + map(str,ignored))
         print 'ignored libraries:', (os.linesep+'  ').join(ignored)
 

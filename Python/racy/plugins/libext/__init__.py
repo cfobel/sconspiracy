@@ -62,11 +62,15 @@ class Plugin(racy.rplugins.Plugin):
 
     def get_env_addon(self, env):
 
+        from os.path import join, dirname
+        builders_path = join(dirname(__file__), 'sconspiracy')
+
         modules = [
                 'cmake',
                 'command',
                 'configure',
                 'copy',
+                'delete',
                 'edit',
                 'make',
                 'mkdir',

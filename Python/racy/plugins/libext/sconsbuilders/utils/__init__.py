@@ -79,8 +79,10 @@ def marker_decorator(func):
         try:
             return func(target, source, env, **kwargs)
         except Exception, e:
+            from traceback import format_stack
+            tb = ''.join(format_stack())
             marker_extra['fileprefix'] = 'error.'
-            marker_extra['exception']  = str(e)
+            marker_extra['exception'] = '{0}{1}{2}'.format(e.__class__, e, tb)
             raise e
         finally:
             write_marker(env, marker_file, **marker_extra)

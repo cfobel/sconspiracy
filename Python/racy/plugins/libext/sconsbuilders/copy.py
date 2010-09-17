@@ -29,7 +29,7 @@ def Copy(target, source, env):
 def CopyString(target, source, env):
     """ Information string for Copy """
     src, dst = CopyArgs(target, source, env)
-    s = '[${CURRENT_PROJECT}]: copying '+' '.join(src)+' to '+dst
+    s = '[${CURRENT_PROJECT}]: copy '+' '.join(src)+' to '+dst
     return env.subst(s)
 
 

@@ -217,14 +217,9 @@ class LibextProject(ConstructibleRacyProject):
 
     def DeleteBuilder(self, file, **kwargs):
         env = self.env
-        sub = env.subst
-        return env.Command(
-                env.Value("Delete " + sub(file)),
-                [],
-                [SCons.Defaults.Delete(file, must_exist=1)],
-                target_factory=env.Value,
-                **kwargs
-                )
+        args = [file]
+        res = env.LibextDelete([marker('Delete',self.full_name, args)], [], ARGS=args)
+        return res
 
 
     def CopyBuilder(self, source, to, **kwargs):

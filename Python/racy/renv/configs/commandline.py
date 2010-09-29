@@ -29,6 +29,7 @@ ALLOWED_COMMANDLINE_OPTIONS = [
         ]
 
 ALLOWED_COMMANDLINE_PRJ_OPTIONS = [
+        'JOBS_LIMIT'      ,
         'LOGLEVEL'        ,
         'BUILD'           ,
         'BUILDDEPS'       ,
@@ -41,6 +42,8 @@ COMMANDLINE_OPTIONS_DESC = {
         'ARCH'              : 'Architecture destination'                            ,
         'DEBUG'             : 'Debug mode'                                          ,
         'RACY_DEBUG'        : 'Switch SConspiracy to debug mode'                    ,
+        'JOBS_LIMIT'        : ('For the specified project, limit the number of'
+                               'simultaneously compiled files'),
         'LOGLEVEL'          : 'Log level'                                           ,
         'OPTIMIZATIONLEVEL' : 'Optimization level'                                  ,
         'WARNINGSASERRORS'  : 'Treat compilation warning as errors '                ,

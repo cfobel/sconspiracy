@@ -21,6 +21,7 @@ TOOL              = 'auto'
 CONFIG            = 'default'
 
 JOBS              = 'auto'
+JOBS_LIMIT        = 0
 
 RACY_DEBUG        = 'no'
 

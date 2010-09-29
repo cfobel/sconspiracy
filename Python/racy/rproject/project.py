@@ -1166,6 +1166,18 @@ class ConstructibleRacyProject(InstallableRacyProject):
                     raise RacyProjectError( prj,
                         'Unknown project TYPE ({prj.type})')
 
+                if prj.get('JOBS_LIMIT'):
+                    limit = prj.get('JOBS_LIMIT')
+                    objsources = result[0].sources
+                    prev = None
+                    for i in range(0, len(objsources), limit):
+                        current = objsources[i: i+limit]
+                        if prev:
+                            env.Depends(current, prev)
+                        prev = objsources[i: i+limit]
+
+
+
             elif not prj.is_bundle:
                 msg = ('Only bundles are allowed to be codeless. '
                         '<{prj.name}> type is "{prj.type}"')

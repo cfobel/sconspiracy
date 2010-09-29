@@ -885,6 +885,13 @@ class InstallableRacyProject(RacyProject):
             for path in libext.ABS_LIBPATH:
                 res += self.install_files(path, self.install_path, regex)
 
+        if not res:
+            if libext.libs_install or libext.LIBS:
+                msg = ( "Nothing to install for {prj.name}, but at least one "
+                        " of the properties <libs> or <libs_install> is not "
+                        "empty.")
+                racy.print_warning("Bin package", msg.format(prj=self))
+
         res = self.env.Alias('install_bin_libext-' + self.full_name, res)
         return res
 

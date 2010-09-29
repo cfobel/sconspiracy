@@ -885,6 +885,7 @@ class InstallableRacyProject(RacyProject):
             for path in libext.ABS_LIBPATH:
                 res += self.install_files(path, self.install_path, regex)
 
+        res = self.env.Alias('install_bin_libext-' + self.full_name, res)
         return res
 
     @memoize
@@ -943,15 +944,18 @@ class InstallableRacyProject(RacyProject):
         if 'pkg' in opts and self.type not in TYPE_ALLBIN:
             result += self.install_pkg()
 
-        bin_results = []
-        for dep in self.bin_rec_deps:
-            bin_results.append( dep.install(opts) )
-
+        bin_deps = 'bin' in opts and 'deps' in opts
+        if bin_deps:
+            bin_results = []
+            for dep in self.bin_rec_deps:
+                bin_results.append( dep.install(opts) )
+            bin_results.sort()
 
         result.sort(key=abspath_key)
         result = env.Alias ('install-' + self.full_name, result)
 
-        env.Depends(result, bin_results)
+        if bin_deps:
+            env.Depends(result, bin_results)
 
         return result
 
@@ -1224,8 +1228,8 @@ class ConstructibleRacyProject(InstallableRacyProject):
             deps_results = []
             deps_results += [dep.install(opts) for dep in deps]
             bin_results = []
-            for dep in self.bin_rec_deps:
-                bin_results.append( dep.install(['bin','rc']) )
+            for dep in self.bin_deps:
+                bin_results.append( dep.install(['bin','deps','rc']) )
             env.Depends(result, deps_results)
             env.Depends(result, bin_results)
 

@@ -6,9 +6,12 @@
 # ****** END LICENSE BLOCK ******
 
 
+import racy
 import ydefaults
 
 class ConfigReader(object):
+
+    compiled = {}
 
     def __init__(self):
         mods = ydefaults.get_racy_option( "CONFIG_IMPORTED_MODULES" )
@@ -16,10 +19,18 @@ class ConfigReader(object):
 
         self.__config_imported_modules__ = mods
 
+    def compile_file(self, _file):
+        content = racy.rutils.get_file_content(_file)
+        content = content.replace('\r','')
+        self.compiled[_file] = compile(content, _file, 'exec')
 
     def __call__(self, _file, _globals, _locals):
         _globals.update(self.__config_imported_modules__)
-        execfile (_file, _globals, _locals)
+
+        if _file not in self.compiled:
+            self.compile_file(_file)
+
+        exec(self.compiled[_file], _globals, _locals)
 
         import racy.renv.configs.default as defaults
         defaults.check_deprecated(_locals, _file)

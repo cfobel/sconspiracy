@@ -257,7 +257,7 @@ class LibExt(object):
                 if env.has_key(name):
                     env[name] = back_env[name]
 
-        env.AppendUnique(**conf)
+        env.PrependUnique(**conf)
 
 
         bin_path = [self.get_libext_path(path) for path in self.BINPATH]

@@ -1118,7 +1118,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
         rlibext.register.configure(prj, indirect_bin_deps, opts=['nolink'])
         rlibext.register.configure(prj, direct_bin_deps  , opts=link_opts)
 
-        env.Prepend(**self.options)
+        env.Append(**self.options)
 
         tool_level_options = [
                 'WARNINGSASERRORS',

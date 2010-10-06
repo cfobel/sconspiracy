@@ -13,7 +13,7 @@ class CommandNotFound(SCons.Warnings.Warning):
 
 ###############################################################################
 
-def SubProcessBuilder(env, command, args, pwd, path = []):
+def SubProcessBuilder(env, command, args, pwd, path = [], stdoutfile = None):
 
     if is_iterable(path):
         path = os.pathsep.join(path)
@@ -44,6 +44,9 @@ def SubProcessBuilder(env, command, args, pwd, path = []):
                 )
 
     stdout, stderr = process.communicate()
+
+    if isinstance(stdoutfile, str):
+        put_file_content(stdoutfile, stdout)
 
     return process.returncode, stdout, stderr
 

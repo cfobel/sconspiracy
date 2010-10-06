@@ -29,6 +29,7 @@ def Command(target, source, env, marker_extra = {}, **kwargs):
     command     = kwargs.get('command',None)
     pwd         = kwargs.get('pwd',None)
     lookup_path = kwargs.get('lookup_path',None)
+    stdoutfile  = kwargs.get('stdoutfile',None)
 
     if pwd is None:
         pwd = os.path.abspath(source[0].get_abspath())
@@ -42,7 +43,7 @@ def Command(target, source, env, marker_extra = {}, **kwargs):
         lookup_path = [pwd]
 
     returncode, stdout, stderr = SubProcessBuilder(env, command, args,
-            pwd, lookup_path)
+            pwd, lookup_path, stdoutfile = stdoutfile)
 
     marker_extra.update({
             'stdout' : stdout,

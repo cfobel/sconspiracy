@@ -4,7 +4,7 @@ import os
 import subprocess
 import SCons
 
-from racy.rutils import is_iterable
+from racy.rutils import is_iterable, put_file_content
 
 ###############################################################################
 

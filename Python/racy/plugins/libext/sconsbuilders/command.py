@@ -29,7 +29,7 @@ def Command(target, source, env, marker_extra = {}, **kwargs):
     command     = kwargs.get('command',None)
     pwd         = kwargs.get('pwd',None)
     lookup_path = kwargs.get('lookup_path',None)
-    stdoutfile  = kwargs.get('stdoutfile',None)
+    stdoutfile  = kwargs.get('stdoutfile',env.get('stdoutfile'))
 
     if pwd is None:
         pwd = os.path.abspath(source[0].get_abspath())

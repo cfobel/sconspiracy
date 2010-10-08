@@ -129,7 +129,10 @@ class CppUnitProject(ConstructibleRacyProject):
 
     @memoize
     def install (self, opts = []):
-        res = super(CppUnitProject, self).install(opts = opts)
+        if rutils.is_true(self.get('BUILD')):
+            res = super(CppUnitProject, self).install(opts = opts)
+        else:
+            res = []
 
         if self.get_lower(self.test_run_var_name) == 'yes':
             if self.type == 'shared':
@@ -137,12 +140,14 @@ class CppUnitProject(ConstructibleRacyProject):
             run_env = self.env.Clone()
 
             dirs = racy.renv.dirs
+            install_bin = opjoin(dirs.install,"bin")
             install_lib = opjoin(dirs.install,"lib")
 
             run_env.AppendENVPath(racy.renv.LD_VAR, install_lib)
-            execpath = res[0].children()[0].abspath
-            run_test = run_env.Alias('run'+self.name, res, execpath)
-            run_env.Depends(run_test, res[0])
+            execpath = opjoin(install_bin, self.full_name)
+            run_test = run_env.Alias('run-'+self.name, res, execpath)
+            if res:
+                run_env.Depends(run_test, res[0])
             run_env.AlwaysBuild(run_test)
 
             res += run_test

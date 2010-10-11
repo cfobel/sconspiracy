@@ -54,8 +54,8 @@ class LibExt(object):
     name  = None
     debug = None
 
-    __src            = None
-    __project_source = None
+    _src            = None
+    _project_source = None
 
     def __init__(self, name, debug, infosource=None):
         platform_init = getattr(self, racy.renv.system(),

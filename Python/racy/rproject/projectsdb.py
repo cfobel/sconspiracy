@@ -157,8 +157,8 @@ class RacyProjectsDB(object):
     @memoize
     def make_prj_from_libext(self, libext):
         return self.make_prjs_from(
-                libext.__project_source__,
-                args = {'prj_path' : libext.__src__},
+                libext.__project_source,
+                args = {'prj_path' : libext.__src},
                 factory=InstallableRacyProject)
 
     def _register_prj_from_file(self, file):

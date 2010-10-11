@@ -52,7 +52,7 @@ class register(object):
                         lib      = name,
                         comp     = comp,
                         version  = nv,
-                        fileorig = overrided.__src__,
+                        fileorig = overrided.__src,
                         file     = src
                         )
                 import racy
@@ -62,7 +62,7 @@ class register(object):
             if not issubclass(cls, LibExt):
                 libext = functools.partial(LibExt, infosource=cls)
 
-            libext.__src__ = src
+            libext.__src = src
             self.libs[name][comp][nv] = libext
 
             # Management of tools added by libexts
@@ -217,9 +217,9 @@ class register(object):
             version = binpkg_versions[libname]
             factory = lib_avail[version]
             libext = factory(libname, get_option('DEBUG') != 'release')
-            libext.__src__ = factory.__src__
+            libext.__src = factory.__src
 
-            libext.__project_source__ = {
+            libext.__project_source = {
                     'TYPE'    : 'bin_libext',
                     'VERSION' : libext.version,
                     'NAME'    : libext.name,

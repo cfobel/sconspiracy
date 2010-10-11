@@ -17,7 +17,7 @@ class ConfigReader(object):
         mods = ydefaults.get_racy_option( "CONFIG_IMPORTED_MODULES" )
         mods = dict( [ (mod, __import__(mod)) for mod in mods ] )
 
-        self.__config_imported_modules__ = mods
+        self.__config_imported_modules = mods
 
     def compile_file(self, _file):
         content = racy.rutils.get_file_content(_file)
@@ -25,7 +25,7 @@ class ConfigReader(object):
         self.compiled[_file] = compile(content, _file, 'exec')
 
     def __call__(self, _file, _globals, _locals):
-        _globals.update(self.__config_imported_modules__)
+        _globals.update(self.__config_imported_modules)
 
         if _file not in self.compiled:
             self.compile_file(_file)

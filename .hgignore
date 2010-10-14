@@ -6,5 +6,5 @@ syntax: glob
 
 Config/*.options
 Python/SCons/
-.sconsign.dblite
+*.dblite
 

@@ -7,42 +7,45 @@
 import os
 import racy
 from os.path import join as opjoin
-from editor_project import EditorProject 
+ 
+from qtcreator import QtCreatorProject
+from eclipse   import EclipseProject
 
-KEYWORD = EditorProject.var_name
-PATH_KEYWORD = EditorProject.path_project
 
 
 class Plugin(racy.rplugins.Plugin):
-    name = 'editor'
+    name = 'EDITOR'
     editor_list = ['none', 'qtcreator', 'eclipse']
 
 
 
     options              = { 
-                            KEYWORD : 'none', 
-                            PATH_KEYWORD : '' 
+                            name  : 'none', 
                            }
     allowed_values       = { 
-                            KEYWORD : editor_list
+                             name: editor_list
                            }
 
-    commandline_opts     = [ KEYWORD, PATH_KEYWORD ] 
-    commandline_prj_opts = [ KEYWORD, PATH_KEYWORD ] 
-    descriptions_opts    = { KEYWORD :'enable / disable editor generation',
-                             PATH_KEYWORD : 'generate editor file for the specified path'
+    commandline_opts     = [ name ] 
+    commandline_prj_opts = [ name ] 
+    descriptions_opts    = { name :'enable / disable editor generation',
                            }
 
 
     def has_additive(self, prj):
-        val = prj.get(KEYWORD)
+        val = prj.get(self.name)
 
-        return val in self.allowed_values[KEYWORD][1:]
+        return val in self.allowed_values[self.name][1:]
 
     def get_additive(self, prj):
-        res = EditorProject(prj) 
-        
-        return [res]
+        if(prj.get_lower(self.name) == 'qtcreator'): 
+            res = QtCreatorProject(prj) 
+            return [res]
+
+        else:
+            if(prj.get_lower(self.name) == 'eclipse'): 
+                res = EclipseProject
+                return [res]
 
 
 

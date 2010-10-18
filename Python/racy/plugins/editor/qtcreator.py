@@ -174,14 +174,8 @@ class QtCreatorProject(ConstructibleRacyProject):
         argument = ''
         os_ext = ''
 
-        includes = []
-        sources = []
-
-        for i in includes_dir:
-            includes.extend(self.list_files(i))
-        
-        for i in sources_dir:
-            sources.extend(self.list_files(i))
+        includes = [] + self.get_includes(False)
+        sources = [] + self.get_sources(False)
         
 
 
@@ -235,12 +229,13 @@ class QtCreatorProject(ConstructibleRacyProject):
 
         #create a dico to replace variable in template.pro.user 
         dico_pro_user = dict(
-                    ROOT_PATH = prj.root_path,
-                    NAME      = base_name,
-                    EXEC      = executable,
-                    EXT       = os_ext,
-                    TARGET    = base_name, 
-                    ARGUMENT  = argument 
+                    ROOT_PATH   = prj.root_path,
+                    NAME        = base_name,
+                    EXEC        = executable,
+                    EXT         = os_ext,
+                    TARGET      = base_name, 
+                    ARGUMENT    = argument ,
+                    INSTALL_DIR = racy.renv.dirs.install,
                     )
 
         #write the .pro.user file
@@ -260,9 +255,9 @@ class QtCreatorProject(ConstructibleRacyProject):
         prefix_dest_file = os.path.expanduser('~')
 
         if os.name == 'nt':
-            prefix_dest_file = opjoin(prefix_dest_file, 'AppData\Roaming\Nokia\qtcreator')
+            prefix_dest_file = opjoin(prefix_dest_file, 'AppData','Roaming','Nokia','qtcreator')
         else:
-            prefix_dest_file = opjoin(prefix_dest_file, '.config\Nokia\qtcreator')
+            prefix_dest_file = opjoin(prefix_dest_file, '.config','Nokia','qtcreator')
             
 
         dest_file_name =  opjoin(prefix_dest_file, session_name)

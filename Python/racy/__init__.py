@@ -10,6 +10,24 @@ from __future__ import print_function
 
 import os
 
+#------------------------------------------------------------------------------
+
+def clean_args(args):
+    """Return the cleaned version of args, replacing '=' by ':' where it is
+    needed.
+    
+    >>> args = "fwData/CPPUNIT=exec/THING='a=4' BUILD=yes DBFILE=/out/file"
+    >>> ' '.join(clean_args(args.split()))
+    "fwData/CPPUNIT:exec/THING:'a=4' BUILD=yes DBFILE=/out/file"
+    """
+    def clean_arg(arg):
+        if '/' in arg.split('=',1)[0]:
+            sp = arg.split('/')
+            sp[1:] = [':'.join(e.split('=',1)) for e in sp[1:]]
+            arg = '/'.join(sp)
+        return arg
+    return map(clean_arg, args)
+
 
 #------------------------------------------------------------------------------
 class Undefined:

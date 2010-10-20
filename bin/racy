@@ -178,7 +178,6 @@ def main():
                                 os.path.expanduser('~/.Racy'))
     os.environ['RACY_CONFIG_DIR'] = (config_dir 
             if os.path.isdir(config_dir) else racy_config_dir)
-        
 
 
     import SCons.Script
@@ -189,6 +188,7 @@ def main():
     sconstruct_file  = os.path.join(racy_rc_path,'SConstruct')
     sys.argv.insert(1,sconstruct_file)
     sys.argv.insert(1,'-f')
+    sys.argv[:] = racy.clean_args(sys.argv)
 
     # this does all the work, and calls sys.exit
     # with the proper exit status when done.

@@ -214,11 +214,7 @@ class EclipseProject(ConstructibleRacyProject):
         
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
-        deps = self.rec_deps
         
-        if self.get_lower(self.var_name) == "clean" :
-            self.clean_project(self)
-        else:
-            self.create(self)
+        self.create(self)
 
         return result

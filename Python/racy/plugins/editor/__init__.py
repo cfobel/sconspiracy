@@ -38,14 +38,13 @@ class Plugin(racy.rplugins.Plugin):
         return val in self.allowed_values[self.name][1:]
 
     def get_additive(self, prj):
-        if prj.type not in ['shared','exec']:
-            return
+        if prj.type not in ['shared','exec', 'bundle']:
+            return [] 
         if(prj.get_lower(self.name) == 'qtcreator'): 
             res = QtCreatorProject(prj) 
             return [res]
 
-        else:
-            if(prj.get_lower(self.name) == 'eclipse'): 
+        elif(prj.get_lower(self.name) == 'eclipse'): 
                 res = EclipseProject
                 return [res]
 

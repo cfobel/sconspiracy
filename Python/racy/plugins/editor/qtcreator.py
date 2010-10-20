@@ -46,6 +46,7 @@ class QtCreatorProject(ConstructibleRacyProject):
                                         **prj.projects_db.prj_args
                                         )
 
+
     @property
     def name (self):
         name = super(QtCreatorProject, self).name
@@ -61,35 +62,13 @@ class QtCreatorProject(ConstructibleRacyProject):
         self.configure_env()
         return result
     
-
-    def list_files(self,path): 
-        file = []
-
-        l = glob(path+'\\*') 
-
-        for i in l: 
-            if os.path.isdir(i):
-                file.extend(self.list_files(i))
-            else:
-                file.append(i)
-
-        return file 
-
     def get_rc_path(self):
         return opjoin(QTCREATOR_PLUGIN_PATH, 'rc')
 
         
-    def clean_project(self, prj):
-        project_path   = os.path.normpath(self.prj.root_path)
-        project_dest   = os.path.join(project_path, PRO_FILE) 
-        if os.path.exists(project_dest):
-            os.remove(project_dest)
-            racy.print_msg('remove: ' + project_dest)
-
-
     def create(self):
         path = os.path.normpath(self.prj.root_path)
-
+		
         base_dir = racy.renv.dirs.install
         base_name = self.prj.base_name
         src_dir = racy.renv.dirs.code
@@ -174,8 +153,8 @@ class QtCreatorProject(ConstructibleRacyProject):
         argument = ''
         os_ext = ''
 
-        includes = [] + self.get_includes(False)
-        sources = [] + self.get_sources(False)
+        includes = map(str, self.prj.get_includes(False))
+        sources = map(str, self.prj.get_sources(False))
         
 
 
@@ -205,8 +184,6 @@ class QtCreatorProject(ConstructibleRacyProject):
                     argument = argument + SUFFIXE_SESSION
                     argument = argument + SUFFIXE_ARG
 
- 
-        
         
         #create a dico to replace variable in template.pro 
         dico_pro = dict(
@@ -250,14 +227,12 @@ class QtCreatorProject(ConstructibleRacyProject):
         apply_pro_user_file.close()
 
     def create_session(self, prj, lib):
-    
         session_name      =  prj.base_name + '.qws'
-        prefix_dest_file = os.path.expanduser('~')
 
         if os.name == 'nt':
-            prefix_dest_file = opjoin(prefix_dest_file, 'AppData','Roaming','Nokia','qtcreator')
+            prefix_dest_file = opjoin(os.environ['APPDATA'],'Nokia','qtcreator')
         else:
-            prefix_dest_file = opjoin(prefix_dest_file, '.config','Nokia','qtcreator')
+            prefix_dest_file = opjoin(os.path.expanduser('~'), prefix_dest_file, '.config','Nokia','qtcreator')
             
 
         dest_file_name =  opjoin(prefix_dest_file, session_name)
@@ -274,7 +249,8 @@ class QtCreatorProject(ConstructibleRacyProject):
                    LIST_DEPS = '\t '.join(list_lib)
                 )
         
-        #write the .pro file
+        #write the .session file
+
         template_file = open(src_session_file  , 'r')
         apply_pro_file = open(dest_session_file , 'w')
 
@@ -289,7 +265,7 @@ class QtCreatorProject(ConstructibleRacyProject):
 
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
-        deps = self.rec_deps
+      
         
         self.create()
 

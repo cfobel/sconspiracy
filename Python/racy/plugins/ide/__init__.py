@@ -1,0 +1,44 @@
+# ***** BEGIN LICENSE BLOCK *****
+# Sconspiracy - Copyright (C) IRCAD, 2004-2009.
+# Distributed under the terms of the BSD Licence as
+# published by the Open Source Initiative.  
+# ****** END LICENSE BLOCK ******
+
+import os
+import racy
+from os.path import join as opjoin
+ 
+from ide_project import IdeProject
+
+
+
+class Plugin(racy.rplugins.Plugin):
+    name = 'IDE'
+    editor_list = ['none', 'qtcreator', 'eclipse']
+
+
+
+    options              = { 
+                            name  : 'none', 
+                           }
+    allowed_values       = { 
+                             name: editor_list
+                           }
+
+    commandline_opts     = [ name ] 
+    commandline_prj_opts = [ name ] 
+    descriptions_opts    = { name :'create ide project',
+                           }
+
+
+    def has_additive(self, prj):
+        val = prj.get(self.name)
+
+        return val in self.allowed_values[self.name][1:]
+
+    def get_additive(self, prj):
+        if prj.type not in ['shared','exec', 'bundle']:
+            return [] 
+
+        res = IdeProject(prj) 
+        return [res]

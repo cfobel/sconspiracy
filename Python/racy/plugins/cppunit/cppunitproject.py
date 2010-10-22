@@ -113,10 +113,15 @@ class CppUnitProject(ConstructibleRacyProject):
     def runner_build_dir(self):
         return opjoin(self.build_dir, 'CPPUnit_runner')
 
+    def get(self, opt):
+        val = super(CppUnitProject, self).get(opt)
+        if opt == "USE":
+            val = list(set(val + ['cppunit']))
+        return val
+
+
     @run_once
     def configure_env(self):
-        racy.rlibext.register.configure(self, ['cppunit'])
-
         super(CppUnitProject, self).configure_env()
 
         self.variant_dir( self.runner_build_dir, self.runner_src_path )

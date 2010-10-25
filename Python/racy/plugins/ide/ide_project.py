@@ -116,6 +116,7 @@ class IdeProject(ConstructibleRacyProject):
                 'IDE_PRJ_PATH'    : opjoin(ide_prj_dir, self.prj.get_lower('IDE'),
                     self.prj.base_name),
                 'PROFILE'         : opjoin(self.prj.install_path,self.prj.versioned_name, 'profile.xml'),
+                'OS'              : os.name
                 }
 
             ###
@@ -133,6 +134,7 @@ class IdeProject(ConstructibleRacyProject):
                            
                 for file in dico_ide['qt']:
                     # path to .pro template
+
                     temp = opjoin(os.path.dirname(__file__),
                             os.path.normpath(file))
 

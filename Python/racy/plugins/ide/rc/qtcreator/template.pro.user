@@ -29,7 +29,11 @@ else:
    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Bureau</value>
    <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Target.DesktopTarget</value>
    <value key="ProjectExplorer.Target.ActiveBuildConfiguration" type="int">0</value>
+%if OS == 'nt':
+   <value key="ProjectExplorer.Target.ActiveRunConfiguration" type="int">1</value>
+%else:
    <value key="ProjectExplorer.Target.ActiveRunConfiguration" type="int">0</value>
+%endif
    <valuemap key="ProjectExplorer.Target.BuildConfiguration.0" type="QVariantMap">
     <valuemap key="ProjectExplorer.BuildConfiguration.BuildStep.0" type="QVariantMap">
      <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
@@ -57,8 +61,13 @@ else:
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration" type="int">2</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory" type="QString">${ROOT_DIR}</value>
+%if OS == 'nt':
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">3</value>
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">2</value>
+%else:
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">4</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">0</value>
+%endif
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">true</value>
    </valuemap>
    <valuemap key="ProjectExplorer.Target.BuildConfiguration.1" type="QVariantMap">
@@ -88,8 +97,13 @@ else:
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration" type="int">0</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory" type="QString">${ROOT_DIR}</value>
+%if OS == 'nt':    
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">3</value>
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">2</value>
+%else:
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">4</value>
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">0</value>
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">0</value>  
+%endif
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">true</value>
    </valuemap>
    <valuemap key="ProjectExplorer.Target.BuildConfiguration.2" type="QVariantMap">
@@ -119,12 +133,32 @@ else:
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration" type="int">2</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory" type="QString">${ROOT_DIR}</value>
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">4</value>
+%if OS == 'nt':   
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">2</value>
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">2</value>
+%else:
+      <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">4</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">0</value>
+%endif
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">true</value>
    </valuemap>
    <value key="ProjectExplorer.Target.BuildConfigurationCount" type="int">3</value>
    <valuemap key="ProjectExplorer.Target.RunConfiguration.0" type="QVariantMap">
+%if OS == 'nt':   
+    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">${PRJ_NAME}</value>
+    <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4RunConfiguration</value>
+    <value key="Qt4ProjectManager.Qt4RunConfiguration.BaseEnvironmentBase" type="int">2</value>
+    <valuelist key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments" type="QVariantList"/>
+    <value key="Qt4ProjectManager.Qt4RunConfiguration.ProFile" type="QString">${PRJ_NAME}.pro</value>
+    <value key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix" type="bool">false</value>
+    <value key="Qt4ProjectManager.Qt4RunConfiguration.UseTerminal" type="bool">false</value>
+    <valuelist key="Qt4ProjectManager.Qt4RunConfiguration.UserEnvironmentChanges" type="QVariantList"/>
+    <value key="Qt4ProjectManager.Qt4RunConfiguration.UserSetName" type="bool">false</value>
+    <value key="Qt4ProjectManager.Qt4RunConfiguration.UserSetWorkingDirectory" type="bool">false</value>
+    <value key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory" type="QString"></value>
+   </valuemap>
+   <valuemap key="ProjectExplorer.Target.RunConfiguration.1" type="QVariantMap">
+%endif
     <valuelist key="ProjectExplorer.CustomExecutableRunConfiguration.Arguments" type="QVariantList"${HACK}>${ARGUMENT}
     <value key="ProjectExplorer.CustomExecutableRunConfiguration.BaseEnvironmentBase" type="int">1</value>
     <value key="ProjectExplorer.CustomExecutableRunConfiguration.Executable" type="QString">${EXECUTABLE}</value>
@@ -136,7 +170,11 @@ else:
     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">${PRJ_NAME}</value>
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.CustomExecutableRunConfiguration</value>
    </valuemap>
-   <value key="ProjectExplorer.Target.RunConfigurationCount" type="int">1</value>
+%if OS == 'nt':   
+   <value key="ProjectExplorer.Target.RunConfigurationCount" type="int">2</value>
+%else:
+    <value key="ProjectExplorer.Target.RunConfigurationCount" type="int">1</value> 
+%endif
   </valuemap>
  </data>
  <data>

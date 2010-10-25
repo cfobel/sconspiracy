@@ -6,12 +6,14 @@ DEPENDPATH += .
 INCLUDEPATH += .
 
 HEADERS += \\
+
 % for i in HEADERS:
     ${i} \\
 
 %endfor
 
-SOURCES += \\  
+SOURCES += \\
+
 % for i in SOURCES:
     ${i} \\
 

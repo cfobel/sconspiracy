@@ -115,7 +115,7 @@ class IdeProject(ConstructibleRacyProject):
      
                 'IDE_PRJ_PATH'    : opjoin(ide_prj_dir, self.prj.get_lower('IDE'),
                     self.prj.base_name),
-                'PROFILE'         : opjoin(self.prj.install_path, 'profile.xml'),
+                'PROFILE'         : opjoin(self.prj.install_path,self.prj.versioned_name, 'profile.xml'),
                 }
 
             ###
@@ -155,7 +155,7 @@ class IdeProject(ConstructibleRacyProject):
                         racy.print_msg('the template : ' + temp  + ' doesn\'t exist')
 
         else:
-            racy.print_msg('Default qtcreatore directory not found, please \
-            check your installation')
+            racy.print_msg('Default qtcreator directory not found, please \
+check your installation')
 
         return result

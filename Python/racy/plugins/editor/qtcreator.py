@@ -126,7 +126,6 @@ class QtCreatorProject(ConstructibleRacyProject):
         
             pro_depends.append(opjoin(path_gen , i.base_name + '.pro'))
       
-
         self.create_session(self.prj, pro_depends)
         
     def create_project(self, prj, dest_prefix, launcher = ''):

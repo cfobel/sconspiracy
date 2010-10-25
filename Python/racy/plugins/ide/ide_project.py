@@ -115,9 +115,10 @@ class IdeProject(ConstructibleRacyProject):
      
                 'IDE_PRJ_PATH'    : opjoin(ide_prj_dir, self.prj.get_lower('IDE'),
                     self.prj.base_name),
-                'PROFILE'         : opjoin(self.prj.install_path,self.prj.versioned_name, 'profile.xml'),
-                'OS'              : os.name
+                'PROFILE'         : opjoin(self.prj.install_path, 'profile.xml'),
+                'OS'              : os.name,
                 }
+
 
             ###
             # Creation  qtcreator file

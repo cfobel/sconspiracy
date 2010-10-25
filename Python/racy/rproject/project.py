@@ -736,40 +736,40 @@ class RacyProject(object):
         return zip(builddirs, dirs)
 
 
-    def get_includes(self, builddir = True):
+    def get_files(self, path, ext, builddir = True):
         """Returns HXX source files of the project"""
         kwargs = {}
         if builddir:
-            kwargs['replace_dir'] = map(self.get_build_dir_for, self.include_path)
+            kwargs['replace_dir'] = map(self.get_build_dir_for, path)
         else:
-            kwargs['replace_dir'] = self.include_path
+            kwargs['replace_dir'] = path
 
-        sources = rutils.DeepGlob(
-                constants.CXX_HEADER_EXT,
-                self.include_path,
-                **kwargs
-                ) + self.extra_sources + self.special_source
+        sources = rutils.DeepGlob( ext, path, **kwargs)
         return sources
 
 
+    def get_includes(self, builddir = True):
+        """Returns HXX source files of the project"""
+        return self.get_files(
+                self.include_path,
+                constants.CXX_HEADER_EXT,
+                builddir
+                )
 
     def get_sources(self, builddir = True):
         """Returns CXX source files of the project"""
-        kwargs = {}
-        if builddir:
-            kwargs['replace_dir'] = map(self.get_build_dir_for, self.src_path)
-        else:
-            kwargs['replace_dir'] = self.src_path
-
-        sources = rutils.DeepGlob(
-                constants.CXX_SOURCE_EXT,
+        return self.get_files(
                 self.src_path,
-                **kwargs
-                ) + self.extra_sources + self.special_source
-        return sources
+                constants.CXX_SOURCE_EXT,
+                builddir
+                )
 
     includes = cached_property(get_includes)
-    sources = cached_property(get_sources)
+
+    @cached_property
+    def sources(self):
+        return self.get_sources() + self.extra_sources + self.special_source
+
 
     @cached_property
     def build_dir(self):

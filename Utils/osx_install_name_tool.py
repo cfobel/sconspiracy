@@ -130,6 +130,16 @@ def main():
     if options.show_ignored:
         ignored = sorted([''] + map(str,ignored))
         print 'ignored libraries:', (os.linesep+'  ').join(ignored)
+        usually_ignored = [
+                'AGL', 'AppKit', 'ApplicationServices', 'AudioToolbox',
+                'Carbon', 'Cocoa', 'CoreFoundation', 'CoreServices',
+                'Foundation', 'IOKit', 'OpenGL', 'QuickTime',
+                'SystemConfiguration', 'WebKit', 'libSystem.B.dylib',
+                'libgcc_s.1.dylib', 'libobjc.A.dylib', 'libstdc++.6.dylib',
+                ]
+        suspicious = [''] + list(set(ignored) - set(usually_ignored))
+        print 'suspiciously ignored :', (os.linesep+'  ').join(ignored)
+
 
 if __name__ == '__main__':
     main()

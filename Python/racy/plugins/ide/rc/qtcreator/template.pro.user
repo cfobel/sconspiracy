@@ -42,13 +42,13 @@ else:
      <value key="ProjectExplorer.ProcessStep.Command" type="QString">${COMPILE_CMD}</value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${ROOT_DIR}</value>
-     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Compilation</value>
+     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy compilatio</value>
      <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.ProcessStep</value>
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.BuildStepsCount" type="int">1</value>
     <valuemap key="ProjectExplorer.BuildConfiguration.CleanStep.0" type="QVariantMap">
      <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList"/>
-     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${CLEAN_CMD} </value>
+     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${CLEAN_CMD} -c </value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${ROOT_DIR}</value>
      <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Clean application</value>
@@ -57,15 +57,13 @@ else:
     <value key="ProjectExplorer.BuildConfiguration.CleanStepsCount" type="int">1</value>
     <value key="ProjectExplorer.BuildConfiguration.ClearSystemEnvironment" type="bool">false</value>
     <valuelist key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges" type="QVariantList"/>
-    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Debug</value>
+    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy</value>
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration" type="int">2</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory" type="QString">${ROOT_DIR}</value>
 %if OS == 'nt':
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">3</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">2</value>
 %else:
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">4</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">0</value>
 %endif
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">true</value>
@@ -73,35 +71,33 @@ else:
    <valuemap key="ProjectExplorer.Target.BuildConfiguration.1" type="QVariantMap">
     <valuemap key="ProjectExplorer.BuildConfiguration.BuildStep.0" type="QVariantMap">
 	 <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
-     <value type="QString">${PRJ_NAME}/DEBUG:release</value>
+     <value type="QString">${PRJ_NAME}/DEBUG=release</value>
      </valuelist>
 	 <value key="ProjectExplorer.ProcessStep.Command" type="QString">${COMPILE_CMD}</value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${ROOT_DIR}</value>
-     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Compilation</value>
+     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy compilation</value>
      <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.ProcessStep</value>
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.BuildStepsCount" type="int">2</value>
     <valuemap key="ProjectExplorer.BuildConfiguration.CleanStep.0" type="QVariantMap">
      <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList"/>
-     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${CLEAN_CMD} </value>
+     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${CLEAN_CMD}/DEBUG=release -c </value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${ROOT_DIR}</value>
-     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Clean application</value>
+     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy clean</value>
      <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.ProcessStep</value>
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.CleanStepsCount" type="int">1</value>
     <value key="ProjectExplorer.BuildConfiguration.ClearSystemEnvironment" type="bool">false</value>
     <valuelist key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges" type="QVariantList"/>
-    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Release</value>
+    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy/DEBUG=release</value>
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration" type="int">0</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory" type="QString">${ROOT_DIR}</value>
 %if OS == 'nt':    
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">3</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">2</value>
 %else:
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">4</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">0</value>  
 %endif
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">true</value>
@@ -109,38 +105,36 @@ else:
    <valuemap key="ProjectExplorer.Target.BuildConfiguration.2" type="QVariantMap">
     <valuemap key="ProjectExplorer.BuildConfiguration.BuildStep.0" type="QVariantMap">
 	 <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
-      <value type="QString">${PRJ_NAME}/BUILDDEPS:no</value>
+      <value type="QString">${PRJ_NAME}/BUILDDEPS=no</value>
      </valuelist>
 	 <value key="ProjectExplorer.ProcessStep.Command" type="QString">${COMPILE_CMD}</value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${ROOT_DIR}</value>
-     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Compilation</value>
+     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy compilation</value>
      <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.ProcessStep</value>
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.BuildStepsCount" type="int">2</value>
     <valuemap key="ProjectExplorer.BuildConfiguration.CleanStep.0" type="QVariantMap">
      <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList"/>
-     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${CLEAN_CMD} </value>
+     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${CLEAN_CMD}/BUILDDEPS=no -c </value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${ROOT_DIR}</value>
-     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Clean application</value>
+     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy clean</value>
      <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.ProcessStep</value>
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.CleanStepsCount" type="int">1</value>
     <value key="ProjectExplorer.BuildConfiguration.ClearSystemEnvironment" type="bool">false</value>
     <valuelist key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges" type="QVariantList"/>
-    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">DEBUG : no deps</value>
+    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy/BUILDDEPS=no</value>
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration" type="int">2</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory" type="QString">${ROOT_DIR}</value>
 %if OS == 'nt':   
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">2</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">2</value>
 %else:
-      <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">4</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="int">0</value>
 %endif
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">true</value>
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">false</value>
    </valuemap>
    <value key="ProjectExplorer.Target.BuildConfigurationCount" type="int">3</value>
    <valuemap key="ProjectExplorer.Target.RunConfiguration.0" type="QVariantMap">

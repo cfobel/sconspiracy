@@ -51,6 +51,7 @@ class IdeProject(ConstructibleRacyProject):
         result = []
         self.configure_env()
         return result
+
     
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
@@ -103,7 +104,7 @@ class IdeProject(ConstructibleRacyProject):
                 'HEADERS'         : self.prj.get_includes(False),
                 'SOURCES'         : self.prj.get_sources(False),
                 'COMPILE_CMD'     : 'racy' + ext,
-                'CLEAN_CMD'       : 'racy' + ext + ' -c',
+                'CLEAN_CMD'       : 'racy' + ext +' '+ self.prj.base_name,
                 'BIN_PATH'        : racy.renv.dirs.install_bin,
                 'BUNDLE_PATH'     : racy.renv.dirs.install_bundle,
                 'LAUNCHER_PATH'   : opjoin(racy.renv.dirs.install_bin,
@@ -156,6 +157,35 @@ class IdeProject(ConstructibleRacyProject):
                         rutils.put_file_content(os.path.normpath(dest_file), template)
                     else:
                         racy.print_msg('the template : ' + temp  + ' doesn\'t exist')
+            
+            ###
+            # Clean qtcreator file
+            ###
+            elif(self.prj.get_lower('IDE') == 'qtcreator-clean'):
+                racy.print_msg('Remove qtcreator preferencies: '+
+                        self.prj.base_name)        
+                install_dir = opjoin(dico['IDE_PRJ_DIR'],'qtcreator')
+
+                for file in dico_ide['qt'] :
+                    #destination file template
+                    dest_file = Template(os.path.normpath(dico_ide['qt'][file]))
+               
+                    try:
+                        file = dest_file.render(**dico)
+                        os.remove(file)
+                    except  OSError:
+                        racy.print_msg('file : ' + file + ' doesn\'t exist')
+
+                try:
+                    os.rmdir(install_dir)
+                except OSError:
+                    pass
+
+                
+                try:
+                    os.rmdir(dico['IDE_PRJ_DIR'])
+                except OSError:
+                    pass
 
         else:
             racy.print_msg('Default qtcreator directory not found, please \

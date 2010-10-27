@@ -77,48 +77,51 @@ class IdeProject(ConstructibleRacyProject):
 
         # if qtcreator defaulkt dir exist
         if os.path.exists(qt_default_dir):
+            eclipse_launch = ('.metadata/.plugins/org.eclipse'
+                                '.debug.core/.launches')
             dico_ide = {
-                   
-                    'qt' :  
-                            {
-                                'rc/qtcreator/template.pro'     :
-                                       '${IDE_DIR}/qtcreator/${PRJ_NAME}/${PRJ_NAME}.pro',
-                                'rc/qtcreator/template.pro.user':
-                                       '${IDE_DIR}/qtcreator/${PRJ_NAME}/$[PRJ_NAME}.pro.user',
-                                'rc/qtcreator/template.qws'     :
-                                                            opjoin(qt_default_dir, '${PRJ_NAME}.qws'),
-                            },
-                    'eclipse' :
-                            {
-                                'rc/eclipse/template.project' :
-                                       '${IDE_DIR}/eclipse/${PRJ_NAME}/.project',
-                                'rc/eclipse/template.cproject' :
-                                       '${IDE_DIR}/eclipse/${PRJ_NAME}/.cproject',
-                                'rc/eclipse/template.racy_config.launch' :
-                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
-org.eclipse.debug.core/.launches/racy_config.launch',
-                                'rc/eclipse/template.racy_BUILDDEPS=no.launch' :
-                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
-org.eclipse.debug.core/.launches/racy_BUILDDEPS=no.launch',
-                                'rc/eclipse/template.racy.launch' :
-                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
-org.eclipse.debug.core/.launches/racy.launch',
-                                 'rc/eclipse/template.racy_BUILDDEPS=no_config.launch' :
-                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
-org.eclipse.debug.core/.launches/racy_BUILDDEPS=no_config.launch',
-                                  'rc/eclipse/template.launchConfigurationHistory.xml' :
-                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
-org.eclipse.debug.ui/launchConfigurationHistory.xml',
-                                  'rc/eclipse/template.racy_RELEASE_config.launch' :
-                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
-org.eclipse.debug.core/.launches/racy_RELEASE_config.launch',
-                                   'rc/eclipse/template.racy_RELEASE.launch' :
-                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
-org.eclipse.debug.core/.launches/racy_RELEASE.launch',
-                        }
+           
+            'qt' :  
+                {
+                'rc/qtcreator/template.pro'     :
+                       '${IDE_DIR}/qtcreator/${PRJ_NAME}/${PRJ_NAME}.pro',
+                'rc/qtcreator/template.pro.user':
+                       '${IDE_DIR}/qtcreator/${PRJ_NAME}/${PRJ_NAME}.pro.user',
+                'rc/qtcreator/template.qws'     :
+                        opjoin(qt_default_dir, '${PRJ_NAME}.qws'),
+                },
+
+            'eclipse' :
+                {
+                'rc/eclipse/template.project' :
+                       '${IDE_DIR}/eclipse/${PRJ_NAME}/.project',
+                'rc/eclipse/template.cproject' :
+                       '${IDE_DIR}/eclipse/${PRJ_NAME}/.cproject',
+                'rc/eclipse/template.racy_config.launch' :
+                       '${IDE_DIR}/eclipse/' + eclipse_launch 
+                       + '/racy_config.launch',
+                'rc/eclipse/template.racy_BUILDDEPS=no.launch' :
+                       '${IDE_DIR}/eclipse/' + eclipse_launch
+                       + '/racy_BUILDDEPS=no.launch',
+                'rc/eclipse/template.racy.launch' :
+                       '${IDE_DIR}/eclipse/' + eclipse_launch
+                       + '/racy.launch',
+                 'rc/eclipse/template.racy_BUILDDEPS=no_config.launch' :
+                       '${IDE_DIR}/eclipse/' + eclipse_launch
+                       + '/racy_BUILDDEPS=no_config.launch',
+                  'rc/eclipse/template.launchConfigurationHistory.xml' :
+                       '${IDE_DIR}/eclipse/' + eclipse_launch
+                       + '/launchConfigurationHistory.xml',
+                  'rc/eclipse/template.racy_RELEASE_config.launch' :
+                       '${IDE_DIR}/eclipse/' + eclipse_launch
+                       + '/racy_RELEASE_config.launch',
+                   'rc/eclipse/template.racy_RELEASE.launch' :
+                       '${IDE_DIR}/eclipse/' + eclipse_launch
+                       + '/racy_RELEASE.launch',
+                }
 
 
-                       }
+               }
 
 
 
@@ -135,7 +138,7 @@ org.eclipse.debug.core/.launches/racy_RELEASE.launch',
                 'PRJ_NAME'        : self.prj.base_name,
                 'EXEC'            : self.prj.full_name + ext_exec,
                 'EXEC_PATH'       : opjoin(self.prj.install_path, 
-                                         self.prj.full_name) + ext_exec, 
+                                     self.prj.full_name) + ext_exec, 
                 'HEADERS'         : self.prj.get_includes(False),
                 'SOURCES'         : self.prj.get_sources(False),
                 'COMPILE_CMD'     : compiler_path + ext,
@@ -143,16 +146,17 @@ org.eclipse.debug.core/.launches/racy_RELEASE.launch',
                 'BIN_PATH'        : racy.renv.dirs.install_bin,
                 'BUNDLE_PATH'     : racy.renv.dirs.install_bundle,
                 'LAUNCHER_PATH'   : opjoin(racy.renv.dirs.install_bin,
-                                        self.prj.projects_db['launcher'].full_name)
-                                             + ext_exec,
+                                    self.prj.projects_db['launcher'].full_name)
+                                         + ext_exec,
                 'TYPE'            : self.prj.get_lower('TYPE'),
-                'DEPS'            : [opjoin(ide_dir, i.base_name, self.prj.get_lower('IDE'),
-                                         i.base_name) for i in deps],
-     
-                'IDE_PRJ_PATH'    : opjoin(ide_dir, self.prj.base_name, self.prj.get_lower('IDE'),
-                    self.prj.base_name),
+                'DEPS'            : [opjoin(ide_dir, i.base_name
+                                     , self.prj.get_lower('IDE'), i.base_name)
+                                     for i in deps],
                 'PROFILE'         : opjoin(self.prj.install_path, 'profile.xml'),
                 'OS'              : os.name,
+                'IDE_PRJ_PATH'    : opjoin(ide_dir,self.prj.get_lower('IDE'),
+                                    self.prj.base_name, self.prj.base_name)
+
                 }
 
 
@@ -161,6 +165,8 @@ org.eclipse.debug.core/.launches/racy_RELEASE.launch',
             ###
 
             if(self.prj.get_lower('IDE') == 'qtcreator'):
+                racy.print_msg('Create qtcreator project : ' + self.prj.base_name)
+                
                 install_dir = opjoin(dico['IDE_DIR'],'qtcreator', dico['PRJ_NAME'])
 
                 # Create path to destination directorie

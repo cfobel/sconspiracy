@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>${PRJ_NAME}</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+	</natures>
+	<linkedResources>
+% for i in HEADERS:
+<% j = i.replace(ROOT_DIR, '') %>
+		<link>
+			<name>${j}</name>
+			<type>1</type>
+			<location>${i}</location>
+		</link>
+%endfor
+% for i in SOURCES :
+<% 
+j = i.replace(ROOT_DIR, '') 
+print j
+%>
+		<link>
+			<name>${j}</name>
+			<type>1</type>
+			<location>${i}</location>
+		</link>
+%endfor
+	</linkedResources>
+</projectDescription>

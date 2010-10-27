@@ -254,7 +254,7 @@ def ressources(file):
 
 
 def get_bin_path():
-    path = os.path.join(__file__, '..', '..','bin')
+    path = os.path.join(__file__, '..', '..','..','bin')
     path = os.path.abspath(path)
     return os.path.normpath(path)
 

@@ -1,4 +1,5 @@
 <%
+import random
 rand_range = [100000000, 9999999999]
 ID_CCONFIG_1 = str(random.randint(*rand_range));
 ID_CCONFIG_2 = str(random.randint(*rand_range));
@@ -26,7 +27,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <folderInfo id="0.${ID_CCONFIG_1}" name="/" resourcePath="">
 <toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.309179245" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 <targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.309179245.625880249" name=""/>
-<builder autoBuildTarget="all" buildPath="" cleanBuildTarget="${PRJ_NAME} -c" command="${EXECUTABLE}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.settings.default.builder.1587018552" incrementalBuildTarget="${PRJ_NAME} BUILDDEPS=no" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+<builder autoBuildTarget="all" buildPath="" cleanBuildTarget="${PRJ_NAME} -c" command="${EXEC}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.settings.default.builder.1587018552" incrementalBuildTarget="${PRJ_NAME} BUILDDEPS=no" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
 <tool id="org.eclipse.cdt.build.core.settings.holder.libs.388163237" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
 <tool id="org.eclipse.cdt.build.core.settings.holder.1630755956" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1225340334" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
@@ -49,7 +50,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -59,7 +60,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="makefileGenerator">
-<runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
+<runAction arguments="-f <%text>${</%text>project_name}_scd.mk" command="make" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -69,7 +70,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -79,7 +80,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -89,7 +90,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -99,7 +100,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -109,7 +110,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -119,7 +120,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -131,7 +132,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -141,7 +142,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="makefileGenerator">
-<runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
+<runAction arguments="-f <%text>${</%text>project_name}_scd.mk" command="make" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -151,7 +152,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -161,7 +162,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -171,7 +172,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -181,7 +182,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -191,7 +192,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -201,7 +202,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -212,7 +213,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 <target name="DEBUG" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} BUILDDEPS=no</buildTarget>
 <stopOnError>true</stopOnError>
@@ -220,7 +221,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="RELEASE" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} BUILDDEPS=no DEBUG=release</buildTarget>
 <stopOnError>true</stopOnError>
@@ -228,7 +229,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="FULL_DEBUG" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}</buildTarget>
 <stopOnError>true</stopOnError>
@@ -236,7 +237,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="FULL_RELEASE" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} DEBUG=release</buildTarget>
 <stopOnError>true</stopOnError>
@@ -244,7 +245,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="DOC" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}/DOX:yes BUILD=no</buildTarget>
 <stopOnError>true</stopOnError>
@@ -252,7 +253,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="CLEAN" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} -c</buildTarget>
 <stopOnError>true</stopOnError>
@@ -260,7 +261,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="CPPUNIT" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}/CPPUNIT:exec/CPPUNIT_RUN:yes</buildTarget>
 <stopOnError>true</stopOnError>
@@ -286,7 +287,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <folderInfo id="0.${ID_CCONFIG_1}.${ID_CCONFIG_2}." name="/" resourcePath="">
 <toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.72385264" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 <targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.72385264.992441996" name=""/>
-<builder autoBuildTarget="all" buildPath="" cleanBuildTarget="${PRJ_NAME} -c" command="${EXECUTABLE}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.settings.default.builder.2054992154" incrementalBuildTarget="${PRJ_NAME} BUILDDEPS=no DEBUG=release" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+<builder autoBuildTarget="all" buildPath="" cleanBuildTarget="${PRJ_NAME} -c" command="${EXEC}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.settings.default.builder.2054992154" incrementalBuildTarget="${PRJ_NAME} BUILDDEPS=no DEBUG=release" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
 <tool id="org.eclipse.cdt.build.core.settings.holder.libs.1490600669" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
 <tool id="org.eclipse.cdt.build.core.settings.holder.229307042" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1130441472" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
@@ -309,7 +310,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -319,7 +320,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="makefileGenerator">
-<runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
+<runAction arguments="-f <%text>${</%text>project_name}_scd.mk" command="make" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -329,7 +330,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -339,7 +340,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -349,7 +350,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -359,7 +360,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -369,7 +370,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -379,11 +380,11 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
-<scannerConfigBuildInfo instanceId="0.${ID_CCONFIG_1}">
+<scannerConfigBuildInfo instanceId="0.<%text>${</%text>ID_CCONFIG_1}">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
@@ -391,7 +392,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -401,7 +402,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="makefileGenerator">
-<runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
+<runAction arguments="-f <%text>${</%text>project_name}_scd.mk" command="make" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -411,7 +412,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -421,7 +422,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -431,7 +432,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -441,7 +442,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/<%text>${</%text>specs_file}" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -451,7 +452,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -461,7 +462,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+<runAction arguments="-E -P -v -dD <%text>${</%text>plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
@@ -472,7 +473,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 <target name="DEBUG" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} BUILDDEPS=no</buildTarget>
 <stopOnError>true</stopOnError>
@@ -480,7 +481,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="RELEASE" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} BUILDDEPS=no DEBUG=release</buildTarget>
 <stopOnError>true</stopOnError>
@@ -488,7 +489,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="FULL_DEBUG" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}</buildTarget>
 <stopOnError>true</stopOnError>
@@ -496,7 +497,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="FULL_RELEASE" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} DEBUG=release</buildTarget>
 <stopOnError>true</stopOnError>
@@ -504,7 +505,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="DOC" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}/DOX:yes BUILD=no</buildTarget>
 <stopOnError>true</stopOnError>
@@ -512,7 +513,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="CLEAN" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} -c</buildTarget>
 <stopOnError>true</stopOnError>
@@ -520,7 +521,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="CPPUNIT" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${EXECUTABLE}</buildCommand>
+<buildCommand>${EXEC}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}/CPPUNIT:exec/CPPUNIT_RUN:yes</buildTarget>
 <stopOnError>true</stopOnError>

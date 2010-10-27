@@ -14,7 +14,7 @@ from ide_project import IdeProject
 
 class Plugin(racy.rplugins.Plugin):
     name = 'IDE'
-    editor_list = ['none', 'qtcreator', 'eclipse', 'qtcreator-clean']
+    editor_list = ['none', 'qtcreator', 'eclipse', 'qtcreator-clean', 'eclipse-clean']
 
 
 

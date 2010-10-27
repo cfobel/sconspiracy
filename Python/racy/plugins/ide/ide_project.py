@@ -109,7 +109,13 @@ org.eclipse.debug.core/.launches/racy_BUILDDEPS=no_config.launch',
                                   'rc/eclipse/template.launchConfigurationHistory.xml' :
                                        '${IDE_DIR}/eclipse/.metadata/.plugins/\
 org.eclipse.debug.ui/launchConfigurationHistory.xml',
-                         }
+                                  'rc/eclipse/template.racy_RELEASE_config.launch' :
+                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
+org.eclipse.debug.core/.launches/racy_RELEASE_config.launch',
+                                   'rc/eclipse/template.racy_RELEASE.launch' :
+                                       '${IDE_DIR}/eclipse/.metadata/.plugins/\
+org.eclipse.debug.core/.launches/racy_RELEASE.launch',
+                        }
 
 
                        }

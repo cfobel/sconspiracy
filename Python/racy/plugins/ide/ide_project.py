@@ -149,8 +149,8 @@ class IdeProject(ConstructibleRacyProject):
                                     self.prj.projects_db['launcher'].full_name)
                                          + ext_exec,
                 'TYPE'            : self.prj.get_lower('TYPE'),
-                'DEPS'            : [opjoin(ide_dir, i.base_name
-                                     , self.prj.get_lower('IDE'), i.base_name)
+                'DEPS'            : [opjoin(ide_dir,  self.prj.get_lower('IDE')
+                                    ,i.base_name, i.base_name)
                                      for i in deps],
                 'PROFILE'         : opjoin(self.prj.install_path, 'profile.xml'),
                 'OS'              : os.name,

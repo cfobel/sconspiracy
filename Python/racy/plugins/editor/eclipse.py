@@ -202,6 +202,7 @@ class EclipseProject(ConstructibleRacyProject):
         ##########################################      
         in_file  = open(cproject_src, "r")
         out_file = open(cproject_dest, "w")
+        print out_file
         
         tpl = Template(in_file.read())
         in_file.close()

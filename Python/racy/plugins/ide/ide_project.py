@@ -57,7 +57,6 @@ class IdeProject(ConstructibleRacyProject):
         self.configure_env()
         return result
 
-    
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
 
@@ -97,27 +96,6 @@ class IdeProject(ConstructibleRacyProject):
                        '${IDE_DIR}/eclipse/${PRJ_NAME}/.project',
                 'rc/eclipse/template.cproject' :
                        '${IDE_DIR}/eclipse/${PRJ_NAME}/.cproject',
-                'rc/eclipse/template.racy_config.launch' :
-                       '${IDE_DIR}/eclipse/' + eclipse_launch 
-                       + '/racy_config.launch',
-                'rc/eclipse/template.racy_BUILDDEPS=no.launch' :
-                       '${IDE_DIR}/eclipse/' + eclipse_launch
-                       + '/racy_BUILDDEPS=no.launch',
-                'rc/eclipse/template.racy.launch' :
-                       '${IDE_DIR}/eclipse/' + eclipse_launch
-                       + '/racy.launch',
-                 'rc/eclipse/template.racy_BUILDDEPS=no_config.launch' :
-                       '${IDE_DIR}/eclipse/' + eclipse_launch
-                       + '/racy_BUILDDEPS=no_config.launch',
-                  'rc/eclipse/template.launchConfigurationHistory.xml' :
-                       '${IDE_DIR}/eclipse/' + eclipse_launch
-                       + '/launchConfigurationHistory.xml',
-                  'rc/eclipse/template.racy_RELEASE_config.launch' :
-                       '${IDE_DIR}/eclipse/' + eclipse_launch
-                       + '/racy_RELEASE_config.launch',
-                   'rc/eclipse/template.racy_RELEASE.launch' :
-                       '${IDE_DIR}/eclipse/' + eclipse_launch
-                       + '/racy_RELEASE.launch',
                 }
 
 
@@ -234,40 +212,22 @@ class IdeProject(ConstructibleRacyProject):
                 install_dir = opjoin(dico['IDE_DIR'],'eclipse', dico['PRJ_NAME'])
                 # Create path to destination directory
 
-                metadata_dir = opjoin(dico['IDE_DIR'], 'eclipse', '.metadata', '.plugins',
-                        'org.eclipse.debug.core', '.launches')
-                
-                
                 if not os.path.exists(install_dir):
                     os.makedirs(install_dir)
                 
-                if not os.path.exists(metadata_dir):
-                    os.makedirs(metadata_dir)
-                
-                metadata_dir = opjoin(dico['IDE_DIR'], 'eclipse', '.metadata', '.plugins',
-                        'org.eclipse.debug.ui')
-                
-                
-                if not os.path.exists(metadata_dir):
-                    os.makedirs(metadata_dir)
-
-                           
                 for file in dico_ide['eclipse']:
                     # path to .pro template
-
                     temp = opjoin(os.path.dirname(__file__),
                             os.path.normpath(file))
-
-
                     if os.path.exists(temp):
-
                         # Open template with mako
                         template_pro = Template(filename = temp) 
                         try:
                             #replace template with dictionary
                             template = template_pro.render(**dico)
                         except:
-                            traceback = RichTraceback()
+                            print exceptions.text_error_template().render()
+
                             exit()
                                     
                             #destination file template
@@ -276,6 +236,7 @@ class IdeProject(ConstructibleRacyProject):
 
                         #open and write destination file
                         rutils.put_file_content(os.path.normpath(dest_file), template)
+                        
              ###
             # Clean qtcreator file
             ###

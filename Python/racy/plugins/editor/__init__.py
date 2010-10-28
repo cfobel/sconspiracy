@@ -45,7 +45,7 @@ class Plugin(racy.rplugins.Plugin):
             return [res]
 
         elif(prj.get_lower(self.name) == 'eclipse'): 
-                res = EclipseProject
+                res = EclipseProject(prj)
                 return [res]
 
 

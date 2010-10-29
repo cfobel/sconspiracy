@@ -95,18 +95,18 @@ class IdeProject(ConstructibleRacyProject):
                                     self.prj.projects_db['launcher'].full_name)
                                          + ext_exec,
                 'TYPE'            : self.prj.get_lower('TYPE'),
-                'DEPS'            : [opjoin(ide_dir,  self.prj.get_lower('IDE')
-                                    ,i.base_name, i.base_name)
-                                     for i in self.prj.rec_deps],
                 'PROFILE'         : opjoin(self.prj.install_path, 'profile.xml'),
                 'OS'              : os.name,
                 'OS_DIR'          : qt_default_dir,
                 'IDE_PRJ_PATH'    : opjoin(ide_dir,self.prj.get_lower('IDE'),
                                     self.prj.base_name, self.prj.base_name),
 
-                'PLUGIN_PATH'     : os.path.dirname(__file__)
-                }
+                'PLUGIN_PATH'     : os.path.dirname(__file__),
+                'ROOT_PROJECT'    : 'fwData',
+                'DEPENDENCIES'    : [i.include_path for i in self.prj.rec_deps],
 
+                }
+            print dico['DEPENDENCIES']
             dico_ide = {
            
             'qtcreator' :  
@@ -115,6 +115,15 @@ class IdeProject(ConstructibleRacyProject):
                         [
                             ('QT_DIR'   ,'${IDE_DIR}/qtcreator/${PRJ_NAME}/'),
                             ('TEMP_DIR' ,'${PLUGIN_PATH}/rc/qtcreator/'      ),
+                        ]
+                    )
+                    ,
+                    ('vars',
+                        [
+                            ('DEPS' , [opjoin(ide_dir,  self.prj.get_lower('IDE')
+                                    ,i.base_name, i.base_name)
+                                     for i in self.prj.rec_deps],
+                            )
                         ]
                     )
                     ,
@@ -135,7 +144,7 @@ class IdeProject(ConstructibleRacyProject):
                [ 
                     ('dirs',
                         [
-                           ( 'EC_DIR'   , '${IDE_DIR}/eclipse/${PRJ_NAME}/'),
+                           ( 'EC_DIR'   , '${IDE_DIR}/eclipse/${ROOT_PROJECT}/${PRJ_NAME}/'),
                            ( 'TEMP_DIR' , '${PLUGIN_PATH}/rc/eclipse/'       ),
                         ]
                     )
@@ -169,10 +178,15 @@ class IdeProject(ConstructibleRacyProject):
                
                 for i,j in dico_ide[ide_type]:
                     for k,l in j:
-                        temp_key = Template(k)
-                        temp_key = temp_key.render(**dico_vars)
-                        temp_value =  Template(l)
-                        dico_vars[temp_key]  = temp_value.render(**dico_vars)
+                        
+                        if not i == 'vars':
+                            temp_key = Template(k)
+                            temp_key = temp_key.render(**dico_vars)
+                            temp_value =  Template(l)
+                            dico_vars[temp_key]  = temp_value.render(**dico_vars)
+                        else:
+                            dico_vars[k]  = l
+
                         if i == 'template_prj':
                             # Open template with mako
                             template = Template(filename = temp_key) 

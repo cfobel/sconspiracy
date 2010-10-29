@@ -4,7 +4,8 @@
 rand_range = [100000000, 9999999999]
 ID_CCONFIG_1 = str(random.randint(*rand_range));
 ID_CCONFIG_2 = str(random.randint(*rand_range));
-ID_CCONFIG_3 = str(random.randint(*rand_range));%>
+ID_CCONFIG_3 = str(random.randint(*rand_range));
+%>
 <cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 <storageModule moduleId="org.eclipse.cdt.core.settings">
 <cconfiguration id="0.${ID_CCONFIG_1}">
@@ -29,6 +30,12 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));%>
 <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1225340334" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 </tool>
 <tool id="org.eclipse.cdt.build.core.settings.holder.656340484" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+
+<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.394996232" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+% for i in DEPENDENCIES:
+<listOptionValue builtIn="false" value="&quot;${i[0]}&quot;"/>
+%endfor
+</option>
 
 <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.196334210" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 </tool>

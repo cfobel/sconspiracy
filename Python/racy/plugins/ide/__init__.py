@@ -39,6 +39,5 @@ class Plugin(racy.rplugins.Plugin):
     def get_additive(self, prj):
         if prj.type not in ['shared','exec', 'bundle']:
             return [] 
-
         res = IdeProject(prj) 
         return [res]

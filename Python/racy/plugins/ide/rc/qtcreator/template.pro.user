@@ -1,9 +1,21 @@
 <%
-
+import os
 if not TYPE == 'exec':
-    HACK = ''
-    ARGUMENT = '\n        <value type = "QString">' + PROFILE + '</value>\n    ' +  '</valuelist>'
-    EXECUTABLE = LAUNCHER_PATH
+    if os.path.exists(PROFILE_DIR) and TYPE == 'bundle':
+        profile = os.path.join(PROFILE_DIR, 'profile.xml')
+        if os.path.exists(profile):
+            HACK = ''
+            ARGUMENT = '\n        <value type = "QString">' + profile + '</value>\n    ' +  '</valuelist>'
+            EXECUTABLE = LAUNCHER_PATH
+        else:
+            HACK = '/'
+            ARGUMENT = ''
+            EXECUTABLE = ''
+
+    else:
+        HACK = '/'
+        ARGUMENT = ''
+        EXECUTABLE = ''
 else:
     HACK = '/'
     ARGUMENT = ''

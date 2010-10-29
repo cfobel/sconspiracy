@@ -112,7 +112,6 @@ class IdeProject(ConstructibleRacyProject):
             'DEPENDENCIES'    : include,
 
             }
-        print dico['DEPENDENCIES']
         dico_ide = {
        
         'qtcreator' :  
@@ -150,17 +149,25 @@ class IdeProject(ConstructibleRacyProject):
            [ 
                 ('dirs',
                     [
-                       ( 'EC_DIR'   , '${IDE_DIR}/eclipse/${ROOT_PROJECT}/${PRJ_NAME}/'),
-                       ( 'TEMP_DIR' , '${PLUGIN_PATH}/rc/eclipse/'       ),
+                       ( 'EC_DIR'     , ('${IDE_DIR}/eclipse/'
+                                         '${ROOT_PROJECT}/${PRJ_NAME}/')
+                       ),
+                       ( 'LAUNCH_DIR' , ('${IDE_DIR}/eclipse/'
+                                         '${ROOT_PROJECT}/.metadata/.plugins/'
+                                          'org.eclipse.debug.core/.launches/')
+                       ),
+                       ( 'TEMP_DIR'   , '${PLUGIN_PATH}/rc/eclipse/'       ),
                     ]
                 )
                 ,
                 ('template_prj',
                     [
-                        ('${TEMP_DIR}/template.project'  ,
-                            '${EC_DIR}/.project'             ),
-                        ('${TEMP_DIR}/template.cproject' ,
-                           '${EC_DIR}/.cproject'             ),
+                        ('${TEMP_DIR}/template.project'       ,
+                            '${EC_DIR}/.project'               ),
+                        ('${TEMP_DIR}/template.cproject'      ,
+                           '${EC_DIR}/.cproject'               ),
+                        ('${TEMP_DIR}/template_exec.launch' ,
+                           '${LAUNCH_DIR}/exec.launch'         ),
                     ]
                 )
            ]

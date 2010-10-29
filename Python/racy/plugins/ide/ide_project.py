@@ -102,6 +102,7 @@ class IdeProject(ConstructibleRacyProject):
                                      + ext_exec,
             'TYPE'            : prj.get_lower('TYPE'),
             'PROFILE_DIR'     : opjoin(prj.root_path, 'rc'),
+            'ROOT_PROFILE_DIR': opjoin(self.prj.root_path, 'rc'),
             'OS'              : os.name,
             'OS_DIR'          : qt_default_dir,
             'IDE_PRJ_PATH'    : opjoin(ide_dir,prj.get_lower('IDE'),

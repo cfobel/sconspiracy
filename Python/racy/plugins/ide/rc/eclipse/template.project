@@ -92,7 +92,6 @@
 % for i in SOURCES :
 <% 
 j = i.replace(ROOT_DIR, '') 
-print j
 %>
 		<link>
 			<name>${j}</name>

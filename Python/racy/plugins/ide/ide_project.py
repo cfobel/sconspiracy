@@ -73,41 +73,9 @@ class IdeProject(ConstructibleRacyProject):
             ext = ''
             ext_exec = ''
 
-
-        # if qtcreator defaulkt dir exist
-        if os.path.exists(qt_default_dir):
-            eclipse_launch = ('.metadata/.plugins/org.eclipse'
-                                '.debug.core/.launches')
-            dico_ide = {
-           
-            'qt' :  
-                {
-                'rc/qtcreator/template.pro'     :
-                       '${IDE_DIR}/qtcreator/${PRJ_NAME}/${PRJ_NAME}.pro',
-                'rc/qtcreator/template.pro.user':
-                       '${IDE_DIR}/qtcreator/${PRJ_NAME}/${PRJ_NAME}.pro.user',
-                'rc/qtcreator/template.qws'     :
-                        opjoin(qt_default_dir, '${PRJ_NAME}.qws'),
-                },
-
-            'eclipse' :
-                {
-                'rc/eclipse/template.project' :
-                       '${IDE_DIR}/eclipse/${PRJ_NAME}/.project',
-                'rc/eclipse/template.cproject' :
-                       '${IDE_DIR}/eclipse/${PRJ_NAME}/.cproject',
-                }
-
-
-               }
-
-
-
-            deps = self.prj.rec_deps
             ide_dir = opjoin(racy.renv.dirs.install, 'ide')
-            compiler_path = opjoin(racy.get_bin_path(), 'racy')
 
-            # This dictionary contains all varibles for templates
+            # this dictionary contains all varibles for templates
             dico = {
                 'INSTALL_DIR'     : racy.renv.dirs.install,
                 'INSTALL_PRJ_DIR' : self.prj.install_path,
@@ -119,8 +87,8 @@ class IdeProject(ConstructibleRacyProject):
                                      self.prj.full_name) + ext_exec, 
                 'HEADERS'         : self.prj.get_includes(False),
                 'SOURCES'         : self.prj.get_sources(False),
-                'COMPILE_CMD'     : compiler_path + ext,
-                'CLEAN_CMD'       : compiler_path + ext +' '+ self.prj.base_name,
+                'COMPILE_CMD'     : opjoin(racy.get_bin_path(), 'racy') + ext,
+                'CLEAN_CMD'       : opjoin(racy.get_bin_path(), 'racy') + ext +' '+ self.prj.base_name,
                 'BIN_PATH'        : racy.renv.dirs.install_bin,
                 'BUNDLE_PATH'     : racy.renv.dirs.install_bundle,
                 'LAUNCHER_PATH'   : opjoin(racy.renv.dirs.install_bin,
@@ -129,149 +97,104 @@ class IdeProject(ConstructibleRacyProject):
                 'TYPE'            : self.prj.get_lower('TYPE'),
                 'DEPS'            : [opjoin(ide_dir,  self.prj.get_lower('IDE')
                                     ,i.base_name, i.base_name)
-                                     for i in deps],
+                                     for i in self.prj.rec_deps],
                 'PROFILE'         : opjoin(self.prj.install_path, 'profile.xml'),
                 'OS'              : os.name,
+                'OS_DIR'          : qt_default_dir,
                 'IDE_PRJ_PATH'    : opjoin(ide_dir,self.prj.get_lower('IDE'),
-                                    self.prj.base_name, self.prj.base_name)
+                                    self.prj.base_name, self.prj.base_name),
 
+                'PLUGIN_PATH'     : os.path.dirname(__file__)
                 }
 
-
-            ###
-            # Creation  qtcreator file
-            ###
-
-            if(self.prj.get_lower('IDE') == 'qtcreator'):
-                racy.print_msg('Create qtcreator project : ' + self.prj.base_name)
-                
-                install_dir = opjoin(dico['IDE_DIR'],'qtcreator', dico['PRJ_NAME'])
-
-                # Create path to destination directorie
-                if not os.path.exists(install_dir):
-                    os.makedirs(install_dir)
-                
-                
-                           
-                for file in dico_ide['qt']:
-                    # path to .pro template
-
-                    temp = opjoin(os.path.dirname(__file__),
-                            os.path.normpath(file))
-
-
-                    if os.path.exists(temp):
-
-                        # Open template with mako
-                        template_pro = Template(filename = temp) 
-
-                        #replace template with dictionary
-                        template = template_pro.render(**dico)
-
-                        #destination file template
-                        dest_file = Template(os.path.normpath(dico_ide['qt'][file]))
-                        dest_file = dest_file.render(**dico)
-
-                        #open and write destination file
-                        rutils.put_file_content(os.path.normpath(dest_file), template)
-                    else:
-                        racy.print_msg('the template : ' + temp  + ' doesn\'t exist')
-            
-            ###
-            # Clean qtcreator file
-            ###
-            elif(self.prj.get_lower('IDE') == 'qtcreator-clean'):
-                racy.print_msg('Remove qtcreator preferencies: '+
-                        self.prj.base_name)        
-                install_dir = opjoin(dico['IDE_DIR'],'qtcreator', dico['PRJ_NAME'])
-
-                for file in dico_ide['qt'] :
-                    #destination file template
-                    dest_file = Template(os.path.normpath(dico_ide['qt'][file]))
-               
-                    try:
-                        file = dest_file.render(**dico)
-                        os.remove(file)
-                    except  OSError:
-                        racy.print_msg('file : ' + file + ' doesn\'t exist')
-
-                try:
-                    os.rmdir(install_dir)
-                except OSError:
-                    pass
-
-                
-                try:
-                    os.rmdir(opjoin(dico['IDE_DIR'], 'qtcreator'))
-                except OSError:
-                    pass
-
-            elif(self.prj.get_lower('IDE') == 'eclipse'):
-                racy.print_msg('Create eclipse project : ' + self.prj.base_name)
-
-                install_dir = opjoin(dico['IDE_DIR'],'eclipse', dico['PRJ_NAME'])
-                # Create path to destination directory
-
-                if not os.path.exists(install_dir):
-                    os.makedirs(install_dir)
-                
-                for file in dico_ide['eclipse']:
-                    # path to .pro template
-                    temp = opjoin(os.path.dirname(__file__),
-                            os.path.normpath(file))
-                    if os.path.exists(temp):
-                        # Open template with mako
-                        template_pro = Template(filename = temp) 
-                        try:
-                            #replace template with dictionary
-                            template = template_pro.render(**dico)
-                        except:
-                            print exceptions.text_error_template().render()
-
-                            exit()
-                                    
-                            #destination file template
-                        dest_file = Template(os.path.normpath(dico_ide['eclipse'][file]))
-                        dest_file = dest_file.render(**dico)
-
-                        #open and write destination file
-                        rutils.put_file_content(os.path.normpath(dest_file), template)
+            dico_ide = {
+           
+            'qtcreator' :  
+                [
+                    ('dirs',
+                        [
+                            ('QT_DIR'   ,'${IDE_DIR}/qtcreator/${PRJ_NAME}/'),
+                            ('TEMP_DIR' ,'${PLUGIN_PATH}/rc/qtcreator/'      ),
+                        ]
+                    )
+                    ,
+                    ('template_prj',
+                        [
                         
-             ###
-            # Clean qtcreator file
-            ###
-            elif(self.prj.get_lower('IDE') == 'eclipse-clean'):
-                racy.print_msg('Remove eclipse preferencies: '+
-                        self.prj.base_name)        
-                install_dir = opjoin(dico['IDE_DIR'],'eclipse', dico['PRJ_NAME'])
+                            ('${TEMP_DIR}/template.pro'     , 
+                                    '${QT_DIR}/${PRJ_NAME}.pro'     ),
+                            ('${TEMP_DIR}/template.pro.user',
+                                    '${QT_DIR}/${PRJ_NAME}.pro.user'),
+                            ('${TEMP_DIR}/template.qws'     ,
+                                    '${OS_DIR}/${PRJ_NAME}.qws'     ),
+                        ]
+                    )
+                ],
 
-                for file in dico_ide['eclipse'] :
-                    #destination file template
-                    dest_file = Template(os.path.normpath(dico_ide['eclipse'][file]))
+            'eclipse' :
+               [ 
+                    ('dirs',
+                        [
+                           ( 'EC_DIR'   , '${IDE_DIR}/eclipse/${PRJ_NAME}/'),
+                           ( 'TEMP_DIR' , '${PLUGIN_PATH}/rc/eclipse/'       ),
+                        ]
+                    )
+                    ,
+                    ('template_prj',
+                        [
+                            ('${TEMP_DIR}/template.project'  ,
+                                '${EC_DIR}/.project'             ),
+                            ('${TEMP_DIR}/template.cproject' ,
+                               '${EC_DIR}/.cproject'             ),
+                        ]
+                    )
+               ]
+            }
+
+
+
+            deps = self.prj.rec_deps
+            ide_dir = opjoin(racy.renv.dirs.install, 'ide')
+            compiler_path = opjoin(racy.get_bin_path(), 'racy')
+
+
+
+            if not (self.prj.get_lower('IDE').endswith('clean')):
+                ide_type = self.prj.get_lower('IDE')
+
+                racy.print_msg('Create {0} project : {1}'.format(ide_type , self.prj.base_name))
+
+                dico_vars = dico 
+
                
-                    try:
-                        file = dest_file.render(**dico)
-                        os.remove(file)
-                    except  OSError:
-                        pass
+                for i,j in dico_ide[ide_type]:
+                    for k,l in j:
+                        temp_key = Template(k)
+                        temp_key = temp_key.render(**dico_vars)
+                        temp_value =  Template(l)
+                        dico_vars[temp_key]  = temp_value.render(**dico_vars)
+                        if i == 'template_prj':
+                            # Open template with mako
+                            template = Template(filename = temp_key) 
 
-                try:
-                    os.rmdir(install_dir)
-                except OSError:
-                    pass
+                            #replace template with dictionary
+                            template = template.render(**dico_vars)
 
-                
-                try:
-                    os.rmdir(opjoin(dico['IDE_DIR'], 'eclipse'))
-                except OSError:
-                    pass
+                            
+                            #destination file template
+                            try:
+                                dest_file = Template(os.path.normpath(dico_vars[temp_key]))
+                                dest_file = dest_file.render(**dico_vars)
+                            except:
+                                print exceptions.text_error_template().render()
 
-            else:
-                        racy.print_msg('the template : ' + temp  + ' doesn\'t exist')
- 
-                    
-        else:
-            racy.print_msg('Default qtcreator directory not found, please \
-check your installation')
+                            #open and write destination file
+                            rutils.put_file_content(os.path.normpath(dest_file), template)
+                        elif i == 'dirs' and not os.path.exists(dico_vars[temp_key]):
+                            try:
+                                os.makedirs(dico_vars[temp_key])
+                            except:
+                                pass
+
 
         return result

@@ -1,0 +1,51 @@
+<%
+import os
+from mako.template import Template
+from mako import exceptions
+import racy.rutils  
+import racy.rutils as rutils
+
+if not TYPE == 'exec':
+    if os.path.exists(ROOT_PROFILE_DIR) and TYPE == 'bundle':
+
+        list_profile = os.listdir(ROOT_PROFILE_DIR)
+        for i in list_profile:
+            if i.endswith('.xml') and i.startswith('profile'): 
+                argument   = i 
+                executable = LAUNCHER_PATH
+                root = ROOT_PROJECT
+                
+                name = i[:-4]
+                name = name[7:]
+                if name == '':
+                    name = 'default'
+                
+                dico = {
+                    'ARGUMENT'     : i,
+                    'EXECUTABLE'   : executable,
+                    'ROOT_PROJECT' : root,
+                    'NAME'         : name,
+                        }
+                try:
+                    template   = Template(filename = os.path.join(TEMP_DIR, 'template_executable.launch'))
+
+                    template   = template.render(**dico)  
+                except:
+                    print exceptions.text_error_template().render()
+
+               
+                dest_file  = os.path.join(LAUNCH_DIR, name)
+                rutils.put_file_content(os.path.normpath(dest_file) + '.launch', template)
+        else:
+            ARGUMENT = ''
+            EXECUTABLE = ''
+
+    else:
+        ARGUMENT = ''
+        EXECUTABLE = ''
+else:
+    ARGUMENT = ''
+    EXECUTABLE = EXEC_PATH
+
+       
+%>

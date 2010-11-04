@@ -33,6 +33,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 
 <option id="org.eclipse.cdt.build.core.settings.holder.incpaths.394996232" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 % for i in DEPENDENCIES:
+<%   j = i.replace('\\', '/') %>
 <listOptionValue builtIn="false" value="&quot;${i}&quot;"/>
 %endfor
 </option>

@@ -82,7 +82,10 @@
 
     <linkedResources>
 % for i in HEADERS:
-<% j = i.replace(ROOT_DIR, '') %>
+<%
+    j = i.replace(ROOT_DIR, '') 
+    j = j.replace('\\', '/') 
+%>
 		<link>
 			<name>${j}</name>
 			<type>1</type>
@@ -91,7 +94,8 @@
 %endfor
 % for i in SOURCES :
 <% 
-j = i.replace(ROOT_DIR, '') 
+    j = i.replace(ROOT_DIR, '') 
+    j = j.replace('\\', '/') 
 %>
 		<link>
 			<name>${j}</name>

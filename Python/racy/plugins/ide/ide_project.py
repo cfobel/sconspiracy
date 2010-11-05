@@ -88,6 +88,7 @@ class IdeProject(ConstructibleRacyProject):
             'ROOT_DIR'        : prj.root_path,
             'IDE_DIR'         : ide_dir, 
             'PRJ_NAME'        : prj.base_name,
+            'USER_PRJ_NAME'   : prj.base_name, 
             'EXEC'            : prj.full_name + ext_exec,
             'EXEC_PATH'       : opjoin(prj.install_path, 
                                  prj.full_name) + ext_exec, 

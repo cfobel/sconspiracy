@@ -20,7 +20,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="${PRJ_NAME}" buildProperties="" description="" id="0.${ID_CCONFIG_1}" name="Debug" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+<configuration artifactName="${USER_PRJ_NAME}" buildProperties="" description="" id="0.${ID_CCONFIG_1}" name="Debug" parent="org.eclipse.cdt.build.core.prefbase.cfg">
 <folderInfo id="0.${ID_CCONFIG_1}" name="/" resourcePath="">
 <toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.309179245" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 <targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.309179245.625880249" name=""/>
@@ -33,6 +33,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 
 <option id="org.eclipse.cdt.build.core.settings.holder.incpaths.394996232" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 % for i in DEPENDENCIES:
+<%   j = i.replace('\\', '/') %>
 <listOptionValue builtIn="false" value="&quot;${i}&quot;"/>
 %endfor
 </option>
@@ -287,7 +288,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="${PRJ_NAME}" buildProperties="" description="" id="0.${ID_CCONFIG_1}.${ID_CCONFIG_2}" name="Release" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+<configuration artifactName="${USER_PRJ_NAME}" buildProperties="" description="" id="0.${ID_CCONFIG_1}.${ID_CCONFIG_2}" name="Release" parent="org.eclipse.cdt.build.core.prefbase.cfg">
 <folderInfo id="0.${ID_CCONFIG_1}.${ID_CCONFIG_2}." name="/" resourcePath="">
 <toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.72385264" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 <targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.72385264.992441996" name=""/>

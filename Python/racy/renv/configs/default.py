@@ -61,9 +61,9 @@ USE               = []
 DEF               = []
 INC               = []
 
-PRJ_INCLUDES      = []
-PRJ_SOURCES       = []
-PRJ_SOURCES_FILES = []
+INCLUDE_DIRS      = ['include']
+SOURCE_DIRS       = ['src']
+SOURCE_FILES      = []
 
 STDLIBPATH        = []
 STDLIB            = []

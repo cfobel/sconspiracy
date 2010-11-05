@@ -164,6 +164,7 @@ class RacyAttributeException(RacyException):
 
 #------------------------------------------------------------------------------
 def no_undef_attr_read(cls):
+    return cls
     def __getattr__(self, attr):
         if attr.startswith('__racy_internal'):
             raise AttributeError
@@ -173,6 +174,7 @@ def no_undef_attr_read(cls):
     return cls
 
 def no_undef_attr_write(cls):
+    return cls
     def __setattr__(self, attr, value):
         if not hasattr(self, attr) and not attr.startswith('__racy_internal'):
             msg = 'write "{0}"'.format(str(value))

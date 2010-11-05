@@ -20,11 +20,11 @@ from racy.rutils           import memoize, remove_vcs_dirs
 all = ['RacyProjectsDB']
 
 @memoize
-def find_files(root, dir, filename):
+def find_files(root, directory, filename):
     """Find recursively 'filename' in 'root' and returns a list
-    with paths of found files if these files are in a directory 'dir'.
+    with paths of found files if these files are in a directory 'directory'.
     Ignore VCS dirs.
-    The 'dir' is filtered to minimize the number of directories walked.
+    The 'directory' is filtered to minimize the number of walked directories.
     """
 
     path_list = []
@@ -32,10 +32,10 @@ def find_files(root, dir, filename):
     for root, dirs, files in walker:
         remove_vcs_dirs(dirs)
 
-        #if dir containt 'dir', don't walk others
-        if dir in dirs: dirs[:] = [dir]
+        #if dirs containt 'directory', don't walk others
+        if directory in dirs: dirs[:] = [directory]
 
-        if root.endswith(os.path.sep + dir):
+        if root.endswith(os.path.sep + directory):
             if filename in files:
                 path_list.append(os.path.join(root, filename))
                 dirs[:] = []

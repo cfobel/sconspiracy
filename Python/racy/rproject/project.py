@@ -293,7 +293,7 @@ class RacyProject(object):
 
     @cached_property
     def src_dirs (self):
-        return [constants.SOURCE_PATH] + self.get('PRJ_SOURCES')
+        return self.get('SOURCE_DIRS')
 
     @cached_property
     def src_path (self):
@@ -301,7 +301,7 @@ class RacyProject(object):
 
     @cached_property
     def include_dirs (self):
-        return [constants.INCLUDE_PATH] + self.get('PRJ_INCLUDES')
+        return self.get('INCLUDE_DIRS')
 
     @cached_property
     def include_path (self):
@@ -323,7 +323,7 @@ class RacyProject(object):
 
     @cached_property
     def cpp_path (self):
-        return [self.get_path(p) for p in [constants.INCLUDE_PATH,'interface'] 
+        return [self.get_path(p) for p in self.get('INCLUDE_DIRS')
                 if os.path.isdir(self.get_path(p))]
 
 
@@ -719,14 +719,14 @@ class RacyProject(object):
 
     @cached_property
     def extra_sources_build_dirs(self):
-        dirs = set(map(os.path.dirname, self.get('PRJ_SOURCES_FILES')))
+        dirs = set(map(os.path.dirname, self.get('SOURCE_FILES')))
         builddirs = map( self.get_build_dir_for , dirs )
         dirs      = map( self.get_path , dirs )
         return zip(builddirs, dirs)
 
     @cached_property
     def extra_sources(self):
-        return map(self.get_build_dir_for, self.get('PRJ_SOURCES_FILES'))
+        return map(self.get_build_dir_for, self.get('SOURCE_FILES'))
 
     @cached_property
     def sources_build_dirs(self):

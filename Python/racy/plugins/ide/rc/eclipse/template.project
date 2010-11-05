@@ -84,7 +84,8 @@
 % for i in HEADERS:
 <%
     j = i.replace(ROOT_DIR, '') 
-    j = j.replace('\\', '/') 
+    j = j.replace('\\', '/')
+    i = i.replace('\\', '/')
 %>
 		<link>
 			<name>${j}</name>
@@ -96,6 +97,8 @@
 <% 
     j = i.replace(ROOT_DIR, '') 
     j = j.replace('\\', '/') 
+    i = i.replace('\\', '/')
+
 %>
 		<link>
 			<name>${j}</name>

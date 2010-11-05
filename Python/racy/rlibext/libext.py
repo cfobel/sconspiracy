@@ -141,11 +141,11 @@ class LibExt(object):
 
     @property
     def BINPATH(self):
-        return self.binpath
+        return map(LibExt.get_path, self.binpath)
 
     @property
     def LIBPATH(self):
-        return self.libpath
+        return map(LibExt.get_path, self.libpath)
 
     @property
     def LIBS(self):
@@ -160,7 +160,7 @@ class LibExt(object):
 
     @property
     def CPPPATH(self):
-        return self.cpppath
+        return map(LibExt.get_path, self.cpppath)
 
     @property
     def CPPDEFINES(self):
@@ -168,7 +168,7 @@ class LibExt(object):
 
     @property
     def FRAMEWORKPATH(self):
-        return self.frameworkpath
+        return map(LibExt.get_path, self.frameworkpath)
 
     @property
     def ABS_BINPATH(self):
@@ -210,14 +210,15 @@ class LibExt(object):
         return path
 
     @staticmethod
-    def get_libext_path(path):
+    def get_path(path):
         path = racy.rutils.iterize(path)
         path = os.path.join(*path)
         return path
 
     def get_abs_path(self, pathlst):
-            pathlst = [self.get_libext_path(path) for path in pathlst]
-            pathlst = [self.absolutize(path, self.basepath) for path in pathlst]
+            pathlst = [LibExt.get_path(path) for path in pathlst]
+            pathlst = [LibExt.absolutize(path, self.basepath)
+                        for path in pathlst]
             return pathlst
 
     def preconfigure(self, env, opts):
@@ -229,18 +230,20 @@ class LibExt(object):
 
         nolink = 'nolink' in opts
         conf = {}
-        names = [
-                'LIBPATH'      , 'LIBS'      ,
-                'CPPPATH'      , 'CPPDEFINES',
-                'FRAMEWORKPATH', 'FRAMEWORKS',
-                'CXXFLAGS'     , 'LINKFLAGS' ,
-                ]
+        names = {
+                'LIBPATH'       : 'ABS_LIBPATH'      ,
+                'CPPPATH'       : 'ABS_CPPPATH'      ,
+                'FRAMEWORKPATH' : 'ABS_FRAMEWORKPATH',
+                'LIBS'          : 'LIBS'             ,
+                'CPPDEFINES'    : 'CPPDEFINES'       ,
+                'FRAMEWORKS'    : 'FRAMEWORKS'       ,
+                'CXXFLAGS'      : 'CXXFLAGS'         ,
+                'LINKFLAGS'     : 'LINKFLAGS'        ,
+                }
 
-        for name in names:
-            attr = getattr(self, name)
+        for name, attr_name in names.items():
+            attr = getattr(self, attr_name)
             if attr:
-                if 'PATH' in name:
-                    attr = self.get_abs_path(attr)
                 conf[name] = attr
 
 
@@ -260,7 +263,7 @@ class LibExt(object):
         env.PrependUnique(**conf)
 
 
-        bin_path = [self.get_libext_path(path) for path in self.BINPATH]
+        bin_path = [self.get_path(path) for path in self.BINPATH]
         bin_path = [self.absolutize(path, self.basepath) for path in bin_path]
         env.PrependENVPath('PATH',bin_path)
 

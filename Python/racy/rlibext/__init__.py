@@ -179,66 +179,65 @@ class register(object):
         libreg  = self.libs
         libext  = None
 
-        if libname in libreg and libreg[libname]:
-            from racy.renv.options import get_option
-
-            comp = prj.compiler
-            lib_avail = libreg[libname]
-
-            if comp not in lib_avail:
-                comp_avail = [UNSPECIFIED_COMPILER]
-                comp_avail += [el for el in lib_avail
-                                    if str(el) != UNSPECIFIED_COMPILER]
-                comp = sorted(comp_avail)[-1]
-
-            lib_avail = lib_avail[comp]
-
-            binpkg_versions = get_option('BINPKG_VERSIONS')
-
-            if getattr(libname,'version',''):
-                version = libname.version.normalized
-            else:
-                last = sorted(lib_avail)[-1]
-                version = binpkg_versions.get(libname, last)
-
-            if version != binpkg_versions.setdefault(libname,version):
-                msg = ( 'Libext <{libext}> required version {req} (in {prj} '
-                        '[{prj.opts_source}]) is in conflict with currently'
-                        'configured version {current}. (You may need to '
-                        'update your "BINPKG_VERSIONS" variable)' 
-                        )
-                raise racy.LibExtException, msg.format(
-                                libext  = libname,
-                                prj     = prj,
-                                req     = version,
-                                current = binpkg_versions[libname],
-                                )
-
-            version = binpkg_versions[libname]
-            factory = lib_avail[version]
-            libext = factory(libname, get_option('DEBUG') != 'release')
-            libext._src = factory._src
-
-            libext._project_source = {
-                    'TYPE'    : 'bin_libext',
-                    'VERSION' : libext.version,
-                    'NAME'    : libext.name,
-                    'USE'     : libext.depends_on,
-                    'CONSOLE' : "no",
-
-                    'LIBEXTINSTANCE' : libext,
-                    }
-
-            db = prj.projects_db
-            if libext.name not in db:
-                libextprjs = db.make_prj_from_libext(libext)
-                for libextprj in libextprjs:
-                    db.register_prj(libextprj)
-
-        else:
+        if not libreg.get(libname):
             msg = ( 'Libext <{libext}> not found, '
                     'required by {prj} ({prj.opts_source})' )
             raise racy.LibExtException, msg.format(libext=libname,prj=prj)
+
+        from racy.renv.options import get_option
+
+        comp = prj.compiler
+        lib_avail = libreg[libname]
+
+        if comp not in lib_avail:
+            comp_avail = [UNSPECIFIED_COMPILER]
+            comp_avail += [el for el in lib_avail
+                                if str(el) != UNSPECIFIED_COMPILER]
+            comp = sorted(comp_avail)[-1]
+
+        lib_avail = lib_avail[comp]
+
+        binpkg_versions = get_option('BINPKG_VERSIONS')
+
+        if getattr(libname,'version',''):
+            version = libname.version.normalized
+        else:
+            last = sorted(lib_avail)[-1]
+            version = binpkg_versions.get(libname, last)
+
+        if version != binpkg_versions.setdefault(libname,version):
+            msg = ( 'Libext <{libext}> required version {req} (in {prj} '
+                    '[{prj.opts_source}]) is in conflict with currently'
+                    'configured version {current}. (You may need to '
+                    'update your "BINPKG_VERSIONS" variable)' 
+                    )
+            raise racy.LibExtException, msg.format(
+                            libext  = libname,
+                            prj     = prj,
+                            req     = version,
+                            current = binpkg_versions[libname],
+                            )
+
+        version = binpkg_versions[libname]
+        factory = lib_avail[version]
+        libext = factory(libname, get_option('DEBUG') != 'release')
+        libext._src = factory._src
+
+        libext._project_source = {
+                'TYPE'         : 'bin_libext',
+                'VERSION'      : libext.version,
+                'NAME'         : libext.name,
+                'USE'          : libext.depends_on,
+                'CONSOLE'      : "no",
+                'INCLUDE_DIRS' : libext.CPPPATH,
+
+                'LIBEXTINSTANCE' : libext,
+                }
+
+        db = prj.projects_db
+        if libext.name not in db:
+            libextprjs = db.make_prj_from_libext(libext)
+            map(db.register_prj, libextprjs)
 
         return libext
 

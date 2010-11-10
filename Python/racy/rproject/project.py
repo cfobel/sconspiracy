@@ -743,7 +743,8 @@ class RacyProject(object):
             kwargs['replace_dir'] = map(self.get_build_dir_for, path)
         else:
             kwargs['replace_dir'] = path
-
+        print ext
+        print path
         sources = rutils.DeepGlob( ext, path, **kwargs)
         return sources
 
@@ -767,7 +768,7 @@ class RacyProject(object):
     def get_others(self, builddir = True):
         """Returns CXX source files of the project"""
         return self.get_files(
-                self.root_path,
+                [self.root_path],
                 constants.CXX_SOURCE_EXT + constants.CXX_HEADER_EXT,
                 builddir,
                 invert_matches = True

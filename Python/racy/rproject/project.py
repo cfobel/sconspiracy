@@ -736,9 +736,9 @@ class RacyProject(object):
         return zip(builddirs, dirs)
 
 
-    def get_files(self, path, ext, builddir = True):
+    def get_files(self, path, ext, builddir=True, invert_matches=False):
         """Returns HXX source files of the project"""
-        kwargs = {}
+        kwargs = { 'invert_matches': invert_matches}
         if builddir:
             kwargs['replace_dir'] = map(self.get_build_dir_for, path)
         else:
@@ -762,6 +762,15 @@ class RacyProject(object):
                 self.src_path,
                 constants.CXX_SOURCE_EXT,
                 builddir
+                )
+
+    def get_others(self, builddir = True):
+        """Returns CXX source files of the project"""
+        return self.get_files(
+                self.root_path,
+                constants.CXX_SOURCE_EXT + constants.CXX_HEADER_EXT,
+                builddir,
+                invert_matches = True
                 )
 
     includes = cached_property(get_includes)

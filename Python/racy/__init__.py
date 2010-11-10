@@ -255,10 +255,16 @@ def ressources(file):
 #------------------------------------------------------------------------------
 
 
-def get_bin_path():
-    path = os.path.join(__file__, '..', '..','..','bin')
+def get_racy_cmd():
+    import sys
+    path = sys.argv[0]
     path = os.path.abspath(path)
     return os.path.normpath(path)
+
+def get_bin_path():
+    import sys
+    path = get_racy_cmd()
+    return os.path.dirname(path)
 
 try:
     import renv

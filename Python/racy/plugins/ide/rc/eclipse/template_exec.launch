@@ -5,26 +5,32 @@ from mako import exceptions
 import racy.rutils  
 import racy.rutils as rutils
 
-if not TYPE == 'exec':
-    if os.path.exists(ROOT_PROFILE_DIR) and TYPE == 'bundle':
 
-        list_profile = os.listdir(ROOT_PROFILE_DIR)
+if PRJ_NAME == CALLING_PROJECT:
+
+   
+    if  PRJ_TYPE == 'bundle':
+   
+        for i in DEPS:
+            if i['PRJ_NAME'] == 'launcher':
+                launcher = i['PRJ_TARGET']
+
+        list_profile = []
+        for i in OTHERS_FILE:
+            list_profile.append(i.split(SEP)[-1])
+
+        
         for i in list_profile:
             if i.endswith('.xml') and i.startswith('profile'): 
                 argument   = i 
-                executable = LAUNCHER_PATH
-                root = ROOT_PROJECT
-                
-                name = i[:-4]
-                name = name[7:]
-                if name == '':
-                    name = 'default'
+                executable = launcher
+                root = CALLING_PROJECT
                 
                 dico = {
-                    'ARGUMENT'     : i,
-                    'EXECUTABLE'   : executable,
-                    'ROOT_PROJECT' : root,
-                    'NAME'         : name,
+                    'ARGUMENT'        : i,
+                    'EXECUTABLE'      : launcher,
+                    'CALLING_PROJECT' : root,
+                    'NAME'            : argument,
                         }
                 try:
                     template   = Template(filename = os.path.join(TEMP_DIR, 'template_executable.launch'))
@@ -34,7 +40,7 @@ if not TYPE == 'exec':
                     print exceptions.text_error_template().render()
 
                
-                dest_file  = os.path.join(LAUNCH_DIR, name)
+                dest_file  = os.path.join(LAUNCH_DIR, i)
                 rutils.put_file_content(os.path.normpath(dest_file) + '.launch', template)
         else:
             ARGUMENT = ''
@@ -42,10 +48,7 @@ if not TYPE == 'exec':
 
     else:
         ARGUMENT = ''
-        EXECUTABLE = ''
-else:
-    ARGUMENT = ''
-    EXECUTABLE = EXEC_PATH
+        EXECUTABLE = CALLING_PROJECT_TARGET
 
-       
+           
 %>

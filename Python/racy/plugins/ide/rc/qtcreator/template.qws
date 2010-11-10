@@ -1,4 +1,5 @@
 <!DOCTYPE QtCreatorSession>
+<% QTCREATOR_PRJ_DIR = IDE_INSTALL_DIR+SEP+'qtcreator'+SEP %>
 <qtcreator>
  <data>
   <variable>OpenEditors</variable>
@@ -12,14 +13,14 @@
   <variable>ProjectList</variable>
   <valuelist type="QVariantList">
 %for i in DEPS:
-    <value type="QString">${i}.pro</value>
+    <value type="QString">${QTCREATOR_PRJ_DIR}${i['PRJ_NAME']}${SEP}${i['PRJ_NAME']}.pro</value>
 %endfor
-    <value type="QString">${IDE_PRJ_PATH}.pro</value>
+    <value type="QString">${QTCREATOR_PRJ_DIR}${CALLING_PROJECT}.pro</value>
   </valuelist>
  </data>
  <data>
   <variable>StartupProject</variable>
-  <value type="QString">${IDE_PRJ_PATH}.pro</value>
+  <value type="QString">${QTCREATOR_PRJ_DIR}${CALLING_PROJECT}.pro</value>
  </data>
  <data>
   <variable>value-ActiveMode</variable>

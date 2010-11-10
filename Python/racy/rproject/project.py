@@ -5,7 +5,6 @@
 # ****** END LICENSE BLOCK ******
 
 import os
-
 from os.path import join as pathjoin, abspath, normpath
 
 
@@ -743,8 +742,6 @@ class RacyProject(object):
             kwargs['replace_dir'] = map(self.get_build_dir_for, path)
         else:
             kwargs['replace_dir'] = path
-        print ext
-        print path
         sources = rutils.DeepGlob( ext, path, **kwargs)
         return sources
 
@@ -765,7 +762,7 @@ class RacyProject(object):
                 builddir
                 )
 
-    def get_others(self, builddir = True):
+    def get_others(self, builddir = False):
         """Returns CXX source files of the project"""
         return self.get_files(
                 [self.root_path],

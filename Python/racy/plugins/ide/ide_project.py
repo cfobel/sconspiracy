@@ -16,7 +16,6 @@ from mako import exceptions
 
 from mako.exceptions import RichTraceback
 
-
 class IdeProjectError(racy.RacyProjectError):
     pass
 
@@ -34,6 +33,7 @@ class IdeProject(ConstructibleRacyProject):
         opts = prj.opts_source
 
         self.prj = prj
+        self.graphviz_buffer = ''
 
         super(IdeProject, self).__init__(
                                         build_options = opts,
@@ -91,7 +91,8 @@ class IdeProject(ConstructibleRacyProject):
         
         prj_deps = []
         for i in prj.rec_deps:
-            prj_deps.append( { 'PRJ_NAME' : i.base_name , 'PRJ_TARGET': ''})
+            prj_deps.append( { 'PRJ_NAME' : i.base_name , 
+                'PRJ_TYPE' : i.get_lower('TYPE'), 'PRJ_TARGET': '' , })
             
 
         # this dictionary contains all varibles for templates
@@ -168,6 +169,22 @@ class IdeProject(ConstructibleRacyProject):
                         ('${TEMP_DIR}/template_exec.launch' ,
                            '${LAUNCH_DIR}/exec.launch'         ),
                     ]
+           },
+
+        'graphviz' :
+           {
+                'dirs':
+                    [
+                       ( 'GRAPHVIZ_DIR' , ('${IDE_INSTALL_DIR}/graphviz/'
+                                         '${CALLING_PROJECT}/'
+                       )),
+                       ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/graphviz/'),
+                    ],
+                'template_prj':
+                    [
+                        ('${TEMP_DIR}/template.dot'            ,
+                         '${GRAPHVIZ_DIR}/${CALLING_PROJECT}.dot'),
+                    ]
            }
         }
 
@@ -177,63 +194,70 @@ class IdeProject(ConstructibleRacyProject):
         compiler_path = opjoin(racy.get_bin_path(), 'racy')
 
 
+        ide_type = self.prj.get_lower('IDE')
+        dico_vars = dico
 
-        if not (self.prj.get_lower('IDE').endswith('clean')):
+        #Create user_prj_name
+        prj_format = self.prj.get_lower('PRJ_USER_FORMAT')
+        prj_format = prj_format.replace('(', '{')
+        prj_format = prj_format.replace(')', '}')
+        prj_format = prj_format.upper()
 
-            ide_type = self.prj.get_lower('IDE')
+        dico_vars['PRJ_USER_FORMAT'] = self.apply_template(
+                                        prj_format,dico_vars) 
 
-            racy.print_msg('Create {0} project : {1}'.format(
-                                            ide_type , prj.base_name))
 
-            dico_vars = dico
+        # Added vars 
+        if dico_ide[ide_type].has_key('vars'):
+                dico_vars = self.add_vars(dico_ide[ide_type]['vars'], dico_vars)
+        
+        racy.print_msg('Create {0} project : {1}'.format(
+                                    ide_type , prj.base_name))
 
-            #Create user_prj_name
-            prj_format = self.prj.get_lower('PRJ_USER_FORMAT')
-            prj_format = prj_format.replace('(', '{')
-            prj_format = prj_format.replace(')', '}')
-            prj_format = prj_format.upper()
 
-            dico_vars['PRJ_USER_FORMAT'] = self.apply_template(
-                                            prj_format,dico_vars) 
+        # Added dirs
+        if dico_ide[ide_type].has_key('dirs'):
+            dico_vars = self.add_dirs(dico_ide[ide_type]['dirs'], dico_vars)
+
+         # Added template_prj
+        if dico_ide[ide_type].has_key('template_prj'):
+            self.add_template_prj(dico_ide[ide_type]['template_prj'], dico_vars)
+
+
+    def add_vars(self, dico_vars_prj, dico_vars):
+        for  key , value in dico_vars_prj:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+        return dico_vars
+
+    def add_dirs(self, dico_dir, dico_vars):
+        for  key , value in dico_dir:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+
+            if not os.path.exists(dico_vars[temp_key]):
+                try:
+                    os.makedirs(dico_vars[temp_key])
+                   
+                except:
+                    pass   
+        return dico_vars
+
+    def add_template_prj(self, dico_template, dico_vars):
+        for key , value in dico_template:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+            file_content = self.apply_file_template(temp_key, dico_vars)
+            rutils.put_file_content(dico_vars[temp_key] , file_content)
  
-
-            # Added vars 
-            if dico_ide[ide_type].has_key('vars'):
-                for key , value in dico_ide[ide_type]['vars']:
-                    dico_vars[key]  = value 
-            
-            
-            # Added dirs
-            if dico_ide[ide_type].has_key('dirs'):
-                for  key , value in dico_ide[ide_type]['dirs']:
-                    temp_key             = self.apply_template(key, dico_vars)
-                    dico_vars[temp_key]  = self.apply_template(value, dico_vars)
- 
-                    if not os.path.exists(dico_vars[temp_key]):
-                        try:
-                            os.makedirs(dico_vars[temp_key])
-                           
-                        except:
-                            pass
-
-             # Added template_prj
-            if dico_ide[ide_type].has_key('template_prj'):
-                for  key , value in dico_ide[ide_type]['template_prj']:
-                    temp_key             = self.apply_template(key, dico_vars)
-                    dico_vars[temp_key]  = self.apply_template(value, dico_vars)
- 
-                    file_content = self.apply_file_template(temp_key, dico_vars)
-                    rutils.put_file_content(dico_vars[temp_key] , file_content)
-           
-
-
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
         
-        self.create_prj(self.prj)
+        
         for i in self.prj.rec_deps:
             if i.type in ['exec', 'bundle', 'shared']:
                 self.create_prj(i)
 
+        self.create_prj(self.prj)
 
         return result

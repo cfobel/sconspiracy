@@ -15,7 +15,7 @@ from ide_project import IdeProject
 class Plugin(racy.rplugins.Plugin):
     name = 'IDE'
     prj_user_format = 'PRJ_USER_FORMAT'
-    editor_list = ['none', 'qtcreator', 'eclipse']
+    editor_list = ['none', 'qtcreator', 'eclipse', 'graphviz']
 
 
 

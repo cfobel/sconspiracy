@@ -91,7 +91,7 @@ class IdeProject(ConstructibleRacyProject):
         
         prj_deps = []
         for i in prj.rec_deps:
-            prj_deps.append( { 'PRJ_NAME' : i.base_name , 'PRJ_TARGET': prj.target_path})
+            prj_deps.append( { 'PRJ_NAME' : i.base_name , 'PRJ_TARGET': ''})
             
 
         # this dictionary contains all varibles for templates
@@ -116,7 +116,7 @@ class IdeProject(ConstructibleRacyProject):
             'CALLING_PROJECT' : self.prj.base_name,
             'DEPS_INCLUDES'   : prj.deps_include_path,
             'DEPS'            : prj_deps,
-            'CALLING_PROJECT_TARGET' : prj.target_path,
+            'CALLING_PROJECT_TARGET' : '',
             }
 
 

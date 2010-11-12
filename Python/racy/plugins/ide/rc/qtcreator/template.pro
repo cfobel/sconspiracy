@@ -4,6 +4,7 @@ TEMPLATE = app
 TARGET = ${PRJ_NAME}
 DEPENDPATH += .
 INCLUDEPATH += . \\
+
 % for i in DEPS_INCLUDES:
     ${i} \\
 

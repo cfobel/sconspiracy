@@ -126,7 +126,7 @@ class IdeProject(ConstructibleRacyProject):
             {
                 'dirs':
                     [
-                        ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator/${PRJ_USER_FORMAT}/'),
+                        ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator/${PRJ_NAME}/'),
                         ('TEMP_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/'     ),
                         ('OS_DIR'   , qt_default_dir,                   ),
                     ]
@@ -135,11 +135,11 @@ class IdeProject(ConstructibleRacyProject):
                     [
                     
                         ('${TEMP_DIR}/template.pro'     , 
-                                '${QT_DIR}/${PRJ_USER_FORMAT}.pro'     ),
+                                '${QT_DIR}/${PRJ_NAME}.pro'     ),
                         ('${TEMP_DIR}/template.pro.user',
-                                '${QT_DIR}/${PRJ_USER_FORMAT}.pro.user'),
+                                '${QT_DIR}/${PRJ_NAME}.pro.user'),
                         ('${TEMP_DIR}/template.qws'     ,
-                                '${OS_DIR}/${PRJ_USER_FORMAT}.qws'     ),
+                                '${OS_DIR}/${PRJ_NAME}.qws'     ),
                     ]
               
             },

@@ -1,31 +1,14 @@
 <%
 import os
-if not TYPE == 'exec':
-    for i in DEPS:
-        if i['PRJ_NAME'] == 'launcher':
-            launcher = i['PRJ_TARGET']
+from mako.template import Template
+from mako import exceptions
+import racy.rutils  
+import racy.rutils as rutils
 
 
-    if os.path.exists(PROFILE_DIR) and TYPE == 'bundle':
-        profile = os.path.join(PRJ_ROOT_DIR,'rc', 'profile.xml')
-        if os.path.exists(profile):
-            HACK = ''
-            ARGUMENT = '\n        <value type = "QString">' + profile + '</value>\n    ' +  '</valuelist>'
-            EXECUTABLE = launcher
-        else:
-            HACK = '/'
-            ARGUMENT = ''
-            EXECUTABLE = ''
-
-    else:
-        HACK = '/'
-        ARGUMENT = ''
-        EXECUTABLE = ''
-else:
-    HACK = '/'
-    ARGUMENT = ''
-    EXECUTABLE = CALLING_PROJECT_TARGET
-
+ARGUMENT = ''
+EXECUTABLE = CALLING_PROJECT_TARGET
+HACK ='/'
 %>
 
 <!DOCTYPE QtCreatorProject>

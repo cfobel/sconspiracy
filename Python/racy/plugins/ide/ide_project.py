@@ -16,7 +16,6 @@ from mako import exceptions
 
 from mako.exceptions import RichTraceback
 
-
 class IdeProjectError(racy.RacyProjectError):
     pass
 
@@ -34,6 +33,7 @@ class IdeProject(ConstructibleRacyProject):
         opts = prj.opts_source
 
         self.prj = prj
+        self.graphviz_buffer = ''
 
         super(IdeProject, self).__init__(
                                         build_options = opts,
@@ -57,6 +57,27 @@ class IdeProject(ConstructibleRacyProject):
         self.configure_env()
         return result
 
+
+    def apply_template(self, string, dico):
+        temp = Template(string)
+        res =''
+        try:
+            res = temp.render(**dico)
+        except:
+            print exceptions.text_error_template().render()
+
+        return res
+            
+    def apply_file_template(self, name, dico):
+        temp = Template(filename = name)
+        res = ''
+        try:
+            res = temp.render(**dico)
+        except:
+            print exceptions.text_error_template().render()
+
+        return res
+ 
     def create_prj (self, prj):
 
 
@@ -64,77 +85,54 @@ class IdeProject(ConstructibleRacyProject):
 
         if os.name == 'nt':
             qt_default_dir = opjoin(os.environ['APPDATA'],'Nokia','qtcreator')
-            ext = '.bat'
-            ext_exec = '.exe'
         else:
             qt_default_dir = opjoin(os.path.expanduser("~"),'.config',
                                             'Nokia', 'qtcreator')
-            ext = ''
-            ext_exec = ''
-
-        ide_dir = opjoin(racy.renv.dirs.install, 'ide')
-
-        include = []
-
+        
+        prj_deps = []
         for i in prj.rec_deps:
-           for j in i.include_path:
-               include.append(j)
-
+            prj_deps.append( { 'PRJ_NAME' : i.base_name , 
+                'PRJ_TYPE' : i.get_lower('TYPE'), 'PRJ_TARGET': '' , })
+            
 
         # this dictionary contains all varibles for templates
         dico = {
-            'INSTALL_DIR'     : racy.renv.dirs.install,
-            'INSTALL_PRJ_DIR' : prj.install_path,
-            'ROOT_DIR'        : prj.root_path,
-            'IDE_DIR'         : ide_dir, 
+            'RACY_INSTALL_DIR': racy.renv.dirs.install,
+            'PRJ_INSTALL_DIR' : prj.install_path,
+            'PRJ_ROOT_DIR'    : prj.root_path,
+            'IDE_INSTALL_DIR' : opjoin(racy.renv.dirs.install, 'ide'), 
             'PRJ_NAME'        : prj.base_name,
-            'USER_PRJ_NAME'   : prj.base_name, 
-            'EXEC'            : prj.full_name + ext_exec,
-            'EXEC_PATH'       : opjoin(prj.install_path, 
-                                 prj.full_name) + ext_exec, 
             'HEADERS'         : prj.get_includes(False),
             'SOURCES'         : prj.get_sources(False),
-            'COMPILE_CMD'     : opjoin(racy.get_bin_path(), 'racy') + ext,
-            'CLEAN_CMD'       : opjoin(racy.get_bin_path(), 'racy') + ext +' '+ prj.base_name,
-            'BIN_PATH'        : racy.renv.dirs.install_bin,
-            'BUNDLE_PATH'     : racy.renv.dirs.install_bundle,
-            'LAUNCHER_PATH'   : opjoin(racy.renv.dirs.install_bin,
-                                prj.projects_db['launcher'].full_name)
-                                     + ext_exec,
-            'TYPE'            : prj.get_lower('TYPE'),
-            'PROFILE_DIR'     : opjoin(prj.root_path, 'rc'),
-            'ROOT_PROFILE_DIR': opjoin(self.prj.root_path, 'rc'),
-            'OS'              : os.name,
-            'OS_DIR'          : qt_default_dir,
-            'IDE_PRJ_PATH'    : opjoin(ide_dir,prj.get_lower('IDE'),
-                                prj.base_name, prj.base_name),
-
-            'PLUGIN_PATH'     : os.path.dirname(__file__),
-            'ROOT_PROJECT'    : self.prj.base_name,
-            'DEPENDENCIES'    : include,
-
+            'OTHERS_FILE'     : prj.get_others(),
+            'RACY_CMD'        : racy.get_racy_cmd(),
+            'RACY_CLEAN_CMD'  : racy.get_racy_cmd() +' '+ prj.base_name,
+            'RACY_BIN_PATH'   : racy.renv.dirs.install_bin,
+            'RACY_BUNDLE_PATH': racy.renv.dirs.install_bundle,
+            'PRJ_TYPE'        : prj.get_lower('TYPE'),
+            'OS_NAME'         : racy.renv.system(), #windows, darwin, linux
+            'SEP'             : os.sep,
+            'PATHSEP'         : os.pathsep,
+            'IDE_PLUGIN_PATH' : os.path.dirname(__file__),
+            'CALLING_PROJECT' : self.prj.base_name,
+            'DEPS_INCLUDES'   : prj.deps_include_path,
+            'DEPS'            : prj_deps,
+            'CALLING_PROJECT_TARGET' : '',
             }
+
+
         dico_ide = {
        
         'qtcreator' :  
-            [
-                ('dirs',
+            {
+                'dirs':
                     [
-                        ('QT_DIR'   ,'${IDE_DIR}/qtcreator/${PRJ_NAME}/'),
-                        ('TEMP_DIR' ,'${PLUGIN_PATH}/rc/qtcreator/'      ),
+                        ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator/${PRJ_NAME}/'),
+                        ('TEMP_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/'     ),
+                        ('OS_DIR'   , qt_default_dir,                   ),
                     ]
-                )
                 ,
-                ('vars',
-                    [
-                        ('DEPS' , [opjoin(ide_dir,  prj.get_lower('IDE')
-                                ,i.base_name, i.base_name)
-                                 for i in prj.rec_deps],
-                        )
-                    ]
-                )
-                ,
-                ('template_prj',
+                'template_prj':
                     [
                     
                         ('${TEMP_DIR}/template.pro'     , 
@@ -144,25 +142,25 @@ class IdeProject(ConstructibleRacyProject):
                         ('${TEMP_DIR}/template.qws'     ,
                                 '${OS_DIR}/${PRJ_NAME}.qws'     ),
                     ]
-                )
-            ],
+              
+            },
 
         'eclipse' :
-           [ 
-                ('dirs',
+           { 
+                'dirs':
                     [
-                       ( 'EC_DIR'     , ('${IDE_DIR}/eclipse/'
-                                         '${ROOT_PROJECT}/${PRJ_NAME}/')
+                       ( 'EC_DIR'     , ('${IDE_INSTALL_DIR}/eclipse/'
+                                         '${CALLING_PROJECT}/${PRJ_USER_FORMAT}/')
                        ),
-                       ( 'LAUNCH_DIR' , ('${IDE_DIR}/eclipse/'
-                                         '${ROOT_PROJECT}/.metadata/.plugins/'
+                       ( 'LAUNCH_DIR' , ('${IDE_INSTALL_DIR}/eclipse/'
+                                         '${CALLING_PROJECT}/.metadata/.plugins/'
                                           'org.eclipse.debug.core/.launches/')
                        ),
-                       ( 'TEMP_DIR'   , '${PLUGIN_PATH}/rc/eclipse/'       ),
+                       ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/eclipse/'       ),
                     ]
-                )
+                
                 ,
-                ('template_prj',
+                'template_prj':
                     [
                         ('${TEMP_DIR}/template.project'       ,
                             '${EC_DIR}/.project'               ),
@@ -171,70 +169,95 @@ class IdeProject(ConstructibleRacyProject):
                         ('${TEMP_DIR}/template_exec.launch' ,
                            '${LAUNCH_DIR}/exec.launch'         ),
                     ]
-                )
-           ]
+           },
+
+        'graphviz' :
+           {
+                'dirs':
+                    [
+                       ( 'GRAPHVIZ_DIR' , ('${IDE_INSTALL_DIR}/graphviz/'
+                                         '${CALLING_PROJECT}/'
+                       )),
+                       ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/graphviz/'),
+                    ],
+                'template_prj':
+                    [
+                        ('${TEMP_DIR}/template.dot'            ,
+                         '${GRAPHVIZ_DIR}/${CALLING_PROJECT}.dot'),
+                    ]
+           }
         }
 
 
 
         deps = prj.rec_deps
-        ide_dir = opjoin(racy.renv.dirs.install, 'ide')
         compiler_path = opjoin(racy.get_bin_path(), 'racy')
 
 
+        ide_type = self.prj.get_lower('IDE')
+        dico_vars = dico
 
-        if not (self.prj.get_lower('IDE').endswith('clean')):
-            ide_type = self.prj.get_lower('IDE')
+        #Create user_prj_name
+        prj_format = self.prj.get_lower('PRJ_USER_FORMAT')
+        prj_format = prj_format.replace('(', '{')
+        prj_format = prj_format.replace(')', '}')
+        prj_format = prj_format.upper()
 
-            racy.print_msg('Create {0} project : {1}'.format(ide_type , prj.base_name))
-
-            dico_vars = dico 
-
-           
-            for i,j in dico_ide[ide_type]:
-                for k,l in j:
-                    
-                    if not i == 'vars':
-                        temp_key = Template(k)
-                        temp_key = temp_key.render(**dico_vars)
-                        temp_value =  Template(l)
-                        dico_vars[temp_key]  = temp_value.render(**dico_vars)
-                    else:
-                        dico_vars[k]  = l
-
-                    if i == 'template_prj':
-                        # Open template with mako
-                        template = Template(filename = temp_key) 
-
-                        #replace template with dictionary
-                        template = template.render(**dico_vars)
-
-                        
-                        #destination file template
-                        try:
-                            dest_file = Template(os.path.normpath(dico_vars[temp_key]))
-                            dest_file = dest_file.render(**dico_vars)
-                        except:
-                            print exceptions.text_error_template().render()
-
-                        #open and write destination file
-                        rutils.put_file_content(os.path.normpath(dest_file), template)
-                    elif i == 'dirs' and not os.path.exists(dico_vars[temp_key]):
-                        try:
-                            os.makedirs(dico_vars[temp_key])
-                        except:
-                            pass
+        dico_vars['PRJ_USER_FORMAT'] = self.apply_template(
+                                        prj_format,dico_vars) 
 
 
+        # Added vars 
+        if dico_ide[ide_type].has_key('vars'):
+                dico_vars = self.add_vars(dico_ide[ide_type]['vars'], dico_vars)
+        
+        racy.print_msg('Create {0} project : {1}'.format(
+                                    ide_type , prj.base_name))
 
 
+        # Added dirs
+        if dico_ide[ide_type].has_key('dirs'):
+            dico_vars = self.add_dirs(dico_ide[ide_type]['dirs'], dico_vars)
+
+         # Added template_prj
+        if dico_ide[ide_type].has_key('template_prj'):
+            self.add_template_prj(dico_ide[ide_type]['template_prj'], dico_vars)
+
+
+    def add_vars(self, dico_vars_prj, dico_vars):
+        for  key , value in dico_vars_prj:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+        return dico_vars
+
+    def add_dirs(self, dico_dir, dico_vars):
+        for  key , value in dico_dir:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+
+            if not os.path.exists(dico_vars[temp_key]):
+                try:
+                    os.makedirs(dico_vars[temp_key])
+                   
+                except:
+                    pass   
+        return dico_vars
+
+    def add_template_prj(self, dico_template, dico_vars):
+        for key , value in dico_template:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+            file_content = self.apply_file_template(temp_key, dico_vars)
+            rutils.put_file_content(dico_vars[temp_key] , file_content)
+ 
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
         
-        self.create_prj(self.prj)
+        
         for i in self.prj.rec_deps:
             if i.type in ['exec', 'bundle', 'shared']:
                 self.create_prj(i)
 
+        self.create_prj(self.prj)
 
         return result

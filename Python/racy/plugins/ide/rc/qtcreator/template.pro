@@ -3,7 +3,13 @@ QT += core gui
 TEMPLATE = app
 TARGET = ${PRJ_NAME}
 DEPENDPATH += .
-INCLUDEPATH += .
+INCLUDEPATH += . \\
+
+% for i in DEPS_INCLUDES:
+    ${i} \\
+
+%endfor
+
 
 HEADERS += \\
 

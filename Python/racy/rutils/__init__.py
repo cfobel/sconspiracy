@@ -152,7 +152,7 @@ def DeepGlob(extensions, src_dir= '.', replace_dir = '', return_orig = False,
         result      = []
 
         if invert_matches:
-            file_match = lambda x: not file_match(x)
+            file_match = lambda x: not regex.match(x)
 
         for root, dirs, files in os.walk(src_dir, topdown=True):
             #don't walk in vcs dirs

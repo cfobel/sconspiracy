@@ -20,11 +20,11 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="${USER_PRJ_NAME}" buildProperties="" description="" id="0.${ID_CCONFIG_1}" name="Debug" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+<configuration artifactName="${PRJ_USER_FORMAT}" buildProperties="" description="" id="0.${ID_CCONFIG_1}" name="Debug" parent="org.eclipse.cdt.build.core.prefbase.cfg">
 <folderInfo id="0.${ID_CCONFIG_1}" name="/" resourcePath="">
 <toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.309179245" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 <targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.309179245.625880249" name=""/>
-<builder autoBuildTarget="all" buildPath="" cleanBuildTarget="${PRJ_NAME} -c" command="${COMPILE_CMD}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.settings.default.builder.1587018552" incrementalBuildTarget="${PRJ_NAME} BUILDDEPS=no" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+<builder autoBuildTarget="all" buildPath="" cleanBuildTarget="${PRJ_NAME} -c" command="${RACY_CMD}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.settings.default.builder.1587018552" incrementalBuildTarget="${PRJ_NAME} BUILDDEPS=no" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
 <tool id="org.eclipse.cdt.build.core.settings.holder.libs.388163237" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
 <tool id="org.eclipse.cdt.build.core.settings.holder.1630755956" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1225340334" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
@@ -32,7 +32,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <tool id="org.eclipse.cdt.build.core.settings.holder.656340484" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
 
 <option id="org.eclipse.cdt.build.core.settings.holder.incpaths.394996232" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
-% for i in DEPENDENCIES:
+% for i in DEPS_INCLUDES:
 <%   j = i.replace('\\', '/') %>
 <listOptionValue builtIn="false" value="&quot;${i}&quot;"/>
 %endfor
@@ -218,7 +218,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 <target name="DEBUG" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} BUILDDEPS=no</buildTarget>
 <stopOnError>true</stopOnError>
@@ -226,7 +226,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="RELEASE" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} BUILDDEPS=no DEBUG=release</buildTarget>
 <stopOnError>true</stopOnError>
@@ -234,7 +234,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="FULL_DEBUG" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}</buildTarget>
 <stopOnError>true</stopOnError>
@@ -242,7 +242,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="FULL_RELEASE" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} DEBUG=release</buildTarget>
 <stopOnError>true</stopOnError>
@@ -250,7 +250,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="DOC" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}/DOX:yes BUILD=no</buildTarget>
 <stopOnError>true</stopOnError>
@@ -258,7 +258,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="CLEAN" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} -c</buildTarget>
 <stopOnError>true</stopOnError>
@@ -266,7 +266,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="CPPUNIT" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}/CPPUNIT:exec/CPPUNIT_RUN:yes</buildTarget>
 <stopOnError>true</stopOnError>
@@ -288,11 +288,11 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="${USER_PRJ_NAME}" buildProperties="" description="" id="0.${ID_CCONFIG_1}.${ID_CCONFIG_2}" name="Release" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+<configuration artifactName="${PRJ_USER_FORMAT}" buildProperties="" description="" id="0.${ID_CCONFIG_1}.${ID_CCONFIG_2}" name="Release" parent="org.eclipse.cdt.build.core.prefbase.cfg">
 <folderInfo id="0.${ID_CCONFIG_1}.${ID_CCONFIG_2}." name="/" resourcePath="">
 <toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.72385264" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 <targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.72385264.992441996" name=""/>
-<builder autoBuildTarget="all" buildPath="" cleanBuildTarget="${PRJ_NAME} -c" command="${COMPILE_CMD}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.settings.default.builder.2054992154" incrementalBuildTarget="${PRJ_NAME} BUILDDEPS=no DEBUG=release" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+<builder autoBuildTarget="all" buildPath="" cleanBuildTarget="${PRJ_NAME} -c" command="${RACY_CMD}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.settings.default.builder.2054992154" incrementalBuildTarget="${PRJ_NAME} BUILDDEPS=no DEBUG=release" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
 <tool id="org.eclipse.cdt.build.core.settings.holder.libs.1490600669" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
 <tool id="org.eclipse.cdt.build.core.settings.holder.229307042" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1130441472" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
@@ -478,7 +478,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 <target name="DEBUG" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} BUILDDEPS=no</buildTarget>
 <stopOnError>true</stopOnError>
@@ -486,7 +486,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="RELEASE" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} BUILDDEPS=no DEBUG=release</buildTarget>
 <stopOnError>true</stopOnError>
@@ -494,7 +494,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="FULL_DEBUG" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}</buildTarget>
 <stopOnError>true</stopOnError>
@@ -502,7 +502,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="FULL_RELEASE" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} DEBUG=release</buildTarget>
 <stopOnError>true</stopOnError>
@@ -510,7 +510,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="DOC" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}/DOX:yes BUILD=no</buildTarget>
 <stopOnError>true</stopOnError>
@@ -518,7 +518,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="CLEAN" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME} -c</buildTarget>
 <stopOnError>true</stopOnError>
@@ -526,7 +526,7 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="CPPUNIT" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>${COMPILE_CMD}</buildCommand>
+<buildCommand>${RACY_CMD}</buildCommand>
 <buildArguments/>
 <buildTarget>${PRJ_NAME}/CPPUNIT:exec/CPPUNIT_RUN:yes</buildTarget>
 <stopOnError>true</stopOnError>

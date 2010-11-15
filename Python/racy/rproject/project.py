@@ -5,7 +5,6 @@
 # ****** END LICENSE BLOCK ******
 
 import os
-
 from os.path import join as pathjoin, abspath, normpath
 
 
@@ -736,14 +735,13 @@ class RacyProject(object):
         return zip(builddirs, dirs)
 
 
-    def get_files(self, path, ext, builddir = True):
+    def get_files(self, path, ext, builddir=True, invert_matches=False):
         """Returns HXX source files of the project"""
-        kwargs = {}
+        kwargs = { 'invert_matches': invert_matches}
         if builddir:
             kwargs['replace_dir'] = map(self.get_build_dir_for, path)
         else:
             kwargs['replace_dir'] = path
-
         sources = rutils.DeepGlob( ext, path, **kwargs)
         return sources
 
@@ -762,6 +760,15 @@ class RacyProject(object):
                 self.src_path,
                 constants.CXX_SOURCE_EXT,
                 builddir
+                )
+
+    def get_others(self, builddir = False):
+        """Returns CXX source files of the project"""
+        return self.get_files(
+                [self.root_path],
+                constants.CXX_SOURCE_EXT + constants.CXX_HEADER_EXT,
+                builddir,
+                invert_matches = True
                 )
 
     includes = cached_property(get_includes)
@@ -990,7 +997,7 @@ class InstallableRacyProject(RacyProject):
 
 
 class ConstructibleRacyProject(InstallableRacyProject):
-    
+
     @memoize
     def exports(self, export=False):
         env = self.env
@@ -1152,13 +1159,71 @@ class ConstructibleRacyProject(InstallableRacyProject):
         self.manage_options(tool_level_options)
 
 
+    @cached_property
+    def main_build_targets(self):
+        prj = self
+        env = self.env
+        self.configure_env()
+        result = []
+        if prj.sources:
+            if prj.is_exec:
+                result = env.Program(
+                        target = prj.target,
+                        source = prj.sources,
+                        )
+            elif prj.is_shared or prj.is_bundle:
+                result = env.SharedLibrary(
+                        target = prj.target,
+                        source = prj.sources,
+                        )
+            elif prj.is_static:
+                result = env.StaticLibrary(
+                        target = prj.target,
+                        source = prj.sources,
+                        )
+            else:
+                raise RacyProjectError( prj,
+                    'Unknown project TYPE ({prj.type})')
+
+            if prj.get('JOBS_LIMIT'):
+                limit = prj.get('JOBS_LIMIT')
+                objsources = result[0].sources
+                prev = None
+                for i in range(0, len(objsources), limit):
+                    current = objsources[i: i+limit]
+                    if prev:
+                        env.Depends(current, prev)
+                    prev = objsources[i: i+limit]
+
+        elif not prj.is_bundle:
+            msg = ('Only bundles are allowed to be codeless. '
+                    '<{prj.name}> type is "{prj.type}"')
+            raise RacyProjectError( prj, msg)
+
+        return result
+
+    @cached_property
+    def main_install_targets(self):
+        prj = self
+        env = self.env
+        main_targets = self.main_build_targets
+        to_install = [r for r in main_targets if env.InstallFileFilter(r)]
+        result = env.Install(dir = prj.install_path, source = to_install)
+        return result
+
+
+    @cached_property
+    def target_path(self):
+        return self.main_install_targets[0].get_abspath()
+
+
     # This one *must* be memoized to avoid several build in env, otherwise
     # SCons will make a big noise and probably interrupt
     @memoize
     def result(self, deps_results=True):
         """Returns the SCons targets for this project.
 
-        if deps_results is False, don't care about depencies existance
+        if deps_results is False, don't care about depencies existence
         """
         prj = self
         env = self.env
@@ -1166,45 +1231,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         if not deps_results:
             result = []
-            self.configure_env()
-
-            if prj.sources:
-                if prj.is_exec:
-                    result = env.Program(
-                            target = prj.target,
-                            source = prj.sources,
-                            )
-                elif prj.is_shared or prj.is_bundle:
-                    result = env.SharedLibrary(
-                            target = prj.target,
-                            source = prj.sources,
-                            )
-                elif prj.is_static:
-                    result = env.StaticLibrary(
-                            target = prj.target,
-                            source = prj.sources,
-                            )
-                else:
-                    raise RacyProjectError( prj,
-                        'Unknown project TYPE ({prj.type})')
-
-                if prj.get('JOBS_LIMIT'):
-                    limit = prj.get('JOBS_LIMIT')
-                    objsources = result[0].sources
-                    prev = None
-                    for i in range(0, len(objsources), limit):
-                        current = objsources[i: i+limit]
-                        if prev:
-                            env.Depends(current, prev)
-                        prev = objsources[i: i+limit]
-
-
-
-            elif not prj.is_bundle:
-                msg = ('Only bundles are allowed to be codeless. '
-                        '<{prj.name}> type is "{prj.type}"')
-                raise RacyProjectError( prj, msg)
-
+            result += self.main_build_targets
         else:
             dep_results = []
             for dep in prj.source_libs_deps + prj.source_bundles_deps:
@@ -1253,9 +1280,15 @@ class ConstructibleRacyProject(InstallableRacyProject):
         result = build_results
 
         if result and prj.sources:
-            filter = env.InstallFileFilter
-            to_install = [r for r in result if filter(r)]
-            result = env.Install(dir = prj.install_path, source = to_install)
+            main_targets = self.main_build_targets
+            def install_filter(r):
+                res = r not in main_targets
+                res = res and env.InstallFileFilter(r)
+                return res
+            to_install = [r for r in result if install_filter(r)]
+
+            result = self.main_install_targets
+            result += env.Install(dir = prj.install_path, source = to_install)
         else:
             result = []
 

@@ -14,20 +14,23 @@ from ide_project import IdeProject
 
 class Plugin(racy.rplugins.Plugin):
     name = 'IDE'
-    editor_list = ['none', 'qtcreator', 'eclipse']
+    prj_user_format = 'PRJ_USER_FORMAT'
+    editor_list = ['none', 'qtcreator', 'eclipse', 'graphviz']
 
 
 
     options              = { 
                             name  : 'none', 
+                            prj_user_format : '$(PRJ_TYPE)_$(PRJ_NAME)'
                            }
     allowed_values       = { 
                              name: editor_list
                            }
 
-    commandline_opts     = [ name ] 
-    commandline_prj_opts = [ name ] 
+    commandline_opts     = [ prj_user_format ] 
+    commandline_prj_opts = [ name, prj_user_format ] 
     descriptions_opts    = { name :'create ide project',
+                             prj_user_format : 'Preferencies formated project name'
                            }
 
 

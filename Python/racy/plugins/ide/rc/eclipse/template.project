@@ -27,7 +27,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>
-					<value>${COMPILE_CMD}</value>
+					<value>${RACY_CMD}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
@@ -83,7 +83,7 @@
     <linkedResources>
 % for i in HEADERS:
 <%
-    j = i.replace(ROOT_DIR, '') 
+    j = i.replace(PRJ_ROOT_DIR, '') 
     j = j.replace('\\', '/')
     i = i.replace('\\', '/')
 %>
@@ -95,7 +95,7 @@
 %endfor
 % for i in SOURCES :
 <% 
-    j = i.replace(ROOT_DIR, '') 
+    j = i.replace(PRJ_ROOT_DIR, '') 
     j = j.replace('\\', '/') 
     i = i.replace('\\', '/')
 
@@ -106,5 +106,18 @@
 			<location>${i}</location>
 		</link>
 %endfor
+% for i in OTHERS_FILE :
+<% 
+    j = i.replace(PRJ_ROOT_DIR, '') 
+    j = j.replace('\\', '/') 
+    i = i.replace('\\', '/')
+%>
+		<link>
+			<name>${j}</name>
+			<type>1</type>
+			<location>${i}</location>
+		</link>
+%endfor
+
 	</linkedResources>
 </projectDescription>

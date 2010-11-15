@@ -9,12 +9,20 @@ import os
 
 Lib = namedtuple('Lib', 'name path')
 
+usually_ignored = [
+                'AGL', 'AppKit', 'ApplicationServices', 'AudioToolbox',
+                'Carbon', 'Cocoa', 'CoreFoundation', 'CoreServices',
+                'Foundation', 'IOKit', 'OpenGL', 'QuickTime',
+                'SystemConfiguration', 'WebKit', 'libSystem.B.dylib',
+                'libgcc_s.1.dylib', 'libobjc.A.dylib', 'libstdc++.6.dylib',
+                ]
+
 def get_lib_deps(lib):
     otool = Popen(['otool', '-L', lib], stdout=PIPE)
     output = otool.communicate()[0]
     libs = [l.strip().split()[0] for l in output.splitlines()[1:]]
     libs = [Lib(name=os.path.basename(lib), path=lib) 
-            for lib in libs if lib and not lib.startswith('@')]
+            for lib in libs if lib and not lib.startswith('@executable_path')]
     return dict(libs)
 
 def find_libs(path, ext='.dylib'):
@@ -24,7 +32,7 @@ def find_libs(path, ext='.dylib'):
     else:
         for (root, dirs, files) in os.walk(path):
             files = [Lib(name = f, path=os.path.join(root,f)) for f in files]
-            libs += [f for f in files if f.name.endswith(ext)]
+            libs += [f for f in files if ext in f.name]
     return dict(libs)
 
 
@@ -111,12 +119,6 @@ def main():
         progress_print_n(' ', '{0}/{1}'.format(n+1,L),'\r')
         sys.stdout.flush()
         if not os.path.islink(lib_file):
-            #'install_name_tool -id @executable_path/../$LIBDIR/$i $i'
-            #cmd = ' '.join(['install_name_tool -id', ' '.join(change), lib_file])
-            #res = Popen(cmd.split(' '), stdout=PIPE).communicate()[0]
-            #if res: 
-            #    verbose(res)
-
             changes = get_install_name_tool_args(lib, libs_set, libs_dict, options.exec_path, ignored)
             verbose(lib_file)
             for change in changes:
@@ -130,15 +132,9 @@ def main():
     if options.show_ignored:
         ignored = sorted([''] + map(str,ignored))
         print 'ignored libraries:', (os.linesep+'  ').join(ignored)
-        usually_ignored = [
-                'AGL', 'AppKit', 'ApplicationServices', 'AudioToolbox',
-                'Carbon', 'Cocoa', 'CoreFoundation', 'CoreServices',
-                'Foundation', 'IOKit', 'OpenGL', 'QuickTime',
-                'SystemConfiguration', 'WebKit', 'libSystem.B.dylib',
-                'libgcc_s.1.dylib', 'libobjc.A.dylib', 'libstdc++.6.dylib',
-                ]
+
         suspicious = [''] + list(set(ignored) - set(usually_ignored))
-        print 'suspiciously ignored :', (os.linesep+'  ').join(ignored)
+        print 'suspiciously ignored :', (os.linesep+'  ').join(suspicious)
 
 
 if __name__ == '__main__':

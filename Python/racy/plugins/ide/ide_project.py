@@ -78,6 +78,32 @@ class IdeProject(ConstructibleRacyProject):
 
         return res
  
+    def add_vars(self, dico_vars_prj, dico_vars):
+        for  key , value in dico_vars_prj:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+        return dico_vars
+
+    def add_dirs(self, dico_dir, dico_vars):
+        for  key , value in dico_dir:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+
+            if not os.path.exists(dico_vars[temp_key]):
+                try:
+                    os.makedirs(dico_vars[temp_key])
+                   
+                except:
+                    pass   
+        return dico_vars
+
+    def add_template_prj(self, dico_template, dico_vars):
+        for key , value in dico_template:
+            temp_key             = self.apply_template(key, dico_vars)
+            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
+            file_content = self.apply_file_template(temp_key, dico_vars)
+            rutils.put_file_content(dico_vars[temp_key] , file_content)
+ 
     def create_prj (self, prj):
 
 
@@ -224,32 +250,7 @@ class IdeProject(ConstructibleRacyProject):
             self.add_template_prj(dico_ide[ide_type]['template_prj'], dico_vars)
 
 
-    def add_vars(self, dico_vars_prj, dico_vars):
-        for  key , value in dico_vars_prj:
-            temp_key             = self.apply_template(key, dico_vars)
-            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
-        return dico_vars
 
-    def add_dirs(self, dico_dir, dico_vars):
-        for  key , value in dico_dir:
-            temp_key             = self.apply_template(key, dico_vars)
-            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
-
-            if not os.path.exists(dico_vars[temp_key]):
-                try:
-                    os.makedirs(dico_vars[temp_key])
-                   
-                except:
-                    pass   
-        return dico_vars
-
-    def add_template_prj(self, dico_template, dico_vars):
-        for key , value in dico_template:
-            temp_key             = self.apply_template(key, dico_vars)
-            dico_vars[temp_key]  = self.apply_template(value, dico_vars)
-            file_content = self.apply_file_template(temp_key, dico_vars)
-            rutils.put_file_content(dico_vars[temp_key] , file_content)
- 
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
         

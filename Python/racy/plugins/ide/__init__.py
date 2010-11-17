@@ -30,7 +30,21 @@ class Plugin(racy.rplugins.Plugin):
     commandline_opts     = [ prj_user_format ] 
     commandline_prj_opts = [ name, prj_user_format ] 
     descriptions_opts    = { name :'create ide project',
-                             prj_user_format : 'Preferencies formated project name'
+                             prj_user_format : 
+    """Preferencies formated project name.
+    You can used this variable like this:
+    $( VARIABLE )
+    PRJ_NAME           : project base name.
+    RACY_CMD           : racy command.
+    PRJ_TYPE           : project type.
+    OS_NAME            : os name.
+    SEP                : os depend separator (/ or \\).
+    PATHSEP            : path separator ( : ).
+    CALLING_PROJECT    : the main project.
+    PROJECT_SPLIT_PATH : list of element in prj_path,
+                         the first element is the last directory
+                         in RACY_SRC_DIR path.
+    """
                            }
 
 

@@ -56,7 +56,19 @@ class IdeProject(ConstructibleRacyProject):
         result = []
         self.configure_env()
         return result
+    
+    def split_project_path(self, path):
+        
+        res = []
+        for i in racy.renv.dirs.code:
+            if path.startswith(i):
+                temp = path.replace(i, '')
+                def_dir = i.split(os.path.sep)[-1]
 
+        res = temp.split(os.path.sep)
+        res[0] = def_dir
+        
+        return res
 
     def apply_template(self, string, dico):
         temp = Template(string)
@@ -144,6 +156,7 @@ class IdeProject(ConstructibleRacyProject):
             'DEPS_INCLUDES'   : prj.deps_include_path,
             'DEPS'            : prj_deps,
             'CALLING_PROJECT_TARGET' : '',
+            'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path), 
             }
 
 

@@ -15,7 +15,7 @@
 
     with open(GRAPHVIZ_DIR+SEP+'temp', 'a') as f:
         for i in DEPS:
-            f.write( i['PRJ_NAME'] + '->' + PRJ_NAME + '\n');
+            f.write(PRJ_NAME + '->' +  i['PRJ_NAME'] + '\n');
 
     if CALLING_PROJECT == PRJ_NAME:
         with open(GRAPHVIZ_DIR+SEP+'temp', 'r') as f:
@@ -25,6 +25,7 @@
 
 %if CALLING_PROJECT == PRJ_NAME:
     digraph G{
+        rankdir = BT
         compound=true;
         ranksep=1.25; 
     ${CALLING_PROJECT} [shape=Mdiamond] ;

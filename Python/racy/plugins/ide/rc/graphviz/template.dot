@@ -1,0 +1,59 @@
+<%
+    import os
+    deps_type = {}
+
+    for i in  DEPS:
+        type = i['PRJ_TYPE']
+
+        if not deps_type.has_key(type):
+            deps_type[type] = []
+        
+        deps_type[i['PRJ_TYPE']].append(i['PRJ_NAME'])
+
+    color_list = ['lightsteelblue','purple', 'azure', 'brown1']        
+    range = 0
+
+    if CALLING_PROJECT == PRJ_NAME:
+        print 'hello'
+        with open(GRAPHVIZ_DIR+SEP+'temp', 'r') as f:
+           data = f.read();
+        os.remove(GRAPHVIZ_DIR+SEP+'temp')
+    else:
+        with open(GRAPHVIZ_DIR+SEP+'temp', 'a') as f:
+            for i in DEPS:
+                f.write(PRJ_NAME + '->' +  i['PRJ_NAME'] + '\n');
+%>
+
+%if CALLING_PROJECT == PRJ_NAME:
+    digraph G{
+        compound=true;
+        ranksep=1.25; 
+    ${CALLING_PROJECT} [shape=Mdiamond] ;
+
+    %for key, value in deps_type.items():
+        subgraph cluster${key}{
+                <% color_temp = color_list[range] %>
+                node [style=filled, color = ${color_temp}]   
+                <% range = range + 1%>
+
+                label = "${key}";
+
+                %for dep_name in value:
+                    ${dep_name};
+                %endfor
+            }
+    %endfor
+    ${data}
+
+%for key, value  in deps_type.items():
+${CALLING_PROJECT} -> ${value[0]} [ lhead = cluster${key}]
+%endfor
+ 
+}
+%endif
+
+
+
+
+
+

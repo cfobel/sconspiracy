@@ -48,10 +48,6 @@ class Plugin(racy.rplugins.Plugin):
 
             if options.has_key('descriptions_opts') :
                 self.descriptions_opts[type_prj] = options['descriptions_opts']
-            b
-            b
-            b
-            b
             else:
                 self.descriptions_opts[type_prj] = '' 
 
@@ -60,11 +56,17 @@ class Plugin(racy.rplugins.Plugin):
         prj = DevProject()
         res = []
         for i in racy.renv.TARGETS.values():
-           if i.opts.has_key('CREATE_PRJ'):
+            if i.opts.has_key('CREATE_PRJ'):
                tmp = i.opts['CREATE_PRJ']
                res += prj.create_prj(i.name, tmp)
 
 
+        for i,j in racy.renv.ARGUMENTS.items():
+            if i == 'CREATE_SRV' :
+               res += prj.create_srv(j)
+               print 'srv-create-ok'
+ 
+        
         return res
 
     def has_env_addon(self, env):
@@ -72,6 +74,11 @@ class Plugin(racy.rplugins.Plugin):
 
             if i.opts.has_key('CREATE_PRJ'):
                 return True
+
+        for i,j in racy.renv.ARGUMENTS.items():
+            if i == 'CREATE_SRV':
+                return True
+
 
         return False
 

@@ -1,0 +1,10 @@
+<plugin id="${PRJ_NAME}" class="::${PRJ_NAME}::Plugin">
+    
+    <library name="${PRJ_NAME}" />
+
+
+    <point id="::${PRJ_NAME}::?????????????????????????" >
+        <implements>::fwServices::IService</implements>
+    </point>
+    
+</plugin>

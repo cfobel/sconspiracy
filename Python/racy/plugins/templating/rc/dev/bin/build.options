@@ -1,0 +1,2 @@
+TYPE = '${PRJ_TYPE}'
+VERSION = '0_1'

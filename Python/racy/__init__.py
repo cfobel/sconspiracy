@@ -253,6 +253,10 @@ def ressources(file):
     return rc
 
 #------------------------------------------------------------------------------
+def exit_racy(status = 0):
+    exit(status)
+
+
 
 
 def get_racy_cmd():

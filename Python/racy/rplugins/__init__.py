@@ -64,6 +64,9 @@ class Plugin(object):
     
     #----------------------------------------
 
+
+
+
     def __load__(self):
         def list_extend_uniq(src,dst):
             """Extends src with dst, check for duplicates. Returns duplicates
@@ -200,6 +203,7 @@ class PluginRegistry(object):
         res = []
         for p in self.obj_eligible_plugins(obj, entry):
             res += get_prj(p,obj)
+
         return res
 
     def get_additive_projects(self, prj):
@@ -207,13 +211,9 @@ class PluginRegistry(object):
 
     def get_replacement_projects(self, prj):
         return self.get_plugins_result(prj, "replacement")
-
+    
     def get_env_addons(self, env):
         return self.get_plugins_result(env, "env_addon")
-
-    def initialize_plugins(self):
-        for p in self.plugins.values():
-            p.Plugin.init()
 
 register = PluginRegistry()
 del PluginRegistry

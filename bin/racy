@@ -55,4 +55,3 @@ import racy
 import racy.__main__ as main
 
 main.main()
-

@@ -116,7 +116,6 @@ class RacyProjectsDB(object):
         res = []
         for dep in (prj,) + prj.source_rec_deps:
             res += rplug.register.get_additive_projects(dep)
-
         return res
 
     def register_prj(self, prj, raise_exception=True):
@@ -183,7 +182,6 @@ class RacyProjectsDB(object):
 
         try:
             target = racy.renv.TARGETS.get(name)
-
             db = self
             if target.name and db.has_key(target.name):
                 racy.print_msg('Target : ' + name)

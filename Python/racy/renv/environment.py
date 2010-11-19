@@ -52,13 +52,18 @@ class Environment(Env):
 
         kwargs['ARCH'] = get_option('ARCH')
 
+
         Env.__init__(self, *args, **kwargs)
 
 
         act = self.Action( CopyBuilder, "Install '$$SOURCE' as '$$TARGET'")
         self.__CopyBuilder__ = self.Builder(action = act)
 
-        racy.rplugins.register.get_env_addons(self)
+        res = racy.rplugins.register.get_env_addons(self)
+       
+        if True in res:
+            racy.exit_racy(0)
+
 
         if not self.GetOption('help'):
             tool = self['TOOL']

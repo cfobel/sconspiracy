@@ -49,7 +49,7 @@ class DevProject:
     def create_prj(self,prj_name, prj_type):
         dico_vars = dico_g
 
-        if not prj_name.count('_') == -1:
+        if not prj_name.find('_') == -1:
             raise NameException(" \n underscore is not supported in prj_name \n")
 
         dico_vars['PRJ_PATH'] = os.path.join(os.getcwd(), prj_name)

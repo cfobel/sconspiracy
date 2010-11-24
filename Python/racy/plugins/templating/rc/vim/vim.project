@@ -1,0 +1,33 @@
+<%
+import glob
+import racy.rutils as rutils
+if PRJ_NAME == CALLING_PROJECT:
+    dep = glob.glob(VIM_DIR + '/' + '*.vimprj')
+    deps= []
+    for i in dep:
+        tmp = rutils.get_file_content(i)
+        deps.append(tmp) 
+%>
+${PRJ_USER_FORMAT}=${PRJ_ROOT_DIR} CD=.{
+    Includes=include/${PRJ_NAME} CD=.{
+        %for i in HEADERS:
+        <% i = i.replace(PRJ_ROOT_DIR + '/include/'+ PRJ_NAME + '/','')%> ${i}
+        %endfor
+    }
+    Sources=src/${PRJ_NAME} CD=.{
+        %for i in SOURCES:
+        <% i = i.replace(PRJ_ROOT_DIR + '/src/'+ PRJ_NAME + '/','')%> ${i}
+        %endfor
+    }
+    Other File=. CD=.{
+        %for i in OTHERS_FILE:
+        <% i = i.replace(PRJ_ROOT_DIR + '/','')%>${i}
+        %endfor
+    }
+}
+%if PRJ_NAME == CALLING_PROJECT:
+    
+    %for i in deps:
+        ${i}
+    %endfor
+%endif

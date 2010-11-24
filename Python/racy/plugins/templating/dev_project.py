@@ -52,6 +52,7 @@ class DevProject:
         if not prj_name.find('_') == -1:
             raise NameException(" \n underscore is not supported in prj_name \n")
 
+        
         dico_vars['PRJ_PATH'] = os.path.join(os.getcwd(), prj_name)
         dico_vars['PRJ_TYPE'] = prj_type
         dico_vars['PRJ_NAME'] = prj_name

@@ -33,7 +33,7 @@ dico_prj_template = {
         'options':
         {
             'default_value': 'none',
-            'allowed_value': ['none', 'eclipse', 'qtcreator', 'graphviz'],
+            'allowed_value': ['none', 'eclipse', 'qtcreator', 'graphviz','vim'],
             'commandline_prj_opts': True,
             'descriptions_opts': 
     """Preferencies formated project name.
@@ -113,7 +113,25 @@ dico_prj_template = {
                     ('${TEMP_DIR}/template.dot'            ,
                      '${GRAPHVIZ_DIR}/${CALLING_PROJECT}.dot'),
                 ]
+          },
+         'vim' :
+         {
+            'dirs':
+                [
+                   ( 'VIM_DIR' , ('${IDE_INSTALL_DIR}/vim/'
+                                     '${CALLING_PROJECT}/'
+                   )),
+                   ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/vim/'),
+                ],
+            'template_prj':
+                [
+                    ('${TEMP_DIR}/vim.tagslist'            ,
+                     '${VIM_DIR}/${CALLING_PROJECT}.tagslist'),
+                    ('${TEMP_DIR}/vim.project'            ,
+                     '${VIM_DIR}/${PRJ_NAME}.vimprj'),
+                ]
           }
+
     }
     ,
     'dico_prj_user_format':

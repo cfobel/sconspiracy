@@ -2,9 +2,11 @@
     
     <library name="${PRJ_NAME}" />
 
-
-    <point id="::${PRJ_NAME}::?????????????????????????" >
-        <implements>::fwServices::IService</implements>
+<!--
+    <point id="/* Extension point */" >
+        <implements>/* SuperClass */</implements>
     </point>
-    
+-->  
+
+
 </plugin>

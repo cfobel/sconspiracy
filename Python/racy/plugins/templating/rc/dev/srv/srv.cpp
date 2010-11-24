@@ -6,19 +6,22 @@ import sys
 
 splitted_path = os.path.split(SRV_PATH)
 
+
 PATH = SRV_PATH.split('/')
 
 COMPLETE_NAMESPACE = '::' + '::'.join(PATH) + '::' + SRV_NAME 
 
 NAMESPACE = SRV_PATH.split('/')
 
-NAMESPACE.append(SRV_NAME)
+NAMESPACE = [PRJ_NAME]
+NAMESPACE.extend(SRV_PATH.split('/'))
+
 
 %>
 
-#include "${PATH}"
+#include "${SRV_PATH}/${SRV_NAME}.hpp"
 
-REGISTER_SERVICE( /* SrvSuperClass */ , ${COMPLETE_NAMESPACE}  , /* Objects */ ) ;
+REGISTER_SERVICE( /* SrvSuperClass */ , ${COMPLETE_NAMESPACE}  , /* Object */ ) ;
 
 
 %for i in NAMESPACE:
@@ -27,7 +30,10 @@ namespace ${i}
 
 %endfor
 
-${SRV_NAME}::${SRV_NAME}();
+${SRV_NAME}::${SRV_NAME}()
+{
+
+}
                                                         
                                                         
 void ${SRV_NAME}::starting() throw ( ::fwTools::Failed )
@@ -50,7 +56,10 @@ void ${SRV_NAME}::updating( fwServices::ObjectMsg::csptr _msg) throw ( ::fwTools
 
 }
 
-void ${SRV_NAME}::configuring() throw ( ::fwTools::Failed );
+void ${SRV_NAME}::configuring() throw ( ::fwTools::Failed )
+{
+
+}
 
 
 

@@ -13,11 +13,11 @@ splitted_path = os.path.split(SRV_PATH)
 
 PATH = SRV_PATH.split('/')
 
-HEADER_GUARD = '_' + '_'.join(PATH) +'_'+'SRV_NAME'+ '_HPP_'
+HEADER_GUARD = '_' + '_'.join(PATH) +'_'+SRV_NAME+ '_HPP_'
 HEADER_GUARD = HEADER_GUARD.upper()
 
-NAMESPACE = SRV_PATH.split('/')
-NAMESPACE.append(SRV_NAME)
+NAMESPACE = [PRJ_NAME]
+NAMESPACE.extend(SRV_PATH.split('/'))
 
 
 %>
@@ -52,7 +52,7 @@ public:
 
 
 
-%for i in NAMESPACE:
+%for i in reversed(NAMESPACE):
 } // namespace ${i}
 
 %endfor

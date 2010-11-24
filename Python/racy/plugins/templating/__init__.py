@@ -64,8 +64,6 @@ class Plugin(racy.rplugins.Plugin):
         for i,j in racy.renv.ARGUMENTS.items():
             if i == 'CREATE_SRV' :
                res += prj.create_srv(j)
-               print 'srv-create-ok'
- 
         
         return res
 

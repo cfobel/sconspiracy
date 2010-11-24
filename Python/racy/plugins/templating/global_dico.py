@@ -176,6 +176,7 @@ dico_prj_template = {
                     ('${TEMP_DIR}/plugin.hpp', '${INCLUDE_DIR}/Plugin.hpp'),
                     ('${TEMP_DIR}/plugin.cpp', '${SRC_DIR}/Plugin.cpp'),
                     ('${TEMP_DIR}/plugin.xml', '${RC_DIR}/plugin.xml'),
+                    ('${TEMP_DIR}/namespace.hpp','${INCLUDE_DIR}/namespace.hpp'),
                     ('${ROOT_TMP_DIR}/bin/build.options', '${BIN_DIR}/build.options'),
                     ('${LICENSE_TMP_DIR}/COPYING', '${PRJ_PATH}/COPYING'),
                     ('${LICENSE_TMP_DIR}/COPYING.LESSER', '${PRJ_PATH}/COPYING.LESSER'),
@@ -227,6 +228,7 @@ dico_prj_template = {
             'template_prj':
                 [
                     ('${TEMP_DIR}/srv.hpp', '${INCLUDE_DIR}${SRV_NAME}.hpp'),
+                    ('${TEMP_DIR}/namespace.hpp', '${INCLUDE_DIR}/namespace.hpp'),
                     ('${TEMP_DIR}/srv.cpp', '${SRC_DIR}${SRV_NAME}.cpp'),
                 ]
 

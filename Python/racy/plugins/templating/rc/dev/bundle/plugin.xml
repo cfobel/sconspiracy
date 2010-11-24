@@ -3,8 +3,8 @@
     <library name="${PRJ_NAME}" />
 
 <!--
-    <point id="/* Extension point */" >
-        <implements>/* SuperClass */</implements>
+    <point id="/*  TODO  */" >
+        <implements>/* TODO */</implements>
     </point>
 -->  
 

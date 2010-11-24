@@ -3,8 +3,8 @@ import os.path
 from mako.template import Template
 from mako import exceptions
 from mako.exceptions import RichTraceback
-
 import racy.rutils as rutils
+
 def apply_template( string, dico):
     temp = Template(string)
     res =''

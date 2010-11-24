@@ -9,9 +9,8 @@ import os.path
 import sys
     
 
-splitted_path = os.path.split(SRV_PATH)
 
-PATH = SRV_PATH.split('/')
+PATH = SRV_SPLITTED_PATH
 
 HEADER_GUARD = '_' + '_'.join(PATH) +'_'+SRV_NAME+ '_HPP_'
 HEADER_GUARD = HEADER_GUARD.upper()
@@ -42,9 +41,9 @@ public:
     ${SRV_NAME}_API ${SRV_NAME}();
 
 
-    ${SRV_NAME}_API virtual void starting() throw ( ::fwTools::Failed );
-    ${SRV_NAME}_API virtual void stopping() throw ( ::fwTools::Failed );
-    ${SRV_NAME}_API virtual void updating() throw ( ::fwTools::Failed );
+    ${SRV_NAME}_API virtual void starting()    throw ( ::fwTools::Failed );
+    ${SRV_NAME}_API virtual void stopping()    throw ( ::fwTools::Failed );
+    ${SRV_NAME}_API virtual void updating()    throw ( ::fwTools::Failed );
     ${SRV_NAME}_API virtual void updating( fwServices::ObjectMsg::csptr _msg ) throw ( ::fwTools::Failed );
     ${SRV_NAME}_API virtual void configuring() throw ( ::fwTools::Failed );
 
@@ -58,5 +57,4 @@ public:
 %endfor
 
 #endif /*${HEADER_GUARD}*/
-
 

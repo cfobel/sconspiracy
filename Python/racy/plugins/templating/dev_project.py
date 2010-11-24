@@ -15,9 +15,12 @@ from racy.rutils   import cached_property, memoize, run_once
 from templating  import *
 from global_dico import *
 
-class DevProjectError(racy.RacyProjectError):
+class NameException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
 
-    pass
+    def __str__(self):
+        return self.msg
 
 class DevProject:
     type='' 
@@ -39,15 +42,21 @@ class DevProject:
     def result(self, deps_results=True):
         result = []
         self.configure_env()
+
+
         return result
 
     def create_prj(self,prj_name, prj_type):
         dico_vars = dico_g
-        print prj_name
+
+        if not prj_name.count('_') == -1:
+            raise NameException(" \n underscore is not supported in prj_name \n")
 
         dico_vars['PRJ_PATH'] = os.path.join(os.getcwd(), prj_name)
         dico_vars['PRJ_TYPE'] = prj_type
         dico_vars['PRJ_NAME'] = prj_name
+
+
 
         dico_prj = get_dico_prj(dico_prj_template['dico_create_prj'], prj_type)
 
@@ -75,10 +84,20 @@ class DevProject:
     def create_srv(self,srv_path):
         dico_vars = dico_g
 
-        dico_vars['SRV_PATH'] = os.path.split(srv_path)[0]
-
         dico_vars['SRV_NAME'] = os.path.split(srv_path)[1]
         dico_vars['PRJ_NAME'] = os.path.split(os.getcwd())[1]
+        dico_vars['SRV_PATH'] = os.path.split(srv_path)[0]
+
+        splitted_path = dico_vars['SRV_PATH'].split('/')[1:]
+
+
+        for item in splitted_path:
+            if not item.find('_') == -1:
+                raise NameException("\n underscore is not supported in src path : {0} \n".format(item))
+
+        dico_vars['SRV_SPLITTED_PATH'] = splitted_path
+
+        
 
         dico_prj = get_dico_prj(dico_prj_template['dico_create_srv'],'srv')
 
@@ -86,7 +105,7 @@ class DevProject:
         if dico_prj.has_key('vars'):
                 dico_vars_template = add_vars_template(dico_prj['vars'], dico_vars)
         
-        racy.print_msg('Create {0} project'.format(
+        racy.print_msg('\nCreate {0} service'.format(
                                     srv_path))
 
 

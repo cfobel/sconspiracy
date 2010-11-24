@@ -4,10 +4,8 @@ import os.path
 import sys
 
 
-splitted_path = os.path.split(SRV_PATH)
 
-
-PATH = SRV_PATH.split('/')
+PATH = SRV_SPLITTED_PATH
 
 COMPLETE_NAMESPACE = '::' + '::'.join(PATH) + '::' + SRV_NAME 
 
@@ -51,7 +49,7 @@ void ${SRV_NAME}::updating() throw ( ::fwTools::Failed )
 
 }
 
-void ${SRV_NAME}::updating( fwServices::ObjectMsg::csptr _msg) throw ( ::fwTools::Failed );
+void ${SRV_NAME}::updating( fwServices::ObjectMsg::csptr _msg) throw ( ::fwTools::Failed )
 {
 
 }
@@ -63,7 +61,7 @@ void ${SRV_NAME}::configuring() throw ( ::fwTools::Failed )
 
 
 
-%for i in NAMESPACE:
+%for i in reversed(NAMESPACE):
 } // namespace ${i}
 
 %endfor

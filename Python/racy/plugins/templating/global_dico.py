@@ -126,9 +126,15 @@ dico_prj_template = {
             'template_prj':
                 [
                     ('${TEMP_DIR}/vim.tagslist'            ,
-                     '${VIM_DIR}/${CALLING_PROJECT}.tagslist'),
+                     '${VIM_DIR}/.${PRJ_NAME}_tagslist'),
                     ('${TEMP_DIR}/vim.project'            ,
-                     '${VIM_DIR}/${PRJ_NAME}.vimprj'),
+                     '${VIM_DIR}/.${PRJ_NAME}_vimprj'),
+                    ('${TEMP_DIR}/tmp.tagslist'            ,
+                     '${VIM_DIR}/tagslist'),
+                    ('${TEMP_DIR}/tmp.vimprj'            ,
+                     '${VIM_DIR}/vimprj'),
+
+
                 ]
           },
           'msvs' :

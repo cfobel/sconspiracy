@@ -33,7 +33,7 @@ dico_prj_template = {
         'options':
         {
             'default_value': 'none',
-            'allowed_value': ['none', 'eclipse', 'qtcreator', 'graphviz','vim'],
+            'allowed_value': ['none', 'eclipse', 'qtcreator', 'graphviz','vim','msvs'],
             'commandline_prj_opts': True,
             'descriptions_opts': 
     """Preferencies formated project name.
@@ -130,8 +130,25 @@ dico_prj_template = {
                     ('${TEMP_DIR}/vim.project'            ,
                      '${VIM_DIR}/${PRJ_NAME}.vimprj'),
                 ]
+          },
+          'msvs' :
+          {
+              'dirs':
+                [
+                   ( 'MSVS_DIR' , ('${IDE_INSTALL_DIR}/msvs/'
+                                     '${CALLING_PROJECT}/${PRJ_NAME}'
+                   )),
+                   ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/msvs/'),
+                ],
+            'template_prj':
+                [
+                    ('${TEMP_DIR}/temp.vcproj'            ,
+                     '${MSVS_DIR}/${PRJ_NAME}.vcproj'),
+                    ('${TEMP_DIR}/temp.sln'            ,
+                     '${IDE_INSTALL_DIR}/msvs/'
+                           '${CALLING_PROJECT}/${CALLING_PROJECT}.sln'),
+                ]
           }
-
     }
     ,
     'dico_prj_user_format':

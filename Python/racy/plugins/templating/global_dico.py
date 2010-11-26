@@ -10,6 +10,7 @@ dico_g = {
     'RACY_INSTALL_DIR': racy.renv.dirs.install,
     'RACY_SRC_DIR'    : racy.renv.dirs.code,
     'IDE_INSTALL_DIR' : opjoin(racy.renv.dirs.install, 'ide'), 
+    'WIX_INSTALL_DIR' : opjoin(racy.renv.dirs.install, 'wix'), 
     'RACY_CMD'        : racy.get_racy_cmd(),
     'RACY_BIN_PATH'   : racy.renv.dirs.install_bin,
     'RACY_BUNDLE_PATH': racy.renv.dirs.install_bundle,
@@ -17,6 +18,7 @@ dico_g = {
     'SEP'             : os.sep,
     'PATHSEP'         : os.pathsep,
     'IDE_PLUGIN_PATH' : os.path.dirname(__file__),
+    'WIX_PLUGIN_PATH' : os.path.dirname(__file__),
     'CALLING_PROJECT_TARGET' : '',
 }
 
@@ -274,6 +276,36 @@ dico_prj_template = {
                 ]
 
         }
+    }
+    ,
+    'dico_create_wix':
+    {
+        'options':
+        {
+            
+            'default_value' : 'false',
+            'commandline_prj_opts': True,
+            'commandline_opts': False,
+            'allowed_values' : ['true' , 'false'],
+            'descriptions_opts':"Create new wix installer",
+        },
+
+        'true':
+        {
+            'dirs':
+                [
+                    ('WIX_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/'),
+                    ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/'),
+                    ('TEMP_DIR' , '${ROOT_TMP_DIR}/wix/'),
+                ],
+            'template_prj':
+                [
+                    ('${TEMP_DIR}/call.wxs', '${WIX_DIR}/${CALLING_PROJECT_FULL_NAME}.wxs'),
+                    ('${TEMP_DIR}/proj.wxs', '${WIX_DIR}/${PRJ_NAME}.wxs'),
+                ]
+
+        }
+
     }
 }
 

@@ -13,6 +13,7 @@ from os.path import join as opjoin
  
 from ide_project import IdeProject
 from dev_project import DevProject
+from wix_project import WixProject
 from global_dico import *
 
 
@@ -82,12 +83,19 @@ class Plugin(racy.rplugins.Plugin):
 
 
     def has_additive(self, prj):
-        val = prj.get('IDE')
-    
-        return val in self.allowed_values['IDE'][1:]
+        if not prj.get('IDE') == 'none':
+            val = prj.get('IDE')
+            res = val in self.allowed_values['IDE'][1:]
+        else:
+            val = prj.get_lower('CREATE_WIX')
+            res = val == 'true'
+        return res
 
     def get_additive(self, prj):
-        if prj.type not in ['shared','exec', 'bundle']:
-            return [] 
-        res = IdeProject(prj) 
+        if prj.get_lower('TYPE') not in ['shared','exec', 'bundle']:
+            return []
+        if not prj.get_lower('IDE') == 'none':
+            res = IdeProject(prj) 
+        else:
+            res = WixProject(prj)
         return [res]

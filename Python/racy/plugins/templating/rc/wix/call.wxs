@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<!--
+	compile : candle.exe SampleFirst.wxs
+	build : light.exe SampleFirst.wixobj
+	install : msiexec /i $(var.SOFTWARE).msi /l*v $(var.SOFTWARE).log
+	uninstall : msiexec /x ${CALLING_PROJECT}.msi
+	
+	before that verify your dependancies with
+	C:\devtools\depends.exe -c -f:1 -u:1 -pa:1 -pb -sm:12 -sf:4 -oc:result.csv -od:result.dwi launcher_0-1_win32_cl7-1.exe
+	grep -i dll result.csv | sed -e 's/.*c://' | sed -e 's/DLL.*//' | grep -v system32 > cool.txt
+	
+-->
+
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+<%
+import uuid
+ID1 = uuid.uuid4()
+ID2 = uuid.uuid4()
+%>
+  <Product Name='${CALLING_PROJECT_FULL_NAME}' Id='${ID1}'
+    Language='1033' Codepage='1252' Version='1.0.0' Manufacturer='IRCAD'>
+
+    <Package Keywords='Installer'
+      Description="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installer"
+      Comments='${CALLING_PROJECT} is a registered trademark of IRCAD' Manufacturer='IRCAD'
+      InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+
+    <Media Id='1' Cabinet='Sample.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
+    <Property Id='DiskPrompt' Value="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installation [1]" />
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='PRODUCTDIR' Name='IRCAD'>
+          <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_FULL_NAME}'>
+
+%for key in CALLING_PROJECT_DEPS:
+            <Merge Id="${key}.id" Language="1033" SourceFile="${key}.msm" DiskId="1" />
+%endfor
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+
+    <Feature Id="${CALLING_PROJECT}" Title="${CALLING_PROJECT}" Display='expand' Level="1">
+%for key in CALLING_PROJECT_DEPS:
+      <MergeRef Id="${key}.id" />
+%endfor
+	  
+    </Feature>
+	
+  </Product>
+</Wix>

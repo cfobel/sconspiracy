@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<% 
+GUID = CALLING_PROJECT_DEPS[PRJ_NAME]['GUID'] 
+TARGET_SRC = CALLING_PROJECT_DEPS[PRJ_NAME]['PRJ_TARGET']
+BASE = CALLING_PROJECT_DEPS[PRJ_NAME]['PRJ_NAME']
+%>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Module Id="${PRJ_NAME}" Language="0" Version="1.2.3">
+
+    <Package Id="${GUID}" InstallerVersion="200"
+      Languages="1033" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no" />
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='IRCAD' Name='IRCAD'>
+          <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT}'>
+%if PRJ_TYPE == 'bundle':
+		    <Directory Id='B${PRJ_NAME}' Name='${PRJ_NAME}' >
+			  <Directory Id='BUNDLESDIR' Name='Bundles'>
+%endif
+				    <Component Id="${PRJ_NAME}.id" Guid="${GUID}">
+%if PRJ_TYPE == 'bundle':
+    %for i in OTHERS_FILE:
+        %if i.count('/rc/') == 1:
+<% import os
+import os.path
+NAME = os.path.split(i)[1]
+EXT = os.path.splitext(NAME)[1] %>				
+                      <File Id="${BASE}.${EXT}"  Name="${BASE}.${EXT}"     Source="${i}" />
+        %endif
+    %endfor
+%endif
+%for i in TARGET_SRC:
+<% import os
+import os.path
+NAME = os.path.split(i)[1]
+EXT = os.path.splitext(NAME)[1] %>
+                   <File Id="${BASE}.${EXT}" Name="${BASE}.${EXT}"  Source="${i}" />
+%endfor
+                  </Component>
+%if PRJ_TYPE == 'bundle':
+                </Directory>
+              </Directory>
+%endif
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+
+  </Module>
+</Wix>

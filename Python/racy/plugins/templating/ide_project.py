@@ -74,9 +74,16 @@ class IdeProject(ConstructibleRacyProject):
 
        
         prj_deps = []
+        
+
         for i in prj.rec_deps:
+            if i.get_lower('TYPE') == 'bin_libext':
+                target = ''
+            else:
+                target = i.target_path 
+
             prj_deps.append( { 'PRJ_NAME' : i.base_name , 
-                'PRJ_TYPE' : i.get_lower('TYPE'), 'PRJ_TARGET': '' , })
+                'PRJ_TYPE' : i.get_lower('TYPE'), 'PRJ_TARGET': target, })
             
 
         # this dictionary contains all varibles for templates
@@ -84,6 +91,7 @@ class IdeProject(ConstructibleRacyProject):
             'PRJ_INSTALL_DIR' : prj.install_path,
             'PRJ_ROOT_DIR'    : prj.root_path,
             'PRJ_NAME'        : prj.base_name,
+            'PRJ_TARGET'      : prj.target_path,
             'HEADERS'         : prj.get_includes(False),
             'SOURCES'         : prj.get_sources(False),
             'OTHERS_FILE'     : prj.get_others(),
@@ -94,6 +102,7 @@ class IdeProject(ConstructibleRacyProject):
             'DEPS'            : prj_deps,
             'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path), 
             }
+        print self.prj.target_path
 
 
 

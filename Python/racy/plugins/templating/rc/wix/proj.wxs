@@ -1,48 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
 <% 
+import uuid
+import os
+import os.path
 GUID = CALLING_PROJECT_DEPS[PRJ_NAME]['GUID'] 
+GUID1 = uuid.uuid4()
 TARGET_SRC = CALLING_PROJECT_DEPS[PRJ_NAME]['PRJ_TARGET']
 BASE = CALLING_PROJECT_DEPS[PRJ_NAME]['PRJ_NAME']
+COUNT = 0
+spe_file = []
 %>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Module Id="${PRJ_NAME}" Language="0" Version="1.2.3">
 
-    <Package Id="${GUID}" InstallerVersion="200"
+    <Package Id="${GUID}" InstallerVersion="100"
       Languages="1033" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no" />
-
-    <Directory Id='TARGETDIR' Name='SourceDir'>
+%if BASE == "launcher":
+    <Icon Id="icn_laun" SourceFile="${CALLING_PROJECT_DEPS['launcher']['PRJ_TARGET'][0]}" />
+%endif
+     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='ProgramFilesFolder' Name='PFiles'>
         <Directory Id='IRCAD' Name='IRCAD'>
-          <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT}'>
+          <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_VERSION_NAME}'>
 %if PRJ_TYPE == 'bundle':
-		    <Directory Id='B${PRJ_NAME}' Name='${PRJ_NAME}' >
 			  <Directory Id='BUNDLESDIR' Name='Bundles'>
+			   <Directory Id='B${PRJ_NAME}' ShortName='D${COUNT}${PRJ_NAME[-6:]}' Name='${PRJ_VERSION_NAME}'>
 %endif
-				    <Component Id="${PRJ_NAME}.id" Guid="${GUID}">
+%if PRJ_TYPE == 'shared':
+		      <Directory Id='SHAREDDIR' Name='Share' >
+			   <Directory Id='S${PRJ_NAME}' ShortName='D${COUNT}${PRJ_NAME[-6:]}' Name='${PRJ_VERSION_NAME}'>
+%endif
+%if PRJ_TYPE == 'exec':
+		      <Directory Id='EXECDIR' Name='bin' >
+			   <Directory Id='E${PRJ_NAME}' ShortName='D${COUNT}${PRJ_NAME[-6:]}' Name='${PRJ_VERSION_NAME}'>
+
+%endif
+				    <Component Id="C${PRJ_NAME}" Guid="${GUID}">
+                    <CreateFolder />
 %if PRJ_TYPE == 'bundle':
-    %for i in OTHERS_FILE:
-        %if i.count('/rc/') == 1:
-<% import os
-import os.path
-NAME = os.path.split(i)[1]
-EXT = os.path.splitext(NAME)[1] %>				
-                      <File Id="${BASE}.${EXT}"  Name="${BASE}.${EXT}"     Source="${i}" />
-        %endif
-    %endfor
+%for i in OTHERS_FILE:
+%if i.count('/rc/') == 1 or i.count('\\rc\\') == 1:
+<% NAME = os.path.split(i)[1]
+ID= NAME.replace('-','_')
+BASE = os.path.splitext(NAME)[0]
+EXT = os.path.splitext(NAME)[1]
+split_path = i.split('\\rc\\')[1]
+split_path = split_path.split('\\')
+save = i
+split_path = split_path[:-1]
+if not split_file == []:
+    spe_file.append(save)     %>
+%if len(NAME) < 15 and split_path == []:
+                  <File Id="F${ID}" ShortName="F${BASE[-7:]}" Name="${NAME}"     Source="${i}" />
+                      <% COUNT += 1 %>
 %endif
-%for i in TARGET_SRC:
-<% import os
-import os.path
+%endif
+%endfor
+%endif
+
+%for i in TARGET_SRC[:-1]:
+<% 
+j = i.replace('-','_')
 NAME = os.path.split(i)[1]
 EXT = os.path.splitext(NAME)[1] %>
-                   <File Id="${BASE}.${EXT}" Name="${BASE}.${EXT}"  Source="${i}" />
+                   <File Id="DLL${BASE}${EXT}" Name="${BASE}${EXT}"  Source="${i}"/>
 %endfor
-                  </Component>
-%if PRJ_TYPE == 'bundle':
-                </Directory>
-              </Directory>
+      </Component>
+%if BASE == "launcher":
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+       <Directory Id="IRCADFolder" Name="IRCAD" >
+       <Component Id="CRemove" Guid="<% i = uuid.uuid4()%>${i}">
+            <RemoveFolder Id='IRCADFolder' On='uninstall'/>
+            <RegistryValue Root='HKMU' Key='Software\IRCAD' Type='string' Value='' KeyPath='yes' />
+       </Component>
+         <Directory Id="ProgramMenuDir" Name="${CALLING_PROJECT_VERSION_NAME}">
+          <Component Id="CProgramMenuDir" Guid="<% i = uuid.uuid4()%>${i}">
+            <RemoveFolder Id='ProgramMenuDir' On='uninstall'/>
+            <RegistryValue Root='HKMU' Key='Software\IRCAD\${CALLING_PROJECT}' Type='string' Value='' KeyPath='yes' />
+                <Shortcut Id="Sh${PRJ_NAME}" ShortName="launcher" Name="${CALLING_PROJECT_VERSION_NAME}" Icon='icn_laun' IconIndex="0" Target="[ProgramMenuDir]${CALLING_PROJECT_VERSION_NAME}.exe" />
+          </Component>
+         </Directory>
+       </Directory>
+      </Directory>
 %endif
+<!--
+%for i in spe_file:
+<% k = i.split('\\rc\\')[1]
+k = k.split('\\')%>
+%if not len(k) == 1:
+%for j in k[:-1]:
+<% 
+
+NAME = k[-1]
+ID= NAME.replace('-','_') 
+GUID_RC = uuid.uuid4()%>
+
+                  <Directory Id='RC${j}' Name='${j}' >
+%endfor
+                    <Component Id="C${COUNT}${ID}" Guid="${GUID_RC}">
+                      <CreateFolder />
+                      <File Id="F${ID}" ShortName="F${COUNT}" Name="${NAME}"     Source="${i}" />
+                      <% COUNT += 1 %>
+                </Component>
+%for j in k[:-1]:
+              </Directory>
+%endfor
+%endif
+%endfor
+-->
+              </Directory>
+             </Directory>
+            <Component Id= "cp${PRJ_NAME}" Guid="${GUID1}" >
+             <CreateFolder/>
+%for i in TARGET_SRC:
+<%
+NAME = os.path.split(i)[1]
+EXT = os.path.splitext(NAME)[1] 
+%>
+%if EXT == '.dll':
+					<CopyFile Id="cp${PRJ_NAME}${COUNT}" FileId="DLL${BASE}${EXT}" DestinationName="${PRJ_FULL_NAME}${EXT}"  />
+%endif
+%if EXT == '.exe':
+					<CopyFile Id="cp${PRJ_NAME}${COUNT}" FileId="DLL${BASE}${EXT}" DestinationName="${CALLING_PROJECT_VERSION_NAME}${EXT}"  />
+%endif
+<% COUNT += 1 %>
+%endfor
+%if PRJ_NAME == CALLING_PROJECT:
+					<CopyFile Id="cpprofile" FileId="FprofileQt.xml" DestinationName="profile.xml"  />
+%endif
+            </Component>
             </Directory>
           </Directory>
         </Directory>

@@ -152,6 +152,9 @@ dico_prj_template = {
                 [
                     ('${TEMP_DIR}/temp.vcproj'            ,
                      '${MSVS_DIR}/${PRJ_NAME}.vcproj'),
+                    ('${TEMP_DIR}/user.template'            ,
+                     '${MSVS_DIR}/${PRJ_NAME}.vcproj.user'),
+
                     ('${TEMP_DIR}/temp.sln'            ,
                      '${IDE_INSTALL_DIR}/msvs/'
                            '${CALLING_PROJECT}/${CALLING_PROJECT}.sln'),

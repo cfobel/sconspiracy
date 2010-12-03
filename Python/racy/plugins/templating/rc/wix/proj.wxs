@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<% 
-import uuid
+<% import uuid
 import os
 import os.path
 GUID = CALLING_PROJECT_DEPS[PRJ_NAME]['GUID'] 
@@ -8,9 +7,7 @@ GUID1 = uuid.uuid4()
 TARGET_SRC = CALLING_PROJECT_DEPS[PRJ_NAME]['PRJ_TARGET']
 BASE = CALLING_PROJECT_DEPS[PRJ_NAME]['PRJ_NAME']
 COUNT = 0
-spe_file = []
-%>
-
+spe_file = [] %>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Module Id="${PRJ_NAME}" Language="0" Version="1.2.3">
 
@@ -52,7 +49,7 @@ split_path = split_path[:-1]
 if not split_file == []:
     spe_file.append(save)     %>
 %if len(NAME) < 15 and split_path == []:
-                  <File Id="F${ID}" ShortName="F${BASE[-7:]}" Name="${NAME}"     Source="${i}" />
+                  <File Id="F${ID}" ShortName="F${BASE[-7:]}" Name="${NAME}" Source="${i}" />
                       <% COUNT += 1 %>
 %endif
 %endif

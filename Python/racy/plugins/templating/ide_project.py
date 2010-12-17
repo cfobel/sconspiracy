@@ -96,13 +96,13 @@ class IdeProject(ConstructibleRacyProject):
             'SOURCES'         : prj.get_sources(False),
             'OTHERS_FILE'     : prj.get_others(),
             'PRJ_TYPE'        : prj.get_lower('TYPE'),
-            'RACY_CLEAN_CMD'  : racy.get_racy_cmd() +' '+ prj.base_name,
+            'RACY_CLEAN_CMD'  : racy.get_racy_cmd(),
             'CALLING_PROJECT' : self.prj.base_name,
             'DEPS_INCLUDES'   : prj.deps_include_path,
             'DEPS'            : prj_deps,
             'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path), 
             }
-
+        print dico['DEPS_INCLUDES']
 
 
 

@@ -6,7 +6,7 @@ DEPENDPATH += .
 INCLUDEPATH += . \\
 
 % for i in DEPS_INCLUDES:
-    ${i} \\
+    ${i}${SEP}${PRJ_NAME}${SEP} \\
 
 %endfor
 

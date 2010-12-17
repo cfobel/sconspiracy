@@ -24,3 +24,10 @@ SOURCES += \\
     ${i} \\
 
 % endfor
+
+OTHER_FILES += \\
+
+% for i in OTHERS_FILE:
+    ${i} \\
+
+% endfor

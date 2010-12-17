@@ -102,7 +102,6 @@ class IdeProject(ConstructibleRacyProject):
             'DEPS'            : prj_deps,
             'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path), 
             }
-        print self.prj.target_path
 
 
 

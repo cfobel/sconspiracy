@@ -5,6 +5,7 @@ import os.path
 from os.path import join as opjoin
 
 
+
 # this dictionary contains all varibles for templates
 dico_g = {
     'RACY_INSTALL_DIR': racy.renv.dirs.install,

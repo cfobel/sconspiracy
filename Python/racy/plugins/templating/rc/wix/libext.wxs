@@ -1,42 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <% ID = PRJ_NAME.replace('-','_')
- COUNT = 0%>
+COUNT = 0%>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="${ID}" Language="0" Version="1.2.3">
+    <Module Id="${ID}" Language="0" Version="1.2.3">
 
-    <Package Id="${GUID}" InstallerVersion="100"
-      Languages="0" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no" />
+        <Package Id="${GUID}" InstallerVersion="100"
+        Languages="0" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no" />
 
-    <Directory Id='TARGETDIR' Name='SourceDir'>
-      <Directory Id='ProgramFilesFolder' Name='PFiles'>
-        <Directory Id='IRCAD' Name='IRCAD'>
-          <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_VERSION_NAME}'>
-		    <Directory Id='LIBEXT' Name='libext' >
-		      <Directory Id='${PRJ_NAME}' ShortName='D${PRJ_NAME[-6:]}' Name='${PRJ_VERSION_NAME}'>
-                <Component Id="C${PRJ_NAME}" Guid="${GUID}">
-%for i in TARGETS:
+        <Directory Id='TARGETDIR' Name='SourceDir'>
+            <Directory Id='ProgramFilesFolder' Name='PFiles'>
+                <Directory Id='IRCAD' Name='IRCAD'>
+                    <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_VERSION_NAME}'>
+                        <Directory Id='LIBEXT' Name='libext' >
+                            <Directory Id='${PRJ_NAME}' ShortName='D${PRJ_NAME[-6:]}' Name='${PRJ_VERSION_NAME}'>
+                                <Component Id="C${PRJ_NAME}" Guid="${GUID}">
+                                %for i in TARGETS:
 <% import os
 NAME = os.path.split(i)[1]%>
-                   <File Id="DLL${COUNT}" Name="${NAME}"  Source="${i}"/>
+                                    <File Id="DLL${COUNT}" Name="${NAME}"  Source="${i}"/>
 <% COUNT += 1%>
-%endfor
-                </Component>
-              </Directory>
-             </Directory>
-              <Component Id= "cp${PRJ_NAME}" Guid="${GUID1}" >
-               <CreateFolder/>
-<%COUNT = 0 %>
-%for i in TARGETS:
+                                %endfor
+                                </Component>
+                            </Directory>
+                        </Directory>
+                        <Component Id= "cp${PRJ_NAME}" Guid="${GUID1}" >
+                            <CreateFolder/>
+<% COUNT = 0 %>
+                        %for i in TARGETS:
 <% import os
 NAME = os.path.split(i)[1]%>
-               <CopyFile Id="cp${COUNT}" FileId="DLL${COUNT}" DestinationName="${NAME}"  />
+                            <CopyFile Id="cp${COUNT}" FileId="DLL${COUNT}" DestinationName="${NAME}"  />
 <% COUNT += 1 %>
-%endfor              
-              </Component>
+                        %endfor              
+                        </Component>
+                    </Directory>
+                </Directory>
             </Directory>
-          </Directory>
         </Directory>
-      </Directory>
-
-  </Module>
+    </Module>
 </Wix>

@@ -17,44 +17,38 @@ ID1 = uuid.uuid4()
 ID2 = uuid.uuid4()
 MENU_ID = uuid.uuid4()
 %>
-  <Product Name='${CALLING_PROJECT_FULL_NAME}' Id='${ID1}'
-    Language='1033' Codepage='1252' Version='1.0.0' Manufacturer='IRCAD' UpgradeCode="${ID2}">
+    <Product Name='${CALLING_PROJECT_FULL_NAME}' Id='${ID1}'
+        Language='1033' Codepage='1252' Version='1.0.0' Manufacturer='IRCAD' UpgradeCode="${ID2}">
 
-    <Package Keywords='Installer'
-      Description="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installer"
-      Comments='${CALLING_PROJECT} is a registered trademark of IRCAD' Manufacturer='IRCAD'
-      InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+        <Package Keywords='Installer'
+            Description="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installer"
+            Comments='${CALLING_PROJECT} is a registered trademark of IRCAD' Manufacturer='IRCAD'
+            InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
 
-    <Media Id='1' Cabinet='Sample.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
-    <Property Id='DiskPrompt' Value="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installation [1]" />
-    <Directory Id='TARGETDIR' Name='SourceDir'>
-   
-       <Directory Id='ProgramFilesFolder' Name='PFiles'>
-        <Directory Id='PRODUCTDIR' Name='IRCAD'>
-          <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_FULL_NAME}'>
-%for key in CALLING_PROJECT_DEPS:
-            <Merge Id="C${key}" Language="1033" SourceFile="${key}.msm" DiskId="1" />
-%endfor
-          </Directory>
+        <Media Id='1' Cabinet='Sample.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
+        <Property Id='DiskPrompt' Value="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installation [1]" />
+        <Directory Id='TARGETDIR' Name='SourceDir'>
+            <Directory Id='ProgramFilesFolder' Name='PFiles'>
+                <Directory Id='PRODUCTDIR' Name='IRCAD'>
+                    <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_FULL_NAME}'>
+                %for key in CALLING_PROJECT_DEPS:
+                        <Merge Id="C${key}" Language="1033" SourceFile="${key}.msm" DiskId="1" />
+                %endfor
+                    </Directory>
+                </Directory>
+            </Directory>
+            <Directory Id="DesktopFolder" Name="Desktop" />
         </Directory>
-      </Directory>
-
-      <Directory Id="DesktopFolder" Name="Desktop" />
-  </Directory>
 
 
-    <Feature Id="${CALLING_PROJECT}" Title="${CALLING_PROJECT}" Display='expand' Level="1">
-%for key in CALLING_PROJECT_DEPS:
-      <MergeRef Id="C${key}" />
-%endfor
-    </Feature>
-
-
-	<Property Id="WIXUI_INSTALLDIR" Value="PRODUCTDIR" />
-	<!--<UIRef Id="WixUI_Minimal" />-->
-	<UIRef Id="WixUI_ErrorProgressText" />
-	<UIRef Id='WixUI_InstallDir' />
-
-
-  </Product>
+        <Feature Id="${CALLING_PROJECT}" Title="${CALLING_PROJECT}" Display='expand' Level="1">
+        %for key in CALLING_PROJECT_DEPS:
+            <MergeRef Id="C${key}" />
+        %endfor
+        </Feature>
+        <Property Id="WIXUI_INSTALLDIR" Value="PRODUCTDIR" />
+        <!--<UIRef Id="WixUI_Minimal" />-->
+        <UIRef Id="WixUI_ErrorProgressText" />
+        <UIRef Id='WixUI_InstallDir' />
+    </Product>
 </Wix>

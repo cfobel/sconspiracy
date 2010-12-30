@@ -127,15 +127,15 @@ class WixProject(ConstructibleRacyProject):
         dico_vars = self.gen_file(dico_vars, dico_prj)
 
         dest_file = dico_vars[dico_vars["TEMP_DIR"] + "/call.wxs"]
-        #os.system("candle.exe " + dico_vars['PRJ_NAME'] + '.wxs')
-        #os.system("light.exe "  + dico_vars['PRJ_NAME'] + '.wixobj')
+        os.system("candle.exe " + dico_vars['PRJ_NAME'] + '.wxs')
+        os.system("light.exe "  + dico_vars['PRJ_NAME'] + '.wixobj')
  
        
         if dico_vars['PRJ_NAME'] == dico_vars['CALLING_PROJECT']:
             os.system("candle.exe " +
             dico_vars['CALLING_PROJECT_FULL_NAME'] + '.wxs')
-         #   os.system("light.exe -ext WixUIExtension -cultures:en-us "  + 
-          #  dico_vars['CALLING_PROJECT_FULL_NAME'] + '.wixobj') 
+            os.system("light.exe -ext WixUIExtension -cultures:en-us "  + 
+            dico_vars['CALLING_PROJECT_FULL_NAME'] + '.wixobj') 
 
 
     def create_libext(self,prj):
@@ -178,8 +178,8 @@ class WixProject(ConstructibleRacyProject):
             dico_vars = self.gen_file(dico, dico_prj)
             dest_file = dico_vars[dico_vars["TEMP_DIR"] + "/libext.wxs"]
 
-        #    os.system("candle.exe " + dico_vars['PRJ_NAME'] + '.wxs')
-         #   os.system("light.exe "  + dico_vars['PRJ_NAME'] + '.wixobj')
+            os.system("candle.exe " + dico_vars['PRJ_NAME'] + '.wxs')
+            os.system("light.exe "  + dico_vars['PRJ_NAME'] + '.wixobj')
 
     def create_target(self, prj):
         targets = []

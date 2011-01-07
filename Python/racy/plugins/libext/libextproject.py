@@ -276,6 +276,13 @@ class LibextProject(ConstructibleRacyProject):
 
 
     @cached_property
+    def build_bin_path (self):
+        path = [self.local_dir, 'bin']
+        return os.path.join(*path)
+
+
+
+    @cached_property
     def lib_path (self):
         path = [self.local_dir, 'lib']
         return os.path.join(*path)
@@ -436,8 +443,21 @@ class LibextProject(ConstructibleRacyProject):
 
         result = []
         prj.configure_env()
+        command = CommandWrapper(prj,'SysCommand')
         prj.prj_locals['generate']()
-        
+
+        if racy.renv.is_darwin():
+            install_tool = opjoin(racy.get_bin_path(),'..','Utils',
+                                    'osx_install_name_tool.py')
+            libs = [self.lib_path]
+            deps_lib = self.ENV['DEPS_LIB']
+            if deps_lib:
+                libs += deps_lib.split(':')
+
+            command(['python', install_tool, '-i', '-a', '-P','*',
+                '-s',self.build_bin_path] + libs , pwd = '.')
+
+
         #import defined strings and functions from generate method
         for k,v in self.ENV.items():
             if isinstance(v, basestring) or callable(v):

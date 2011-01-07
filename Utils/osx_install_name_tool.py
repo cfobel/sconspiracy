@@ -6,9 +6,12 @@
 #    -headerpad_max_install_names)
 
 
-from collections import defaultdict
-from subprocess import Popen, PIPE
+import sys
 import os
+
+from collections import defaultdict
+from fnmatch     import fnmatch
+from subprocess  import Popen, PIPE
 
 
 usually_ignored = [
@@ -87,14 +90,14 @@ class BinaryFile(object):
         return hash(self.name)
 
     @staticmethod
-    def find(path, ext='.dylib'):
+    def find(path, pattern='*.dylib'):
         binfiles = []
         if os.path.isfile(path):
             binfiles += [BinaryFile(path=path)]
         else:
             for (root, dirs, files) in os.walk(path):
                 files = [BinaryFile(path=os.path.join(root,f)) for f in files]
-                binfiles += [f for f in files if f.name.endswith(ext)]
+                binfiles += [f for f in files if fnmatch(f.name,pattern)]
         return dict((l.name, l) for l in binfiles)
 
 
@@ -119,9 +122,8 @@ class BinaryFile(object):
 
 
 
-def main():
+def get_options(args):
     from optparse import OptionParser
-    import sys
 
     usage = "usage: %prog [options] binary_or_dir ..."
     epilog = """Updates the install names of executable or shared libraries
@@ -137,7 +139,8 @@ def main():
 
     parser.add_option("-e", "--executable-path", dest="exec_path",
                     help=("specifies the executable path to which the install "
-                        "names will be relocated. disabled if '-a' is used."), metavar="DIR")
+                          "names will be relocated. disabled if '-a' is used."),
+                    metavar="DIR")
 
     #parser.add_option("-L", "--library-path", 
     #                action="append", dest="libpath",
@@ -162,10 +165,23 @@ def main():
                   action="store_true", dest="verbose", default=False,
                   help="verbose output")
 
+    parser.add_option("-P", "--search-pattern", dest="search_pattern",
+            default="*.dylib", help= ("specifies the executable path to "
+                        "which the install names will be relocated. "
+                        "disabled if '-a' is used."), metavar="PATTERN")
 
-    (options, args) = parser.parse_args()
+    parser.add_option("-s", "--search", 
+                    action="append", dest="search_dirs", default=[],
+                    help="this directory will be searched with pattern "
+                    "provided by -P", metavar="DIR")
+    
 
 
+    (options, args) = parser.parse_args(args)
+    return (options, args)
+
+
+def main(options, args):
     def print_msg(*a):
         print ' '.join(map(str,a))
     def print_msg_n(*a):
@@ -190,6 +206,9 @@ def main():
 
     for d in args:
         BinaryFile.db.update(BinaryFile.find(d))
+
+    for d in options.search_dirs:
+        BinaryFile.db.update(BinaryFile.find(d, options.search_pattern))
 
     relpath = os.path.relpath
     librelpath = lambda path : os.path.join( '@executable_path', relpath( path, options.exec_path ) )
@@ -233,5 +252,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    (options, args) = get_options(sys.argv[1:])
+    main(options, args)
 

@@ -11,14 +11,8 @@
 	
 -->
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
-<%
-import uuid
-ID1 = uuid.uuid4()
-ID2 = uuid.uuid4()
-MENU_ID = uuid.uuid4()
-%>
-    <Product Name='${CALLING_PROJECT_FULL_NAME}' Id='${ID1}'
-        Language='1033' Codepage='1252' Version='1.0.0' Manufacturer='IRCAD' UpgradeCode="${ID2}">
+    <Product Name='${CALLING_PROJECT_FULL_NAME}' Id='${uuid(CALLING_PROJECT_FULL_NAME)}'
+        Language='1033' Codepage='1252' Version='${CALLING_PROJECT_VERSION.dotted}' Manufacturer='IRCAD' UpgradeCode="${uuid(CALLING_PROJECT)}">
 
         <Package Keywords='Installer'
             Description="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installer"
@@ -32,7 +26,7 @@ MENU_ID = uuid.uuid4()
                 <Directory Id='PRODUCTDIR' Name='IRCAD'>
                     <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_FULL_NAME}'>
                 %for key in CALLING_PROJECT_DEPS:
-                        <Merge Id="C${key}" Language="1033" SourceFile="${key}.msm" DiskId="1" />
+                        <Merge Id="${key}" Language="1033" SourceFile="${key}.msm" DiskId="1" />
                 %endfor
                     </Directory>
                 </Directory>
@@ -43,8 +37,8 @@ MENU_ID = uuid.uuid4()
 
         <Feature Id="${CALLING_PROJECT}" Title="${CALLING_PROJECT}" Display='expand' Level="1">
         %for key in CALLING_PROJECT_DEPS:
-            <MergeRef Id="C${key}" />
-        %endfor
+            <MergeRef Id="${key}" />
+            %endfor
         </Feature>
         <Property Id="WIXUI_INSTALLDIR" Value="PRODUCTDIR" />
         <!--<UIRef Id="WixUI_Minimal" />-->

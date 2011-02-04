@@ -1,22 +1,21 @@
 import os
-import shutil
-import string
 import uuid
+import functools
 from os.path import join as opjoin
 import racy
-import racy.rutils as rutils
 
-from racy.renv     import constants
 from racy.rproject import ConstructibleRacyProject, LibName
-from racy.rutils   import cached_property, memoize, run_once
+from racy.rutils   import memoize, run_once
 from global_dico import *
 from templating  import *
+
+
 
 class WixProjectError(racy.RacyProjectError):
     pass
 
 class WixProject(ConstructibleRacyProject):
-    
+
     var_name = 'WIX_PRJ'
     prj = ''
     call_prj_deps ={}
@@ -33,7 +32,7 @@ class WixProject(ConstructibleRacyProject):
 
         self.prj = prj
         self.graphviz_buffer = ''
-        
+
 
         super(WixProject, self).__init__(
                                         build_options = opts,
@@ -75,22 +74,29 @@ class WixProject(ConstructibleRacyProject):
 
 
         # This dictionary contains all supported ide
-       
+
         prj_deps = []
         for i in prj.rec_deps:
-            prj_deps.append( { 'PRJ_NAME' : i.base_name , 
+            prj_deps.append( { 'PRJ_NAME' : i.base_name ,
                 'PRJ_TYPE' : i.get_lower('TYPE'), })
-        
-        self.call_prj_deps[prj.base_name] = { 
+
+        self.call_prj_deps[prj.base_name] = {
                     'PRJ_NAME'      : prj.base_name,
                     'PRJ_FULL_NAME' : prj.full_name,
                     'PRJ_VERSION_NAME' : prj.versioned_name,
-                    'PRJ_TYPE'      : prj.get_lower('TYPE'), 
+                    'PRJ_TYPE'      : prj.get_lower('TYPE'),
                     'PRJ_TARGET'    : prj.target_path,
-                    'GUID'          : uuid.uuid4(),
                     }
 
- 
+        profile_without_rc = self.prj.get('WIX_PROFILE').replace("rc",'')
+        profile_without_rc = profile_without_rc[1:]
+        profile_path = os.path.join('Bundles', self.prj.versioned_name,
+                                            profile_without_rc)
+        icon_path = self.prj.get('WIX_ICON')
+        if icon_path:
+            icon_path = self.prj.get_path(icon_path)
+
+
         # this dictionary contains all varibles for templates
         dico = {
             'PRJ_INSTALL_DIR' : prj.install_path,
@@ -107,61 +113,45 @@ class WixProject(ConstructibleRacyProject):
             'CALLING_PROJECT_VERSION_NAME' : self.prj.versioned_name,
             'CALLING_PROJECT_FULL_NAME' : self.prj.full_name,
             'CALLING_PROJECT_DEPS' : self.call_prj_deps,
+            'CALLING_PROJECT_VERSION' : self.prj.version,
+            'CALLING_PROJECT_PROFILE' : profile_path,
+            'CALLING_PROJECT_ICON' : icon_path,
             'DEPS_INCLUDES'   : prj.deps_include_path,
             'VERSION'         : prj.version,
             'DEPS'            : prj_deps,
-            'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path), 
+            'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path),
+            'uuid' : functools.partial(uuid.uuid5, uuid.NAMESPACE_OID),
             }
-
-
 
 
         dico.update(dico_g)
 
-        deps = prj.rec_deps
-        compiler_path = opjoin(racy.get_bin_path(), 'racy')
-
-
         dico_vars = dico
-        dico_prj  = dico_prj_template['dico_create_wix']['true'] 
+        dico_prj  = dico_prj_template['dico_create_wix']['yes']
         dico_vars = self.gen_file(dico_vars, dico_prj)
 
-        dest_file = dico_vars[dico_vars["TEMP_DIR"] + "/call.wxs"]
-        os.system("candle.exe " + dico_vars['PRJ_NAME'] + '.wxs')
-        os.system("light.exe "  + dico_vars['PRJ_NAME'] + '.wixobj')
- 
-       
-        if dico_vars['PRJ_NAME'] == dico_vars['CALLING_PROJECT']:
-            os.system("candle.exe " +
-            dico_vars['CALLING_PROJECT_FULL_NAME'] + '.wxs')
-            os.system("light.exe -ext WixUIExtension -cultures:en-us "  + 
-            dico_vars['CALLING_PROJECT_FULL_NAME'] + '.wixobj') 
+        racy.print_msg("Create {0} wix file".format(prj.base_name))
 
-
-    def create_libext(self,prj):
-        targets = self.create_target(prj)
+    def create_libext(self):
+        targets = self.create_target()
 
         if not targets == []:
- 
-            self.call_prj_deps[prj.base_name] = { 
-                    'PRJ_NAME'      : prj.base_name,
-                    'PRJ_FULL_NAME' : prj.full_name,
-                    'PRJ_VERSION_NAME' : prj.versioned_name,
-                    'PRJ_TYPE'      : prj.get_lower('TYPE'), 
+
+            self.call_prj_deps['libext'] = {
+                    'PRJ_NAME'      : '',
+                    'PRJ_FULL_NAME' : '',
+                    'PRJ_VERSION_NAME' : '',
                     }
-           
+
             dico = {
-                'PRJ_NAME' : prj.base_name,
-                'PRJ_VERSION_NAME' : prj.versioned_name,
-                'PRJ_FULL_NAME' : prj.full_name,
-                'GUID' : uuid.uuid4(),
-                'GUID1': uuid.uuid4(),
                 'CALLING_PROJECT_VERSION_NAME' : self.prj.versioned_name,
                 'CALLING_PROJECT' : self.prj.base_name,
-                'TARGETS':  targets}
+                'TARGETS':  targets,
+                'uuid' : functools.partial(uuid.uuid5, uuid.NAMESPACE_OID),
+            }
 
             dico.update(dico_g)
-            
+
             dico_prj = {
                 'dirs':
                     [
@@ -171,71 +161,37 @@ class WixProject(ConstructibleRacyProject):
                     ],
                 'template_prj':
                     [
-                        ('${TEMP_DIR}/libext.wxs', '${WIX_DIR}/${PRJ_NAME}.wxs'),
+                        ('${TEMP_DIR}/libext.wxs', '${WIX_DIR}/libext.wxs'),
                     ]
             }
 
-            dico_vars = self.gen_file(dico, dico_prj)
-            dest_file = dico_vars[dico_vars["TEMP_DIR"] + "/libext.wxs"]
+            self.gen_file(dico, dico_prj)
+        racy.print_msg("Create libext wix file")
 
-            os.system("candle.exe " + dico_vars['PRJ_NAME'] + '.wxs')
-            os.system("light.exe "  + dico_vars['PRJ_NAME'] + '.wixobj')
 
-    def create_target(self, prj):
+    def create_target(self):
+        bin_dir = racy.renv.dirs.install_bin
         targets = []
-        
-        if prj.base_name.count('_') > 0:
-            base = prj.base_name.split('_')[0]
-        else:
-            base = prj.base_name
-        dir_target = racy.renv.dirs.binpkg
 
-        if prj.get_lower("DEBUG") == "full":
-            dir_target = opjoin(dir_target, "debug")
-        else:
-            dir_target = opjoin(dir_target, "release")
-
-#Exception pour Qt et Wx
-        if base.startswith("wx") and self.qt== False:
-            base ='wx'
-            self.qt = True
-        elif base.startswith("qt") and self.wx == False:
-            base ='qt'
-            self.wx = True
+        for i in os.listdir(bin_dir):
+            if not i.endswith('.exe'):
+                targets.append(os.path.join(bin_dir,i))
 
 
-        tmp = dir_target
-        for i in os.listdir(dir_target):
-            if i.startswith(base):
-                dir_target = opjoin(dir_target, i, 'bin')
-        
-        if dir_target == tmp:
-            targets = []
-        else:
-            dir_depend = os.path.split(dir_target)[0]
-
-            dir_depend,name = os.path.split(dir_depend)
-            
-            for i in os.listdir(dir_target)  :
-                if not i.endswith('exe'):
-                    targets.append(opjoin(dir_target,i))
-
-                 
-        
         return targets
 
-        
 
-    
+
+
     def gen_file(self, dico_vars, dico_prj):
         # Added vars 
         if dico_prj.has_key('vars'):
-                dico_vars_template = add_vars(dico_prj['vars'], dico_vars)
-        
+            dico_vars = add_vars(dico_prj['vars'], dico_vars)
+
 
         # Added dirs
         if dico_prj.has_key('dirs'):
-            dico_vars= add_dirs_template(dico_prj['dirs'], dico_vars)
+            dico_vars = add_dirs_template(dico_prj['dirs'], dico_vars)
 
          # Added template_prj
         if dico_prj.has_key('template_prj'):
@@ -244,14 +200,14 @@ class WixProject(ConstructibleRacyProject):
         return dico_vars
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
-        
-        
+
+
         for i in self.prj.rec_deps:
             if i.get_lower('TYPE') in ['exec', 'bundle', 'shared']:
                 self.create_prj(i)
-            else:
-                self.create_libext(i)
+
+        self.create_libext()
 
         self.create_prj(self.prj)
-   
+
         return result

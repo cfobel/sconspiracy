@@ -88,7 +88,7 @@ class Plugin(racy.rplugins.Plugin):
             res = val in self.allowed_values['IDE'][1:]
         else:
             val = prj.get_lower('CREATE_WIX')
-            res = val == 'true'
+            res = val == 'yes'
         return res
 
     def get_additive(self, prj):

@@ -286,15 +286,15 @@ dico_prj_template = {
     {
         'options':
         {
-            
-            'default_value' : 'false',
+
+            'default_value' : 'no',
             'commandline_prj_opts': True,
             'commandline_opts': False,
-            'allowed_values' : ['true' , 'false'],
+            'allowed_values' : ['yes' , 'no'],
             'descriptions_opts':"Create new wix installer",
         },
 
-        'true':
+        'yes':
         {
             'dirs':
                 [
@@ -304,13 +304,46 @@ dico_prj_template = {
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/call.wxs', '${WIX_DIR}/${CALLING_PROJECT_FULL_NAME}.wxs'),
+                    ('${TEMP_DIR}/call.wxs',
+                        '${WIX_DIR}/${CALLING_PROJECT_FULL_NAME}.wxs'),
                     ('${TEMP_DIR}/proj.wxs', '${WIX_DIR}/${PRJ_NAME}.wxs'),
+                    ('${TEMP_DIR}/generate_msi.py',
+                         '${WIX_DIR}/gen_msi_${CALLING_PROJECT_FULL_NAME}.py'),
+                    ('${TEMP_DIR}/generate_msi.bat',
+                         '${WIX_DIR}/gen_msi_${CALLING_PROJECT_FULL_NAME}.bat'),
+
                 ]
 
         }
 
     }
+    ,
+    'dico_wix_profile':
+    {
+        'options':
+        {
+
+            'default_value' : 'rc/profile.xml',
+            'commandline_prj_opts': True,
+            'commandline_opts': False,
+            'allowed_values' : [],
+            'descriptions_opts':"Path to profile relative to project dir",
+        },
+    }
+    ,
+    'dico_wix_icon':
+    {
+        'options':
+        {
+
+            'default_value' : '',
+            'commandline_prj_opts': True,
+            'commandline_opts': False,
+            'allowed_values' : [],
+            'descriptions_opts':"Path to icon relative to project dir",
+        },
+    }
+
 }
 
 def get_dico_prj(dico, type):
@@ -320,13 +353,13 @@ def get_dico_prj_options(dico):
     res = {}
     for prj, attr in dico.items():
 
-        
+
         if attr.has_key('options'):
             prj = prj.replace('dico_', '')
             prj = prj.upper()
             res[prj] = attr['options']
 
     return res
-        
+
 
 

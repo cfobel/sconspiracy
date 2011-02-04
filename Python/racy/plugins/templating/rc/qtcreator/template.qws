@@ -15,12 +15,12 @@
 %for i in DEPS:
     <value type="QString">${QTCREATOR_PRJ_DIR}${i['PRJ_NAME']}${SEP}${i['PRJ_NAME']}.pro</value>
 %endfor
-    <value type="QString">${QTCREATOR_PRJ_DIR}${CALLING_PROJECT}.pro</value>
+    <value type="QString">${QTCREATOR_PRJ_DIR}${CALLING_PROJECT}${SEP}${CALLING_PROJECT}.pro</value>
   </valuelist>
  </data>
  <data>
   <variable>StartupProject</variable>
-  <value type="QString">${QTCREATOR_PRJ_DIR}${CALLING_PROJECT}.pro</value>
+  <value type="QString">${QTCREATOR_PRJ_DIR}${CALLING_PROJECT}${SEP}${CALLING_PROJECT}.pro</value>
  </data>
  <data>
   <variable>value-ActiveMode</variable>

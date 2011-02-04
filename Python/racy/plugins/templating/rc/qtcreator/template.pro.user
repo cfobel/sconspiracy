@@ -5,13 +5,17 @@ from mako import exceptions
 import racy.rutils  
 import racy.rutils as rutils
 
-
 ARGUMENT = ''
 EXECUTABLE = CALLING_PROJECT_TARGET
 HACK ='/'
+if OS_NAME == "windows":
+    EXT = '.bat'
+else:
+    EXT=''
 %>
 
 <!DOCTYPE QtCreatorProject>
+
 <qtcreator>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -39,16 +43,19 @@ HACK ='/'
      <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
       <value type="QString">${PRJ_NAME}</value>
      </valuelist>
-     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CMD}</value>
+     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CMD}${EXT}</value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${PRJ_ROOT_DIR}</value>
-     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy compilatio</value>
+     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy compilation</value>
      <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.ProcessStep</value>
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.BuildStepsCount" type="int">1</value>
     <valuemap key="ProjectExplorer.BuildConfiguration.CleanStep.0" type="QVariantMap">
-     <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList"/>
-     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CLEAN_CMD} -c </value>
+      <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
+      <value type="QString">${PRJ_NAME} -c</value>
+     </valuelist>
+
+     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CLEAN_CMD}${EXT}</value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${PRJ_ROOT_DIR}</value>
      <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Clean application</value>
@@ -73,7 +80,7 @@ HACK ='/'
 	 <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
      <value type="QString">${PRJ_NAME}/DEBUG=release</value>
      </valuelist>
-	 <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CMD}</value>
+	 <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CMD}${EXT}</value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${PRJ_ROOT_DIR}</value>
      <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy compilation</value>
@@ -81,8 +88,10 @@ HACK ='/'
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.BuildStepsCount" type="int">2</value>
     <valuemap key="ProjectExplorer.BuildConfiguration.CleanStep.0" type="QVariantMap">
-     <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList"/>
-     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CLEAN_CMD}/DEBUG=release -c </value>
+      <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
+      <value type="QString">${PRJ_NAME} -c</value>
+     </valuelist>
+     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CLEAN_CMD}${EXT}/DEBUG=release -c </value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${PRJ_ROOT_DIR}</value>
      <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy clean</value>
@@ -107,7 +116,7 @@ HACK ='/'
 	 <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
       <value type="QString">${PRJ_NAME}/BUILDDEPS=no</value>
      </valuelist>
-	 <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CMD}</value>
+	 <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CMD}${EXT}</value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${PRJ_ROOT_DIR}</value>
      <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy compilation</value>
@@ -115,8 +124,10 @@ HACK ='/'
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.BuildStepsCount" type="int">2</value>
     <valuemap key="ProjectExplorer.BuildConfiguration.CleanStep.0" type="QVariantMap">
-     <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList"/>
-     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CLEAN_CMD}/BUILDDEPS=no -c </value>
+      <valuelist key="ProjectExplorer.ProcessStep.Arguments" type="QVariantList">
+      <value type="QString">${PRJ_NAME} -c</value>
+     </valuelist>
+     <value key="ProjectExplorer.ProcessStep.Command" type="QString">${RACY_CLEAN_CMD}${EXT}/BUILDDEPS=no -c </value>
      <value key="ProjectExplorer.ProcessStep.Enabled" type="bool">true</value>
      <value key="ProjectExplorer.ProcessStep.WorkingDirectory" type="QString">${PRJ_ROOT_DIR}</value>
      <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">racy clean</value>

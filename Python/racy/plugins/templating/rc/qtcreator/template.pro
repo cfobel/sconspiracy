@@ -6,7 +6,7 @@ DEPENDPATH += .
 INCLUDEPATH += . \\
 
 % for i in DEPS_INCLUDES:
-    ${i} \\
+    ${i}${SEP}${PRJ_NAME}${SEP} \\
 
 %endfor
 
@@ -21,6 +21,13 @@ HEADERS += \\
 SOURCES += \\
 
 % for i in SOURCES:
+    ${i} \\
+
+% endfor
+
+OTHER_FILES += \\
+
+% for i in OTHERS_FILE:
     ${i} \\
 
 % endfor

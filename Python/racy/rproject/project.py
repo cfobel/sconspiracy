@@ -1212,9 +1212,16 @@ class ConstructibleRacyProject(InstallableRacyProject):
         return result
 
 
+
     @cached_property
     def target_path(self):
-        return self.main_install_targets[0].get_abspath()
+        def get_path(x):
+            try:
+                return x.get_abspath()
+            except:
+                return x
+
+        return map( get_path, self.main_install_targets)
 
 
     # This one *must* be memoized to avoid several build in env, otherwise

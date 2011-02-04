@@ -1,0 +1,187 @@
+
+templating=. {
+ rc=rc {
+  VC_RED.MSI
+  VC_RED.cab
+  eula.1028.txt
+  eula.1031.txt
+  eula.1033.txt
+  eula.1036.txt
+  eula.1040.txt
+  eula.1041.txt
+  eula.1042.txt
+  eula.2052.txt
+  eula.3082.txt
+  globdata.ini
+  install.exe
+  install.ini
+  install.res.1028.dll
+  install.res.1031.dll
+  install.res.1033.dll
+  install.res.1036.dll
+  install.res.1040.dll
+  install.res.1041.dll
+  install.res.1042.dll
+  install.res.2052.dll
+  install.res.3082.dll
+  setenvDEV.bat
+  vcredist.bmp
+  dev=dev {
+   bin=bin {
+   }
+   bundle=bundle {
+   }
+   exec=exec {
+   }
+   licenses=licenses {
+   }
+   shared=shared {
+   }
+   srv=srv {
+   }
+  }
+  eclipse=eclipse {
+  }
+  graphviz=graphviz {
+  }
+  msvs=msvs {
+  }
+  qtcreator=qtcreator {
+  }
+  vim=vim {
+  }
+ }
+ templating=D:/DEV_FOLDER/sconspiracy/Python/racy/plugins {
+  coloracy=coloracy {
+   __init__.py
+   base.py
+   colorizer.py
+   stdoutproxy.py
+   colorconsole=colorconsole {
+    __init__.py
+    base.py
+    posixconsole.py
+    winconsole.py
+   }
+  }
+  cppunit=cppunit {
+   __init__.py
+   cppunitproject.py
+   rc=rc {
+    testRunnerExec.cpp
+    testRunnerShared.cpp
+    testRunnerXML.cpp
+   }
+  }
+  dependencies=dependencies {
+   __init__.py
+   dependenciesproject.py
+  }
+  doxygen=doxygen {
+   __init__.py
+   doxygenproject.py
+   rc=rc {
+    Doxyfile
+   }
+  }
+  graphlibext=graphlibext {
+   __init__.py
+   generategraph.py
+  }
+  libext=libext {
+   __init__.py
+   builderwrapper.py
+   libexterror.py
+   libextproject.py
+   nodeholder.py
+   sconsbuilders=sconsbuilders {
+    __init__.py
+    cmake.py
+    command.py
+    configure.py
+    copy.py
+    delete.py
+    edit.py
+    make.py
+    mkdir.py
+    patch.py
+    subprocessbuilder.py
+    untar.py
+    unzip.py
+    url.py
+    write.py
+    utils=utils {
+     __init__.py
+    }
+   }
+  }
+  qt=qt {
+   __init__.py
+   sconstools=sconstools {
+    qt4.py
+   }
+  }
+  templating=templating {
+   __init__.py
+   dev_project.py
+   global_dico.py
+   ide_project.py
+   templating.py
+   rc=rc {
+    dev=dev {
+     bin=bin {
+      build.options
+     }
+     bundle=bundle {
+      config.hpp
+      namespace.hpp
+      plugin.cpp
+      plugin.hpp
+      plugin.xml
+     }
+     exec=exec {
+      main.cpp
+     }
+     licenses=licenses {
+      COPYING
+      COPYING.LESSER
+     }
+     shared=shared {
+      config.hpp
+     }
+     srv=srv {
+      namespace.hpp
+      namespace_dir.hpp
+      srv.cpp
+      srv.hpp
+     }
+
+    }
+    eclipse=eclipse {
+     template.cproject
+     template.project
+     template_exec.launch
+     template_executable.launch
+    }
+    graphviz=graphviz {
+     template.dot
+    }
+    msvs=msvs {
+     temp.sln
+     temp.vcproj
+    }
+    qtcreator=qtcreator {
+     template.pro
+     template.pro.user
+     template.qws
+    }
+    vim=vim {
+     tmp.tagslist
+     tmp.vimprj
+     vim.project
+     vim.tagslist
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,32 @@
+
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+%for i in DEPS:
+%if i['PRJ_TYPE'] in ['shared', 'bundle', 'exec','libext']:
+Project("{${CALLING_PROJECT}}") = "${i['PRJ_NAME']}", "${i['PRJ_NAME']}\${i['PRJ_NAME']}.vcproj", "{${i['PRJ_NAME']}}"
+EndProject
+%endif
+%endfor
+Project("{${CALLING_PROJECT}}") = "${CALLING_PROJECT}", "${CALLING_PROJECT}\${CALLING_PROJECT}.vcproj", "${CALLING_PROJECT}"
+
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Win32 = Debug|Win32
+        Release|Win32 = Release|Win32
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        %for i in DEPS:
+        %if i['PRJ_TYPE'] in ['shared', 'bundle', 'exec','libext']:
+        {${i['PRJ_NAME']}}.Debug|Win32.ActiveCfg = Debug|Win32
+        {${i['PRJ_NAME']}}.Debug|Win32.Build.0 = Debug|Win32
+        {${i['PRJ_NAME']}}.Release|Win32.ActiveCfg = Release|Win32
+        {${i['PRJ_NAME']}}.Release|Win32.Build.0 = Release|Win32
+        %endif
+        %endfor
+        {${CALLING_PROJECT}}.Release|Win32.Build.0 = Release|Win32
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+EndGlobal
+

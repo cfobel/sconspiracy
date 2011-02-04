@@ -1,0 +1,17 @@
+${PRJ_USER_FORMAT}=${PRJ_ROOT_DIR} {
+    Includes=include/${PRJ_NAME} {
+        %for i in sorted(HEADERS):
+        <% i = i.replace(PRJ_ROOT_DIR +'/include/'+PRJ_NAME + '/', '')%>${i} 
+        %endfor
+    }
+    Sources=src/${PRJ_NAME} {
+        %for i in sorted(SOURCES):
+        <% i = i.replace(PRJ_ROOT_DIR+'/src/'+PRJ_NAME + '/', '')%>${i}
+        %endfor
+    }
+    Other File=. {
+        %for i in sorted(OTHERS_FILE):
+        <% i = i.replace(PRJ_ROOT_DIR, '')%>${i}
+        %endfor
+    }
+}

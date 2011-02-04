@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<% 
+import base64
+import os
+import os.path
+
+def b64hexhash(s):
+    h = hash(s)
+    hh = hex(h)
+    hh = hh.split('x')[1]
+    if len(hh)%2:
+        hh = '0'+hh
+    code = base64.urlsafe_b64encode(hh.decode('hex'))
+    code = code.replace('-','.')
+    code = code.replace('=','')
+    code = code.replace('.','_')
+    return code
+
+def get_file_tree(files,prefix):
+    files = [ f.replace(prefix,"") for f in files]
+    tree = {}
+
+    for f in files:
+        current_dict = tree
+        lst = f.split(os.sep)
+        for item in lst[:-1]:
+            current_dict = current_dict.setdefault(item, {})
+        current_dict[lst[-1]] = lst[-1]
+    return tree
+
+def create_dirs(dir_tree, prefix):
+
+    file_xml = """<File Id='F{id}' ShortName='{id}' 
+                Name='{name}' Source='{file}' />\n"""
+
+    file_list = []
+    dir_dict  = {}
+    for key, value in dir_tree.iteritems():
+        if isinstance(value, dict):
+            dir_dict[key] = value
+        else:
+            file_list.append(value)
+
+    if file_list:
+        component_id = prefix+'_files'
+        args = {}
+        args['id'] = b64hexhash(component_id)
+        args['guid'] = uuid(component_id)
+        context.write("<Component Id='C{id}' Guid='{guid}'>\n".format(**args))
+        context.write("<CreateFolder />\n")
+        for key in file_list:
+                fargs = {}
+                fargs['id'] = b64hexhash(prefix + key)
+                fargs['name'] = key
+                fargs['file'] = os.path.join(prefix, key)
+                context.write(file_xml.format(**fargs))
+                
+        context.write("</Component>\n")
+
+
+    for key, value in dir_dict.iteritems():
+        args = {}
+        args['id'] = b64hexhash(prefix + key)
+        args['name'] = key
+        args['file'] = os.path.join(prefix, key)
+
+        context.write("<Directory Id='D{id}' Name='{name}'>\n".format(**args))
+        create_dirs(value, args['file'])
+        context.write("</Directory>\n")
+
+        
+
+
+
+
+TARGET_SRC = CALLING_PROJECT_DEPS[PRJ_NAME]['PRJ_TARGET']
+BASE = CALLING_PROJECT_DEPS[PRJ_NAME]['PRJ_NAME']
+COUNT = 0
+spe_file = [] %>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Module Id="${PRJ_NAME}" Language="0" Version="${VERSION.dotted}">
+    <Package Id="${uuid(PRJ_NAME)}" InstallerVersion="100"
+        Languages="1033" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no" />
+        %if BASE == "launcher":
+        <Icon Id="icn_laun" SourceFile="${CALLING_PROJECT_DEPS['launcher']['PRJ_TARGET'][0]}" />
+        %endif
+        <Directory Id='TARGETDIR' Name='SourceDir'>
+            <Directory Id='ProgramFilesFolder' Name='PFiles'>
+                <Directory Id='IRCAD' Name='IRCAD'>
+                    <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_VERSION_NAME}'>
+                %if PRJ_TYPE == 'bundle':
+                        <Directory Id='BUNDLESDIR' Name='Bundles'>
+                            <Directory Id='B${PRJ_NAME}' ShortName='D${COUNT}${PRJ_NAME[-6:]}' Name='${PRJ_VERSION_NAME}'>
+                %else:
+                        <Directory Id='SHAREDDIR' Name='share' >
+                            <Directory Id='S${PRJ_NAME}' ShortName='D${COUNT}${PRJ_NAME[-6:]}' Name='${PRJ_VERSION_NAME}'>
+
+                %endif
+                    %if OTHERS_FILE:
+                    <% 
+                    others = [f for f in OTHERS_FILE if '\\rc\\' in f]
+                    if others:
+                        prefix = others[0].split('\\rc\\')[0] + '\\rc\\'
+
+                        create_dirs(get_file_tree(others, prefix), prefix)
+                    %>
+
+
+                        %if PRJ_TYPE  == 'bundle':
+
+                            <Component Id="C${PRJ_NAME}_RC" Guid="${uuid(PRJ_NAME)}">
+                                <CreateFolder />
+                            %for i in [x for x in TARGET_SRC if not x.endswith('.pdb')] :
+<%
+FULL_NAME = os.path.split(i)[1] 
+ID = b64hexhash(FULL_NAME)
+ID = str(ID).replace('-','_')
+%>
+                            <File Id="F${ID}" Name="${FULL_NAME}"  Source="${i}"/>
+                            %endfor
+                            </Component>
+                        %endif
+
+                    %endif
+                            </Directory>
+                        </Directory>
+
+                        <Directory Id='EXECDIR' Name='bin' >
+                                <Component Id="C${PRJ_NAME}_DLL" Guid="${uuid(PRJ_NAME+'-bin')}">
+                                    <CreateFolder />
+                               %if not PRJ_TYPE  == 'bundle':
+                                %for i in TARGET_SRC:
+<%
+NAME = os.path.split(i)[1]
+EXT = os.path.splitext(NAME)[1]
+%>
+                            <File Id="DLL${BASE}${EXT}" Name="${PRJ_FULL_NAME}${EXT}"  Source="${i}"/>
+                                %endfor
+                               %endif
+                                </Component>
+                            %if BASE == "launcher":
+                                <Directory Id="ProgramMenuFolder" Name="Programs">
+                                    <Directory Id="IRCADFolder" Name="IRCAD" >
+                                        <Component Id="CRemove" Guid="${uuid(CALLING_PROJECT+'remove')}">
+                                            <RemoveFolder Id='IRCADFolder' On='uninstall'/>
+                                            <RegistryValue Root='HKMU' Key='Software\IRCAD' Type='string' Value='' KeyPath='yes' />
+                                        </Component>
+                                        <Directory Id="ProgramMenuDir" Name="${CALLING_PROJECT_VERSION_NAME}">
+                                            <Component Id="CProgramMenuDir" Guid="${uuid(CALLING_PROJECT+'startmenu')}">
+                                                <RemoveFolder Id='ProgramMenuDir' On='uninstall'/>
+                                                <RegistryValue Root='HKCU' Key='Software\IRCAD\${CALLING_PROJECT}' Type='integer' Value='1' KeyPath='yes' Name='installed' />
+
+                                %for i in [t for t in TARGET_SRC if t.endswith('.exe')]:
+<%
+NAME = os.path.split(i)[1]
+EXT = os.path.splitext(NAME)[1]
+%>
+                            <Shortcut
+                                Id="${PRJ_NAME}"
+                                Name="${CALLING_PROJECT} ${CALLING_PROJECT_VERSION.dotted}"
+                                Icon='icn_laun'
+                                IconIndex="0"
+                                Target="[INSTALLDIR]bin\${PRJ_FULL_NAME}${EXT}"
+                                Arguments='"${CALLING_PROJECT_PROFILE}"'
+                                WorkingDirectory="INSTALLDIR"
+                                />
+                                %endfor
+                            <Shortcut
+                                Id="UninstallProduct"
+                                Name="Uninstall ${CALLING_PROJECT} ${CALLING_PROJECT_VERSION.dotted}"
+                                Target="[System64Folder]msiexec.exe"
+                                Arguments="/x [ProductCode]"
+                                Description="Uninstalls ${CALLING_PROJECT} ${CALLING_PROJECT_VERSION.dotted}"
+                                />
+
+
+                                            </Component>
+                                        </Directory>
+                                    </Directory>
+                                </Directory>
+                            %endif
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+
+    </Module>
+</Wix>

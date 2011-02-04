@@ -1,0 +1,12 @@
+<plugin id="${PRJ_NAME}" class="::${PRJ_NAME}::Plugin">
+    
+    <library name="${PRJ_NAME}" />
+
+<!--
+    <point id="/*  TODO  */" >
+        <implements>/* TODO */</implements>
+    </point>
+-->  
+
+
+</plugin>

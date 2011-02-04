@@ -1,0 +1,19 @@
+<% import glob
+import racy.rutils as rutils
+if PRJ_NAME == CALLING_PROJECT:
+    dep = glob.glob(VIM_DIR + '/' + '.*tagslist')
+    deps= []
+    for i in dep:
+        tmp = rutils.get_file_content(i)
+        deps.append(tmp) %>
+%if PRJ_NAME == CALLING_PROJECT:
+    %for i in deps:
+${i}
+    %endfor
+%endif
+%for i in SOURCES:
+${i}
+%endfor
+%for i in HEADERS:
+${i}
+%endfor

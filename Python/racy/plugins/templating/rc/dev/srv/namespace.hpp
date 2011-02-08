@@ -7,7 +7,7 @@ import racy.rutils as rutils
 
 NAMESPACE = []
 path = opjoin('include', PRJ_NAME)
-temp_file = TEMP_DIR + '/' + 'namespace_dir.hpp'
+temp_file = TPL_DIR + '/' + 'namespace_dir.hpp'
 
 
 for i in SRV_SPLITTED_PATH:

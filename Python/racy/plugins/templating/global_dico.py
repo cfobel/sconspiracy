@@ -40,7 +40,7 @@ dico_prj_template = {
             'commandline_prj_opts': True,
             'descriptions_opts': 
     """Preferencies formated project name.
-    You can used this variable like this:
+    You can use this variable like this:
     $( VARIABLE )
     PRJ_NAME           : project base name.
     RACY_CMD           : racy command.
@@ -60,18 +60,18 @@ dico_prj_template = {
             'dirs':
                 [
                     ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator/${PRJ_NAME}/'),
-                    ('TEMP_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/'     ),
+                    ('TPL_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/'     ),
                     ('OS_DIR'   , qt_default_dir                   ),
                 ]
             ,
             'template_prj':
                 [
                 
-                    ('${TEMP_DIR}/template.pro'     , 
+                    ('${TPL_DIR}/template.pro'     , 
                             '${QT_DIR}/${PRJ_NAME}.pro'     ),
-                    ('${TEMP_DIR}/template.pro.user',
+                    ('${TPL_DIR}/template.pro.user',
                             '${QT_DIR}/${PRJ_NAME}.pro.user'),
-                    ('${TEMP_DIR}/template.qws'     ,
+                    ('${TPL_DIR}/template.qws'     ,
                             '${OS_DIR}/${PRJ_NAME}.qws'     ),
                 ]
           
@@ -88,20 +88,46 @@ dico_prj_template = {
                                      '${CALLING_PROJECT}/.metadata/.plugins/'
                                       'org.eclipse.debug.core/.launches/')
                    ),
-                   ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/eclipse/'       ),
+                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/eclipse/'       ),
                 ]
             
             ,
             'template_prj':
                 [
-                    ('${TEMP_DIR}/template.project'       ,
+                    ('${TPL_DIR}/template.project'       ,
                         '${EC_DIR}/.project'               ),
-                    ('${TEMP_DIR}/template.cproject'      ,
+                    ('${TPL_DIR}/template.cproject'      ,
                        '${EC_DIR}/.cproject'               ),
-                    ('${TEMP_DIR}/template_exec.launch' ,
+                    ('${TPL_DIR}/template_exec.launch' ,
                        '${LAUNCH_DIR}/exec.launch'         ),
                 ]
          },
+
+        'eclipse-inplace' :
+        { 
+            'dirs':
+                [
+                   ( 'EC_DIR'     , ('${PRJ_ROOT_DIR}/')
+                   ),
+                   ( 'LAUNCH_DIR' , ('${IDE_INSTALL_DIR}/eclipse/'
+                                     '${CALLING_PROJECT}/.metadata/.plugins/'
+                                      'org.eclipse.debug.core/.launches/')
+                   ),
+                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/eclipse/'       ),
+                ]
+            
+            ,
+            'template_prj':
+                [
+                    ('${TPL_DIR}/template.project'       ,
+                        '${EC_DIR}/.project'               ),
+                    ('${TPL_DIR}/template.cproject'      ,
+                       '${EC_DIR}/.cproject'               ),
+                    ('${TPL_DIR}/template_exec.launch' ,
+                       '${LAUNCH_DIR}/exec.launch'         ),
+                ]
+         },
+
          'graphviz' :
          {
             'dirs':
@@ -109,11 +135,11 @@ dico_prj_template = {
                    ( 'GRAPHVIZ_DIR' , ('${IDE_INSTALL_DIR}/graphviz/'
                                      '${CALLING_PROJECT}/'
                    )),
-                   ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/graphviz/'),
+                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/graphviz/'),
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/template.dot'            ,
+                    ('${TPL_DIR}/template.dot'            ,
                      '${GRAPHVIZ_DIR}/${CALLING_PROJECT}.dot'),
                 ]
           },
@@ -124,17 +150,17 @@ dico_prj_template = {
                    ( 'VIM_DIR' , ('${IDE_INSTALL_DIR}/vim/'
                                      '${CALLING_PROJECT}/'
                    )),
-                   ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/vim/'),
+                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/vim/'),
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/vim.tagslist'            ,
+                    ('${TPL_DIR}/vim.tagslist'            ,
                      '${VIM_DIR}/.${PRJ_NAME}_tagslist'),
-                    ('${TEMP_DIR}/vim.project'            ,
+                    ('${TPL_DIR}/vim.project'            ,
                      '${VIM_DIR}/.${PRJ_NAME}_vimprj'),
-                    ('${TEMP_DIR}/tmp.tagslist'            ,
+                    ('${TPL_DIR}/tmp.tagslist'            ,
                      '${VIM_DIR}/tagslist'),
-                    ('${TEMP_DIR}/tmp.vimprj'            ,
+                    ('${TPL_DIR}/tmp.vimprj'            ,
                      '${VIM_DIR}/vimprj'),
 
 
@@ -147,16 +173,16 @@ dico_prj_template = {
                    ( 'MSVS_DIR' , ('${IDE_INSTALL_DIR}/msvs/'
                                      '${CALLING_PROJECT}/${PRJ_NAME}'
                    )),
-                   ( 'TEMP_DIR'   , '${IDE_PLUGIN_PATH}/rc/msvs/'),
+                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/msvs/'),
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/temp.vcproj'            ,
+                    ('${TPL_DIR}/temp.vcproj'            ,
                      '${MSVS_DIR}/${PRJ_NAME}.vcproj'),
-                    ('${TEMP_DIR}/user.template'            ,
+                    ('${TPL_DIR}/user.template'            ,
                      '${MSVS_DIR}/${PRJ_NAME}.vcproj.user'),
 
-                    ('${TEMP_DIR}/temp.sln'            ,
+                    ('${TPL_DIR}/temp.sln'            ,
                      '${IDE_INSTALL_DIR}/msvs/'
                            '${CALLING_PROJECT}/${CALLING_PROJECT}.sln'),
                 ]
@@ -189,7 +215,7 @@ dico_prj_template = {
             'dirs':
                 [
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
-                    ('TEMP_DIR' , '${ROOT_TMP_DIR}/exec/'),
+                    ('TPL_DIR' , '${ROOT_TMP_DIR}/exec/'),
                     ('LICENSE_TMP_DIR', '${ROOT_TMP_DIR}/licenses/'),
                     ('SRC_DIR', '${PRJ_PATH}/src/${PRJ_NAME}'),
                     ('INCLUDE_DIR', '${PRJ_PATH}/include/${PRJ_NAME}'),
@@ -197,7 +223,7 @@ dico_prj_template = {
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/main.cpp', '${SRC_DIR}/main.cpp'),
+                    ('${TPL_DIR}/main.cpp', '${SRC_DIR}/main.cpp'),
                     ('${ROOT_TMP_DIR}/bin/build.options', '${BIN_DIR}/build.options'),
                     ('${LICENSE_TMP_DIR}/COPYING', '${PRJ_PATH}/COPYING'),
                     ('${LICENSE_TMP_DIR}/COPYING.LESSER', '${PRJ_PATH}/COPYING.LESSER'),
@@ -209,7 +235,7 @@ dico_prj_template = {
             'dirs':
                 [
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
-                    ('TEMP_DIR' , '${ROOT_TMP_DIR}/bundle/'),
+                    ('TPL_DIR' , '${ROOT_TMP_DIR}/bundle/'),
                     ('LICENSE_TMP_DIR', '${ROOT_TMP_DIR}/licenses/'),
                     ('SRC_DIR', '${PRJ_PATH}/src/${PRJ_NAME}'),
                     ('RC_DIR', '${PRJ_PATH}/rc/'),
@@ -219,11 +245,11 @@ dico_prj_template = {
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/config.hpp', '${INCLUDE_DIR}/config.hpp'),
-                    ('${TEMP_DIR}/plugin.hpp', '${INCLUDE_DIR}/Plugin.hpp'),
-                    ('${TEMP_DIR}/plugin.cpp', '${SRC_DIR}/Plugin.cpp'),
-                    ('${TEMP_DIR}/plugin.xml', '${RC_DIR}/plugin.xml'),
-                    ('${TEMP_DIR}/namespace.hpp','${INCLUDE_DIR}/namespace.hpp'),
+                    ('${TPL_DIR}/config.hpp', '${INCLUDE_DIR}/config.hpp'),
+                    ('${TPL_DIR}/plugin.hpp', '${INCLUDE_DIR}/Plugin.hpp'),
+                    ('${TPL_DIR}/plugin.cpp', '${SRC_DIR}/Plugin.cpp'),
+                    ('${TPL_DIR}/plugin.xml', '${RC_DIR}/plugin.xml'),
+                    ('${TPL_DIR}/namespace.hpp','${INCLUDE_DIR}/namespace.hpp'),
                     ('${ROOT_TMP_DIR}/bin/build.options', '${BIN_DIR}/build.options'),
                     ('${LICENSE_TMP_DIR}/COPYING', '${PRJ_PATH}/COPYING'),
                     ('${LICENSE_TMP_DIR}/COPYING.LESSER', '${PRJ_PATH}/COPYING.LESSER'),
@@ -234,7 +260,7 @@ dico_prj_template = {
             'dirs':
                 [
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
-                    ('TEMP_DIR' , '${ROOT_TMP_DIR}/bundle/'),
+                    ('TPL_DIR' , '${ROOT_TMP_DIR}/bundle/'),
                     ('LICENSE_TMP_DIR', '${ROOT_TMP_DIR}/licenses/'),
                     ('SRC_DIR', '${PRJ_PATH}/src/${PRJ_NAME}'),
                     ('INCLUDE_DIR', '${PRJ_PATH}/include/${PRJ_NAME}'),
@@ -243,7 +269,7 @@ dico_prj_template = {
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/config.hpp', '${INCLUDE_DIR}/config.hpp'),
+                    ('${TPL_DIR}/config.hpp', '${INCLUDE_DIR}/config.hpp'),
                     ('${ROOT_TMP_DIR}/bin/build.options', '${BIN_DIR}/build.options'),
                     ('${LICENSE_TMP_DIR}/COPYING', '${PRJ_PATH}/COPYING'),
                     ('${LICENSE_TMP_DIR}/COPYING.LESSER', '${PRJ_PATH}/COPYING.LESSER'),
@@ -268,15 +294,15 @@ dico_prj_template = {
             'dirs':
                 [
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
-                    ('TEMP_DIR' , '${ROOT_TMP_DIR}/srv/'),
+                    ('TPL_DIR' , '${ROOT_TMP_DIR}/srv/'),
                     ('SRC_DIR', 'src/${PRJ_NAME}/'),
                     ('INCLUDE_DIR', 'include/${PRJ_NAME}/${SRV_PATH}/'),
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/srv.hpp', '${INCLUDE_DIR}${SRV_NAME}.hpp'),
-                    ('${TEMP_DIR}/namespace.hpp', '${INCLUDE_DIR}/namespace.hpp'),
-                    ('${TEMP_DIR}/srv.cpp', '${SRC_DIR}${SRV_NAME}.cpp'),
+                    ('${TPL_DIR}/srv.hpp', '${INCLUDE_DIR}${SRV_NAME}.hpp'),
+                    ('${TPL_DIR}/namespace.hpp', '${INCLUDE_DIR}/namespace.hpp'),
+                    ('${TPL_DIR}/srv.cpp', '${SRC_DIR}${SRV_NAME}.cpp'),
                 ]
 
         }
@@ -300,16 +326,16 @@ dico_prj_template = {
                 [
                     ('WIX_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/'),
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/'),
-                    ('TEMP_DIR' , '${ROOT_TMP_DIR}/wix/'),
+                    ('TPL_DIR' , '${ROOT_TMP_DIR}/wix/'),
                 ],
             'template_prj':
                 [
-                    ('${TEMP_DIR}/call.wxs',
+                    ('${TPL_DIR}/call.wxs',
                         '${WIX_DIR}/${CALLING_PROJECT_FULL_NAME}.wxs'),
-                    ('${TEMP_DIR}/proj.wxs', '${WIX_DIR}/${PRJ_NAME}.wxs'),
-                    ('${TEMP_DIR}/generate_msi.py',
+                    ('${TPL_DIR}/proj.wxs', '${WIX_DIR}/${PRJ_NAME}.wxs'),
+                    ('${TPL_DIR}/generate_msi.py',
                          '${WIX_DIR}/gen_msi_${CALLING_PROJECT_FULL_NAME}.py'),
-                    ('${TEMP_DIR}/generate_msi.bat',
+                    ('${TPL_DIR}/generate_msi.bat',
                          '${WIX_DIR}/gen_msi_${CALLING_PROJECT_FULL_NAME}.bat'),
 
                 ]

@@ -33,7 +33,7 @@ if PRJ_NAME == CALLING_PROJECT:
                     'NAME'            : argument,
                         }
                 try:
-                    template   = Template(filename = os.path.join(TEMP_DIR, 'template_executable.launch'))
+                    template   = Template(filename = os.path.join(TPL_DIR, 'template_executable.launch'))
 
                     template   = template.render(**dico)  
                 except:

@@ -16,7 +16,8 @@ HEADER_GUARD = '_' + '_'.join(PATH) +'_'+SRV_NAME+ '_HPP_'
 HEADER_GUARD = HEADER_GUARD.upper()
 
 NAMESPACE = [PRJ_NAME]
-NAMESPACE.extend(SRV_PATH.split('/'))
+if '/' in NAMESPACE:
+    NAMESPACE.extend(SRV_PATH.split('/'))
 
 
 %>

@@ -11,13 +11,12 @@ import sys
 
 
 PATH = SRV_SPLITTED_PATH
-
+print PATH
 HEADER_GUARD = '_' + '_'.join(PATH) +'_'+SRV_NAME+ '_HPP_'
 HEADER_GUARD = HEADER_GUARD.upper()
 
 NAMESPACE = [PRJ_NAME]
-if '/' in NAMESPACE:
-    NAMESPACE.extend(SRV_PATH.split('/'))
+NAMESPACE.extend(PATH)
 
 
 %>
@@ -36,8 +35,7 @@ class ${PRJ_NAME}_CLASS_API ${SRV_NAME} : public /* SrvSuperClass */
 {
 
 public:
-
-    fwCoreClassDefinitionsWithFactoryMacro( (${SRV_NAME})(/* SrvSuperClass */), (()), new ${SRV_NAME});
+    fwCoreServiceClassDefinitionsMacro ( (${SRV_NAME})(/* SrvSuperclass */) ) ;
 
     ${SRV_NAME}_API ${SRV_NAME}();
 

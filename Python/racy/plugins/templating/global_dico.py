@@ -38,7 +38,7 @@ dico_prj_template = {
             'default_value': 'none',
             'allowed_value': ['none', 'eclipse', 'qtcreator', 'graphviz','vim','msvs'],
             'commandline_prj_opts': True,
-            'descriptions_opts': 
+            'descriptions_opts':
     """Preferencies formated project name.
     You can use this variable like this:
     $( VARIABLE )
@@ -55,7 +55,7 @@ dico_prj_template = {
     """,
         },
 
-        'qtcreator' :  
+        'qtcreator' :
         {
             'dirs':
                 [
@@ -66,15 +66,15 @@ dico_prj_template = {
             ,
             'template_prj':
                 [
-                
-                    ('${TPL_DIR}/template.pro'     , 
+
+                    ('${TPL_DIR}/template.pro'     ,
                             '${QT_DIR}/${PRJ_NAME}.pro'     ),
                     ('${TPL_DIR}/template.pro.user',
                             '${QT_DIR}/${PRJ_NAME}.pro.user'),
                     ('${TPL_DIR}/template.qws'     ,
                             '${OS_DIR}/${PRJ_NAME}.qws'     ),
                 ]
-          
+
         },
 
         'eclipse' :
@@ -90,7 +90,7 @@ dico_prj_template = {
                    ),
                    ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/eclipse/'       ),
                 ]
-            
+
             ,
             'template_prj':
                 [
@@ -104,7 +104,7 @@ dico_prj_template = {
          },
 
         'eclipse-inplace' :
-        { 
+        {
             'dirs':
                 [
                    ( 'EC_DIR'     , ('${PRJ_ROOT_DIR}/')
@@ -115,7 +115,7 @@ dico_prj_template = {
                    ),
                    ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/eclipse/'       ),
                 ]
-            
+
             ,
             'template_prj':
                 [
@@ -295,7 +295,7 @@ dico_prj_template = {
                 [
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/srv/'),
-                    ('SRC_DIR', 'src/${PRJ_NAME}/'),
+                    ('SRC_DIR', 'src/${PRJ_NAME}/${SRV_PATH}/'),
                     ('INCLUDE_DIR', 'include/${PRJ_NAME}/${SRV_PATH}/'),
                 ],
             'template_prj':

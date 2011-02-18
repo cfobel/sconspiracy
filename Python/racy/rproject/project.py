@@ -885,22 +885,23 @@ class InstallableRacyProject(RacyProject):
     def install_bin_libext (self):
         env = self.env
         import fnmatch
+        from glob import glob
         libext = self.get('LIBEXTINSTANCE')
 
-        patterns = []
+        lib_patterns = []
         if racy.renv.system() == "windows":
-            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
-            patterns.append( '{0}.pdb*' )
-            patterns.append( env.subst('{0}${WINDOWSSHLIBMANIFESTSUFFIX}*') )
+            lib_patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
+            lib_patterns.append( '{0}.pdb*' )
+            lib_patterns.append( env.subst('{0}${WINDOWSSHLIBMANIFESTSUFFIX}*'))
         elif racy.renv.system() == "darwin":
-            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
-            patterns.append( env.subst('${SHLIBPREFIX}{0}.*${SHLIBSUFFIX}'))
+            lib_patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
+            lib_patterns.append( env.subst('${SHLIBPREFIX}{0}.*${SHLIBSUFFIX}'))
         else:
-            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}*'))
+            lib_patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}*'))
 
 
         matches = []
-        for pattern in patterns:
+        for pattern in lib_patterns:
             for lib in libext.LIBS:
                 matches.append( fnmatch.translate(pattern.format(lib)) )
 
@@ -909,10 +910,27 @@ class InstallableRacyProject(RacyProject):
 
         regex = '|'.join(matches)
 
+        def install_translate( install_item ):
+            src_base = libext.basepath
+            source, dest = install_item
+            source = pathjoin(src_base, source)
+            sources = [f.rstrip('\\/') for f in glob(source)]
+            dests = [''.join([dest, os.path.split(src)[1]]) for src in sources]
+            return zip(sources, dests)
+
+        install_matches = map(install_translate, libext.install)
+
         res = []
         if regex:
             for path in libext.ABS_LIBPATH:
                 res += self.install_files(path, self.install_path, regex)
+
+        for group in install_matches:
+            for src, dest in group:
+                res += env.CopyFile(
+                        pathjoin(racy.renv.dirs.install, dest),
+                        source = src,
+                        )
 
         if not res:
             if libext.libs_install or libext.LIBS:

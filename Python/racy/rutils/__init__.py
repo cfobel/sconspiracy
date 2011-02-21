@@ -203,7 +203,6 @@ def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
             os.unlink(dst)
 
     elif os.path.isdir(src):
-        print ("THIS IS A DIR", src, dst )
         #mkdir_p(dst)
         action = shutil.copytree
     else:
@@ -215,7 +214,6 @@ def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
             mkdir_p(os.path.split(dst)[0])
         action(src, dst)
     except exceptions.OSError, e:
-        print ("FLUTE", src, dst )
         import errno
         if not e.errno == errno.EEXIST:
             raise e

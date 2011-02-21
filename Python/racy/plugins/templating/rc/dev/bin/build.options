@@ -1,2 +1,10 @@
 TYPE = '${PRJ_TYPE}'
 VERSION = '0.1'
+
+%if not PRJ_TYPE == 'exec':
+#USE = []
+#LIB = []
+%endif
+%if PRJ_TYPE == 'bundle':
+#BUNDLES = []
+%endif

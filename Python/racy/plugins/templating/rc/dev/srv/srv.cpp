@@ -12,12 +12,12 @@ COMPLETE_NAMESPACE = '::' + '::'.join(PATH) + '::' + SRV_NAME
 NAMESPACE = SRV_PATH.split('/')
 
 NAMESPACE = [PRJ_NAME]
-NAMESPACE.extend(SRV_PATH.split('/'))
+NAMESPACE.extend(PATH)
 
 
 %>
 
-#include "${SRV_PATH}/${SRV_NAME}.hpp"
+#include "${SRV_PATH[1:]}/${SRV_NAME}.hpp"
 
 REGISTER_SERVICE( /* SrvSuperClass */ , ${COMPLETE_NAMESPACE}  , /* Object */ ) ;
 

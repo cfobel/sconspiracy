@@ -346,19 +346,25 @@ class LibextProject(ConstructibleRacyProject):
 
         kwdeps = {}
         for prefix, dependencies in keys_deps:
-            deps = dict(
-                    ('{0}_{1}'.format(prefix, p.name).upper(), p.local_dir)
+            deps_prj = dict(
+                    ('{0}_{1}'.format(prefix, p.name).upper(), p)
                     for p in dependencies
                     )
+            deps = dict( (n , p.local_dir) for n, p in deps_prj.items())
+
             items = deps.items()
             deps_include = dict((k+'_INCLUDE', v+'/include') for k,v in items)
             deps_lib     = dict((k+'_LIB'    , v+'/lib'    ) for k,v in items)
             deps_bin     = dict((k+'_BIN'    , v+'/bin'    ) for k,v in items)
+
+            deps_ver = dict((k+'_VERSION', p.version) for k,p in deps_prj.items())
+
             if prefix == 'DEP':
                 kwdeps.update(deps)
                 kwdeps.update(deps_include)
                 kwdeps.update(deps_lib)
                 kwdeps.update(deps_bin)
+                kwdeps.update(deps_ver)
             join = os.pathsep.join
 
             vars = {

@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
+<%
+include_list = []
+for i in DEPS_INCLUDES:
+    include_list.append(i)
+INCLUDE= ';'.join(include_list)
+%>
 <VisualStudioProject
     ProjectType="Visual C++"
     Version="9,00"
@@ -21,7 +27,7 @@
             IntermediateDirectory="$(ConfigurationName)"
             ConfigurationType="1"
             CharacterSet="2"
-            ExcludeBuckets="4;5;6;7;8;9;10;12;13;14;15;16;18;19;21"  
+            ExcludeBuckets="4;5;6;8;9;10;12;13;14;15;16;18;19;21"  
             >
             <Tool
                 Name="VCPreBuildEventTool"
@@ -43,6 +49,7 @@
             <Tool
                 Name="VCCLCompilerTool"
                 Optimization="0"
+                AdditionalIncludeDirectories="${INCLUDE}"
                 MinimalRebuild="true"
                 BasicRuntimeChecks="3"
                 RuntimeLibrary="3"
@@ -91,7 +98,7 @@
             IntermediateDirectory="$(ConfigurationName)"
             ConfigurationType="1"
             CharacterSet="2"
-            ExcludeBuckets="4;5;6;7;8;9;10;12;13;14;15;16;18;19;21"  
+            ExcludeBuckets="4;5;6;8;9;10;12;13;14;15;16;18;19;21"  
             >
             <Tool
                 Name="VCPreBuildEventTool"
@@ -113,6 +120,7 @@
             <Tool
                 Name="VCCLCompilerTool"
                 Optimization="0"
+                AdditionalIncludeDirectories="${INCLUDE}"
                 MinimalRebuild="true"
                 BasicRuntimeChecks="3"
                 RuntimeLibrary="3"
@@ -161,7 +169,7 @@
             IntermediateDirectory="$(ConfigurationName)"
             ConfigurationType="1"
             CharacterSet="2"
-            ExcludeBuckets="4;5;6;7;8;9;10;12;13;14;15;16;18;19;21"  
+            ExcludeBuckets="4;5;6;8;9;10;12;13;14;15;16;18;19;21"  
             >
             <Tool
                 Name="VCPreBuildEventTool"
@@ -183,6 +191,7 @@
             <Tool
                 Name="VCCLCompilerTool"
                 Optimization="0"
+                AdditionalIncludeDirectories="${INCLUDE}"
                 MinimalRebuild="true"
                 BasicRuntimeChecks="3"
                 RuntimeLibrary="3"
@@ -231,7 +240,7 @@
             IntermediateDirectory="$(ConfigurationName)"
             ConfigurationType="1"
             CharacterSet="2"
-            ExcludeBuckets="4;5;6;7;8;9;10;12;13;14;15;16;18;19;21"  
+            ExcludeBuckets="4;5;6;8;9;10;12;13;14;15;16;18;19;21"  
             >
             <Tool
                 Name="VCPreBuildEventTool"
@@ -253,6 +262,7 @@
             <Tool
                 Name="VCCLCompilerTool"
                 Optimization="2"
+                AdditionalIncludeDirectories="${INCLUDE}"
                 EnableIntrinsicFunctions="true"
                 RuntimeLibrary="2"
                 EnableFunctionLevelLinking="true"

@@ -74,14 +74,19 @@ class IdeProject(ConstructibleRacyProject):
 
        
         prj_deps = []
-        
+
+        deps_include = []
 
         for i in prj.rec_deps:
             if i.get_lower('TYPE') == 'bin_libext':
                 target = ''
+                for deps in i.include_path:
+                    if not deps in deps_include:
+                      deps_include.append(deps)
             else:
-                target = i.target_path 
-
+                target = i.target_path
+                deps_include.extend(i.include_path)
+          
             prj_deps.append( { 'PRJ_NAME' : i.base_name , 
                 'PRJ_TYPE' : i.get_lower('TYPE'), 'PRJ_TARGET': target, })
             
@@ -98,11 +103,13 @@ class IdeProject(ConstructibleRacyProject):
             'PRJ_TYPE'        : prj.get_lower('TYPE'),
             'RACY_CLEAN_CMD'  : racy.get_racy_cmd(),
             'CALLING_PROJECT' : self.prj.base_name,
-            'DEPS_INCLUDES'   : prj.deps_include_path,
+            'DEPS_INCLUDES'   : deps_include,
             'DEPS'            : prj_deps,
             'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path), 
             }
-        print dico['DEPS_INCLUDES']
+            
+
+
 
 
 

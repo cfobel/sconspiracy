@@ -104,6 +104,7 @@ class IdeProject(ConstructibleRacyProject):
             'RACY_CLEAN_CMD'  : racy.get_racy_cmd(),
             'CALLING_PROJECT' : self.prj.base_name,
             'DEPS_INCLUDES'   : deps_include,
+            'DEPS_INCLUDES_BASE' : prj.deps_include_path,
             'DEPS'            : prj_deps,
             'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path), 
             }

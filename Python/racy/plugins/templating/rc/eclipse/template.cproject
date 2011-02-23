@@ -32,9 +32,9 @@ ID_CCONFIG_3 = str(random.randint(*rand_range));
 <tool id="org.eclipse.cdt.build.core.settings.holder.656340484" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
 
 <option id="org.eclipse.cdt.build.core.settings.holder.incpaths.394996232" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
-% for i in DEPS_INCLUDES:
-<%   j = i.replace('\\', '/') %>
-<listOptionValue builtIn="false" value="&quot;${i}&quot;"/>
+% for i in DEPS_INCLUDES_BASE:
+<%j = i.replace('\\', '/')%>
+<listOptionValue builtIn="false" value="&quot;${j}&quot;"/>
 %endfor
 </option>
 

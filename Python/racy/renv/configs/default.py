@@ -42,6 +42,7 @@ BUILDPKG          = "no"
 
 CXX               = ''
 MSVC_VERSION      = ''
+MSSDK_VERSION     = ''
 
 USEVISIBILITY     = 'yes'
 CONSOLE           = 'no'

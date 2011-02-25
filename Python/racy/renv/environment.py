@@ -42,7 +42,7 @@ class Environment(Env):
 
         kwargs['toolpath'] = renv.toolpath() + kwargs.get('toolpath',[])
 
-        for opt in ['DEBUG', 'TOOL', 'MSVC_VERSION']:
+        for opt in ['DEBUG', 'TOOL', 'MSVC_VERSION','MSSDK_VERSION']:
             kwargs[opt] = get_option(opt)
 
 

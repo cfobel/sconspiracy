@@ -477,6 +477,17 @@ class LibextProject(ConstructibleRacyProject):
                 ]
         res += BuilderWrapper.apply_calls( prj, **self.ENV )
 
+        #has_download = map(lambda x: self.download_target in str(x), res)
+        #if any(has_download):
+            #download_id = has_download.index(True)
+            #download = res[download_id]
+            #res.remove(download)
+            #res.insert(0,download)
+
+        downloads = [x for x in res if self.download_target in str(x)]
+        map(res.remove, downloads)
+        res = downloads + res
+
         previous_node = []
         for nodes in res:
             if not isinstance(nodes, LibextProject):

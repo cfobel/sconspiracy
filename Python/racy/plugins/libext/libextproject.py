@@ -171,6 +171,14 @@ class SetENVPathWrapper(object):
         self.prj.env['ENV'][name] = subst(newpath)
         return None
 
+class SetWrapper(object):
+    def __init__(self, prj):
+        self.prj = prj
+    def __call__(self, var, val):
+        subst = self.prj.env.subst
+        self.prj.env[var] = subst(val)
+        return None
+
 
 class LibextProject(ConstructibleRacyProject):
     LIBEXT    = ('libext', )
@@ -178,7 +186,7 @@ class LibextProject(ConstructibleRacyProject):
     ENV       = None
 
     def __init__(self, *args, **kwargs):
-        generate_functions = {}
+        self.generate_functions = generate_functions = {}
         builder_wrappers = [
                 BuilderWrapper  (self,'Download'),
                 BuilderWrapper  (self,'UnTar'),
@@ -198,11 +206,12 @@ class LibextProject(ConstructibleRacyProject):
         for bld in builder_wrappers:
             bld.subscribe_to(generate_functions)
 
-        functions = {
+        self.env_functions = functions = {
                 'WhereIs'         : WhereIsWrapper(self),
                 'AppendENVPath'   : AppendENVPathWrapper(self),
                 'PreprendENVPath' : PrependENVPathWrapper(self),
                 'SetENVPath'      : SetENVPathWrapper(self),
+                'Set'             : SetWrapper(self),
                 }
         generate_functions.update(functions)
 
@@ -435,6 +444,18 @@ class LibextProject(ConstructibleRacyProject):
         return kwargs
 
     @run_once
+    def configure_consumer(self, consumer):
+        direct_deps = self.source_deps
+
+        for d in direct_deps:
+            d.configure_consumer(consumer)
+
+        configure = self.prj_locals.get('configure_consumer')
+        if configure is not None:
+            configure(consumer)
+
+
+    @run_once
     def configure_env(self):
         prj = self
         env = self.env
@@ -448,7 +469,13 @@ class LibextProject(ConstructibleRacyProject):
         env = self.env
 
         result = []
+
+        class ConfigureMethods(object):
+            for name, f in self.env_functions.items():
+                locals()[name] = f
+
         prj.configure_env()
+        prj.configure_consumer(ConfigureMethods)
         command = CommandWrapper(prj,'SysCommand')
         prj.prj_locals['generate']()
 
@@ -476,13 +503,6 @@ class LibextProject(ConstructibleRacyProject):
                 self.MkdirBuilder('${LOCAL_DIR}/include'),
                 ]
         res += BuilderWrapper.apply_calls( prj, **self.ENV )
-
-        #has_download = map(lambda x: self.download_target in str(x), res)
-        #if any(has_download):
-            #download_id = has_download.index(True)
-            #download = res[download_id]
-            #res.remove(download)
-            #res.insert(0,download)
 
         downloads = [x for x in res if self.download_target in str(x)]
         map(res.remove, downloads)

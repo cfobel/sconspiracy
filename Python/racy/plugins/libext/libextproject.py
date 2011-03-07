@@ -163,7 +163,7 @@ class PrependENVPathWrapper(object):
         return self.prj.env.PrependENVPath(*subst(args), **kwargs)
 
 
-class SetENVPathWrapper(object):
+class SetENVWrapper(object):
     def __init__(self, prj):
         self.prj = prj
     def __call__(self, name, newpath):
@@ -210,7 +210,7 @@ class LibextProject(ConstructibleRacyProject):
                 'WhereIs'         : WhereIsWrapper(self),
                 'AppendENVPath'   : AppendENVPathWrapper(self),
                 'PreprendENVPath' : PrependENVPathWrapper(self),
-                'SetENVPath'      : SetENVPathWrapper(self),
+                'SetENV'          : SetENVWrapper(self),
                 'Set'             : SetWrapper(self),
                 }
         generate_functions.update(functions)

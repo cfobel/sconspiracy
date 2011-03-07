@@ -89,14 +89,7 @@ class Environment(Env):
         # allow use of cached md5 after 600 sec (instead of 2 days).
         self.SetOption('max_drift', 600)
         
-        sconsign_file = self.GetOption('file')
-        if sconsign_file:
-            racy_sconsdir     = dirname(sconsign_file[0])
-        else:
-            racy_sconsdir     = '.'
-
-        racy_db_file_default = join(racy_sconsdir,'.sconsign.dblite')
-        racy_db_file_default = abspath(racy_db_file_default)
+        racy_db_file_default = join(racy.renv.dirs.build, '.sconsign.dblite')
 
         racy_db_file = get_option('RACY_DBFILE')
         if not racy_db_file:

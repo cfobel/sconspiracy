@@ -154,19 +154,44 @@ def mssdk_setup_env(env):
     import platform
     env['ENV']["PROCESSOR_ARCHITECTURE"] = platform.machine()
     env_clone = env.Clone()
-    for k in ["OS"]:
+    for k in ['OS']:
         env_clone['ENV'][k] = os.environ[k]
-    stdout = MSCommon.get_output(sdk_dir + 'bin\\SetEnv.Cmd', args, env_clone)
+    stdout = get_output(sdk_dir + 'bin\\SetEnv.Cmd', args, env_clone)
     # Stupid batch files do not set return code: we take a look at the
     # beginning of the output for an error message instead
     olines = stdout.splitlines()
     if olines[0].startswith("The specified configuration type is missing"):
         raise racy.ToolError('mssdk', "\n".join(olines[:2]) )
-
     d = MSCommon.parse_output(stdout, ("INCLUDE", "LIB", "LIBPATH", "PATH"))
     for k, v in d.items():
         env.PrependENVPath(k, v, delete_existing=True)
-        
+
+#------------------------------------------------------------------------------
+
+def get_output(vcbat, args , env ):
+    """Parse the output of given bat file, with given args."""
+    import subprocess
+    system32_folder = os.environ['SystemRoot'] +'\System32'
+    popen = SCons.Action._subproc(env,
+                                  '"%s" %s & set' % (vcbat, args),
+                                  stdin = 'devnull',
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE,
+                                  cwd=system32_folder )#needed by bat script file (to find reg and cmd program)
+
+    # Use the .stdout and .stderr attributes directly because the
+    # .communicate() method uses the threading module on Windows
+    # and won't work under Pythons not built with threading.
+    stdout = popen.stdout.read()
+    stderr = popen.stderr.read()
+    if stderr:
+        raise racy.ToolError('mssdk', stderr )
+    if popen.wait() != 0:
+        raise IOError(stderr.decode("mbcs"))
+
+    output = stdout.decode("mbcs")
+    return output
+
 #------------------------------------------------------------------------------
 
 def manage_options(env, prj, options):

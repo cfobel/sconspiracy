@@ -152,9 +152,9 @@ def mssdk_setup_env(env):
     args = '{build_arg} {arch_arg}'
     args = args.format(arch_arg = target_arch[get_option('ARCH')], build_arg = target_build[get_option('DEBUG')])
     import platform
-    env['ENV']["PROCESSOR_ARCHITECTURE"] = platform.machine()
     env_clone = env.Clone()
-    for k in ['OS']:
+    env_clone['ENV']['PROCESSOR_ARCHITECTURE'] = platform.machine()
+    for k in ['OS','windir']:
         env_clone['ENV'][k] = os.environ[k]
     stdout = get_output(sdk_dir + 'bin\\SetEnv.Cmd', args, env_clone)
     # Stupid batch files do not set return code: we take a look at the
@@ -178,7 +178,6 @@ def get_output(vcbat, args , env ):
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   cwd=system32_folder )#needed by bat script file (to find reg and cmd program)
-
     # Use the .stdout and .stderr attributes directly because the
     # .communicate() method uses the threading module on Windows
     # and won't work under Pythons not built with threading.

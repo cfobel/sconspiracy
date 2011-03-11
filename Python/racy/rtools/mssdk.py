@@ -20,7 +20,7 @@ import SCons
 #------------------------------------------------------------------------------
 
 class MssdkFlags(common.Flags):
-    CXXFLAGS         = ['/GR']
+    CXXFLAGS         = ['/GR','/bigobj']
     CXXFLAGS_RELEASE = ['/W3','/EHs','/Zm600','/MD','/Oi','/Ot','/Ob2','/TP']
     CXXFLAGS_DEBUG   = ['/W3','/EHsc','/MDd','/Od']
     CFLAGS           = []

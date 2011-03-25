@@ -15,7 +15,7 @@ ARCH          = ['32','64']
 DEBUG         = ['full','release']
 DISTRIB       = ['yes','no']
 
-TOOL          = ['auto','g++','msvc']
+TOOL          = ['auto','g++','msvc','mssdk']
 
 TYPE          = [
                 'exec','shared','static','bundle',

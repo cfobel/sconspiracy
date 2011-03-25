@@ -163,12 +163,20 @@ class PrependENVPathWrapper(object):
         return self.prj.env.PrependENVPath(*subst(args), **kwargs)
 
 
-class SetENVPathWrapper(object):
+class SetENVWrapper(object):
     def __init__(self, prj):
         self.prj = prj
     def __call__(self, name, newpath):
         subst = self.prj.env.subst
         self.prj.env['ENV'][name] = subst(newpath)
+        return None
+
+class SetWrapper(object):
+    def __init__(self, prj):
+        self.prj = prj
+    def __call__(self, var, val):
+        subst = self.prj.env.subst
+        self.prj.env[var] = subst(val)
         return None
 
 
@@ -178,7 +186,7 @@ class LibextProject(ConstructibleRacyProject):
     ENV       = None
 
     def __init__(self, *args, **kwargs):
-        generate_functions = {}
+        self.generate_functions = generate_functions = {}
         builder_wrappers = [
                 BuilderWrapper  (self,'Download'),
                 BuilderWrapper  (self,'UnTar'),
@@ -198,11 +206,12 @@ class LibextProject(ConstructibleRacyProject):
         for bld in builder_wrappers:
             bld.subscribe_to(generate_functions)
 
-        functions = {
+        self.env_functions = functions = {
                 'WhereIs'         : WhereIsWrapper(self),
                 'AppendENVPath'   : AppendENVPathWrapper(self),
                 'PreprendENVPath' : PrependENVPathWrapper(self),
-                'SetENVPath'      : SetENVPathWrapper(self),
+                'SetENV'          : SetENVWrapper(self),
+                'Set'             : SetWrapper(self),
                 }
         generate_functions.update(functions)
 
@@ -276,6 +285,13 @@ class LibextProject(ConstructibleRacyProject):
 
 
     @cached_property
+    def build_bin_path (self):
+        path = [self.local_dir, 'bin']
+        return os.path.join(*path)
+
+
+
+    @cached_property
     def lib_path (self):
         path = [self.local_dir, 'lib']
         return os.path.join(*path)
@@ -339,19 +355,25 @@ class LibextProject(ConstructibleRacyProject):
 
         kwdeps = {}
         for prefix, dependencies in keys_deps:
-            deps = dict(
-                    ('{0}_{1}'.format(prefix, p.name).upper(), p.local_dir)
+            deps_prj = dict(
+                    ('{0}_{1}'.format(prefix, p.name).upper(), p)
                     for p in dependencies
                     )
+            deps = dict( (n , p.local_dir) for n, p in deps_prj.items())
+
             items = deps.items()
             deps_include = dict((k+'_INCLUDE', v+'/include') for k,v in items)
             deps_lib     = dict((k+'_LIB'    , v+'/lib'    ) for k,v in items)
             deps_bin     = dict((k+'_BIN'    , v+'/bin'    ) for k,v in items)
+
+            deps_ver = dict((k+'_VERSION', p.version) for k,p in deps_prj.items())
+
             if prefix == 'DEP':
                 kwdeps.update(deps)
                 kwdeps.update(deps_include)
                 kwdeps.update(deps_lib)
                 kwdeps.update(deps_bin)
+                kwdeps.update(deps_ver)
             join = os.pathsep.join
 
             vars = {
@@ -422,6 +444,18 @@ class LibextProject(ConstructibleRacyProject):
         return kwargs
 
     @run_once
+    def configure_consumer(self, consumer):
+        direct_deps = self.source_deps
+
+        for d in direct_deps:
+            d.configure_consumer(consumer)
+
+        configure = self.prj_locals.get('configure_consumer')
+        if configure is not None:
+            configure(consumer)
+
+
+    @run_once
     def configure_env(self):
         prj = self
         env = self.env
@@ -435,9 +469,28 @@ class LibextProject(ConstructibleRacyProject):
         env = self.env
 
         result = []
+
+        class ConfigureMethods(object):
+            for name, f in self.env_functions.items():
+                locals()[name] = f
+
         prj.configure_env()
+        prj.configure_consumer(ConfigureMethods)
+        command = CommandWrapper(prj,'SysCommand')
         prj.prj_locals['generate']()
-        
+
+        if racy.renv.is_darwin():
+            install_tool = opjoin(racy.get_bin_path(),'..','Utils',
+                                    'osx_install_name_tool.py')
+            libs = [self.lib_path]
+            deps_lib = self.ENV['DEPS_LIB']
+            if deps_lib:
+                libs += deps_lib.split(':')
+
+            command(['python', install_tool, '-i', '-a', '-P','*',
+                '-s',self.build_bin_path] + libs , pwd = '.')
+
+
         #import defined strings and functions from generate method
         for k,v in self.ENV.items():
             if isinstance(v, basestring) or callable(v):
@@ -450,6 +503,10 @@ class LibextProject(ConstructibleRacyProject):
                 self.MkdirBuilder('${LOCAL_DIR}/include'),
                 ]
         res += BuilderWrapper.apply_calls( prj, **self.ENV )
+
+        downloads = [x for x in res if self.download_target in str(x)]
+        map(res.remove, downloads)
+        res = downloads + res
 
         previous_node = []
         for nodes in res:

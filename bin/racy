@@ -51,6 +51,20 @@ racy_python_dir = os.path.join(racy_root_dir,'Python')
 
 #insert racy dir in python path
 sys.path.insert(0, racy_python_dir)
+
+try:
+    import SCons
+except ImportError:
+    print >> sys.stderr, ("Currently SConspiracy need the SCons module (v1.3.1) to be "
+           "installed in SConspiracy's <Python> subdirectory ({0}). "
+           "The sources can be downloaded from "
+           "http://www.scons.org/download.php \n\n"
+           "After unpacking the sources, run 'python setup.py build' in SCons"
+           " source directory, and then copy the SCONS_DIR/build/lib/SCons"
+           " directory to SConspiracy's Python subdirectory"
+           ).format(racy_python_dir)
+    exit(1)
+
 import racy
 import racy.__main__ as main
 

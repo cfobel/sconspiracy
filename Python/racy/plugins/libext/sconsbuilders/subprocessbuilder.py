@@ -17,7 +17,7 @@ def SubProcessBuilder(env, command, args, pwd, path = [], stdoutfile = None):
 
     if is_iterable(path):
         path = os.pathsep.join(path)
-    path = os.pathsep.join([path, os.environ['PATH'], env['ENV']['PATH']])
+    path = os.pathsep.join([path, env['ENV']['PATH'], os.environ['PATH']])
 
     cmd = env.WhereIs(command, path=path)
 

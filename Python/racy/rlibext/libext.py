@@ -48,6 +48,8 @@ class LibExt(object):
 
     debug_suffix   = ''
 
+    install        = []
+
     scons_tools    = []
     scons_env      = {}
 
@@ -87,6 +89,7 @@ class LibExt(object):
                 'cxxflags'      , 'linkflags'     ,
                 'parse_configs' ,
                 'scons_tools'   , 'scons_env'     ,
+                'install'       ,
                 ]
         import copy
         for name in names:

@@ -148,6 +148,7 @@ class CppUnitProject(ConstructibleRacyProject):
             install_bin = opjoin(dirs.install,"bin")
             install_lib = opjoin(dirs.install,"lib")
 
+            run_env.Append(ENV = os.environ)
             run_env.AppendENVPath(racy.renv.LD_VAR, install_lib)
             execpath = opjoin(install_bin, self.full_name)
             run_test = run_env.Alias('run-'+self.name, res, execpath)

@@ -172,13 +172,24 @@ def DeepGlob(extensions, src_dir= '.', replace_dir = '', return_orig = False,
 
 
 #------------------------------------------------------------------------------
-def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
-    #never true if symlinks not supported
-    import shutil
-    import os
-    action = None
+def mkdir_p(path):
+    """Create the directory and intermediate directories as required by path.
+    raise an exceptions only if path exists and is not a dir.
+    """
+    try:
+        os.makedirs(path)
+    except exceptions.OSError, exc:
+        import errno
+        if not (exc.errno == errno.EEXIST and os.path.isdir(path)):
+            raise
 
-    if preserve_links and os.path.islink(src): 
+#------------------------------------------------------------------------------
+def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
+    import shutil
+    action = lambda s, d : None
+
+    #never true if symlinks not supported
+    if preserve_links and os.path.islink(src):
         linktarget = os.readlink( src )
 
         if preserve_relative_links_only and os.path.isabs(linktarget):
@@ -191,14 +202,21 @@ def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
         if os.path.exists(dst): 
             os.unlink(dst)
 
-        #hack to manage some symlinks errors
-        try:
-            action(src, dst)
-        except exceptions.OSError, e:
-            if not e.strerror == 'File exists':
-                raise e
+    elif os.path.isdir(src):
+        #mkdir_p(dst)
+        action = shutil.copytree
     else:
-        shutil.copy(src, dst)
+        action = shutil.copy
+
+    #hack to manage some symlinks errors
+    try:
+        if not os.path.exists(os.path.split(dst)[0]):
+            mkdir_p(os.path.split(dst)[0])
+        action(src, dst)
+    except exceptions.OSError, e:
+        import errno
+        if not e.errno == errno.EEXIST:
+            raise e
 
 
 #------------------------------------------------------------------------------

@@ -30,9 +30,10 @@ for i in SRV_SPLITTED_PATH:
 
 
 /**
-*
-*     TODO Doxygen documentation
-*
+* @brief
+* @namespace     TODO Doxygen documentation
+* @author
+* @date
 **/
 
 %for i in NAMESPACE:

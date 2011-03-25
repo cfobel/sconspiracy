@@ -3,10 +3,9 @@ QT += core gui
 TEMPLATE = app
 TARGET = ${PRJ_NAME}
 DEPENDPATH += .
-INCLUDEPATH += . \\
-
+INCLUDEPATH = 
 % for i in DEPS_INCLUDES:
-    ${i}${SEP}${PRJ_NAME}${SEP} \\
+    ${i}${SEP};
 
 %endfor
 

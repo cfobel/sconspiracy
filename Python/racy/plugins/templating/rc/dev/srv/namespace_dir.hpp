@@ -1,7 +1,8 @@
 /**
-*
-*     TODO Doxygen documentation
-*
+* @brief
+* @namespace     TODO Doxygen documentation
+* @author
+* @date
 **/
 
 

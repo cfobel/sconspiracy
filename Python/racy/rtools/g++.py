@@ -25,7 +25,6 @@ class GccFlags(common.Flags):
     CFLAGS           = ['-pipe']
     CFLAGS_DEBUG     = ['-O0']
 
-    ARCH_FLAGS         = ['-m${ARCH}']
 
     WARNINGSASERRORS_FLAGS = ['-Werror']
     OPTIMIZATION_FLAGS     = ['-O${OPTIMIZATIONLEVEL}']
@@ -55,6 +54,8 @@ class GccFlagsOsX(GccFlags):
                      '-headerpad_max_install_names',
                     ]
 
+    ARCH_FLAGS         = ['-arch','${"i386" if ARCH=="32" else "x86_64"}']
+
     LINKFLAGS_BUNDLE = [
             '-dynamic',
             '-nostartfiles',
@@ -79,6 +80,7 @@ class GccFlagsLinux(GccFlags):
                      '-fno-stric-aliasing',
                      '-fno-common',
                     ]
+    ARCH_FLAGS         = ['-m${ARCH}']
 
 
 

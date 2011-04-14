@@ -51,6 +51,7 @@ class Environment(Env):
         kwargs.update(env_vars)
 
         kwargs['ARCH'] = get_option('ARCH')
+        kwargs['CXX']  = get_option('CXX')
 
 
         Env.__init__(self, *args, **kwargs)

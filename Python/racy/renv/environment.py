@@ -51,11 +51,11 @@ class Environment(Env):
         kwargs.update(env_vars)
 
         kwargs['ARCH'] = get_option('ARCH')
-        kwargs['CXX']  = get_option('CXX')
-
+        cxx = get_option('CXX')
+        if cxx :
+            kwargs['CXX'] = cxx
 
         Env.__init__(self, *args, **kwargs)
-
 
         act = self.Action( CopyBuilder, "Install '$$SOURCE' as '$$TARGET'")
         self.__CopyBuilder__ = self.Builder(
@@ -69,7 +69,6 @@ class Environment(Env):
         if True in res:
             racy.exit_racy(0)
 
-
         if not self.GetOption('help'):
             tool = self['TOOL']
             if tool == 'auto':
@@ -78,8 +77,10 @@ class Environment(Env):
 
             self.Decider('MD5-timestamp')
 
+
             self.prj_db = db = RacyProjectsDB(env = self)
             self.lookup_list.append( db.target_lookup )
+
 
         num_jobs = get_option('JOBS')
         if num_jobs == 'auto':
@@ -102,6 +103,7 @@ class Environment(Env):
         import os
         from racy.renv.configs.commandline import get_opts_help
         self.Help( (os.linesep*2).join(get_opts_help()) )
+
 
 
 

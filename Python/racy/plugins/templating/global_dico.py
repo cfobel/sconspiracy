@@ -325,6 +325,7 @@ dico_prj_template = {
             'dirs':
                 [
                     ('WIX_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/'),
+                    ('WIX_BITMAP_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/Bitmaps'),
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/wix/'),
                 ],

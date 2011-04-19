@@ -17,16 +17,28 @@
         <Package Keywords='Installer'
             Description="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installer"
             Comments='${CALLING_PROJECT} is a registered trademark of IRCAD' Manufacturer='IRCAD'
-            InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
-
-        <Media Id='1' Cabinet='Sample.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
+            InstallerVersion='200' Languages='1033' Compressed='yes'
+            SummaryCodepage='1252'
+%if ARCH == "64":
+            Platform="x64"
+%endif
+            />
+<% nb_proj = len(CALLING_PROJECT_DEPS.keys()) %>
+%for i in range(1,nb_proj/5 + 2):
+        <Media Id='${i}' Cabinet='cab${i}.cab' EmbedCab='yes' DiskPrompt="CD-ROM #${i}" />
+%endfor
         <Property Id='DiskPrompt' Value="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installation [1]" />
         <Directory Id='TARGETDIR' Name='SourceDir'>
             <Directory Id='ProgramFilesFolder' Name='PFiles'>
                 <Directory Id='PRODUCTDIR' Name='IRCAD'>
-                    <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_FULL_NAME}'>
+                    <Directory Id='INSTALLDIR'
+                        Name='${CALLING_PROJECT_FULL_NAME}'> <% COUNT = 0; ID_DISK= 1 %>
                 %for key in CALLING_PROJECT_DEPS:
-                        <Merge Id="${key}" Language="1033" SourceFile="${key}.msm" DiskId="1" />
+                        <% COUNT +=1 %>
+                        %if COUNT % 5 == 0:
+                        <% ID_DISK +=1 %>
+                        %endif
+                        <Merge Id="${key}" Language="1033" SourceFile="${key}.msm" DiskId="${ID_DISK}" />
                 %endfor
                     </Directory>
                 </Directory>

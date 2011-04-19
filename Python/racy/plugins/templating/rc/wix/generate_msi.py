@@ -2,7 +2,7 @@ from __future__ import print_function
 import functools
 import multiprocessing
 import subprocess
-
+import sys
 
 
 def light_the_candle(prj, light_opts=[]):

@@ -79,8 +79,12 @@ COUNT = 0
 spe_file = [] %>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Module Id="${PRJ_NAME}" Language="0" Version="${VERSION.dotted}">
-    <Package Id="${uuid(PRJ_NAME)}" InstallerVersion="100"
-        Languages="1033" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no" />
+    <Package Id="${uuid(PRJ_NAME)}" InstallerVersion="200"
+        Languages="1033" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no"
+%if ARCH == "64":
+        Platform="x64"
+%endif
+            />
         %if BASE == "launcher":
         <Icon Id="icn_laun" SourceFile="${CALLING_PROJECT_DEPS['launcher']['PRJ_TARGET'][0]}" />
         %endif

@@ -29,7 +29,12 @@
 %endfor
         <Property Id='DiskPrompt' Value="IRCAD's ${CALLING_PROJECT_FULL_NAME} Installation [1]" />
         <Directory Id='TARGETDIR' Name='SourceDir'>
+%if ARCH == "64":
+            <Directory Id='ProgramFiles64Folder' Name='PFiles'>
+%else:
             <Directory Id='ProgramFilesFolder' Name='PFiles'>
+
+%endif
                 <Directory Id='PRODUCTDIR' Name='IRCAD'>
                     <Directory Id='INSTALLDIR'
                         Name='${CALLING_PROJECT_FULL_NAME}'> <% COUNT = 0; ID_DISK= 1 %>

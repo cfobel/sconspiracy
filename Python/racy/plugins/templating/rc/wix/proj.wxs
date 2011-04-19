@@ -89,7 +89,12 @@ spe_file = [] %>
         <Icon Id="icn_laun" SourceFile="${CALLING_PROJECT_DEPS['launcher']['PRJ_TARGET'][0]}" />
         %endif
         <Directory Id='TARGETDIR' Name='SourceDir'>
+%if ARCH == "64":
+            <Directory Id='ProgramFiles64Folder' Name='PFiles'>
+%else:
             <Directory Id='ProgramFilesFolder' Name='PFiles'>
+
+%endif
                 <Directory Id='IRCAD' Name='IRCAD'>
                     <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_VERSION_NAME}'>
                 %if PRJ_TYPE == 'bundle':

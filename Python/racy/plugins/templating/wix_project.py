@@ -151,7 +151,8 @@ class WixProject(ConstructibleRacyProject):
                 'CALLING_PROJECT' : self.prj.base_name,
                 'TARGETS':  targets,
                 'uuid' : functools.partial(uuid.uuid5, uuid.NAMESPACE_OID),
-                'EXTRA_NAME' : folder
+                'EXTRA_NAME' : folder,
+                'ARCH'         : self.prj.get_lower('ARCH'),
             }
 
             dico.update(dico_g)

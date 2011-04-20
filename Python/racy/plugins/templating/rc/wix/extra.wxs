@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<%
+import base64
+import os
+import os.path
+
+def b64hexhash(s):
+    h = hash(s)
+    hh = hex(h)
+    hh = hh.split('x')[1]
+    if len(hh)%2:
+        hh = '0'+hh
+    code = base64.urlsafe_b64encode(hh.decode('hex'))
+    code = code.replace('-','.')
+    code = code.replace('=','')
+    code = code.replace('.','_')
+    return code
+
+def get_file_tree(files,prefix):
+    files = [ f.replace(prefix,"") for f in files]
+    tree = {}
+
+    for f in files:
+        current_dict = tree
+        lst = f.split(os.sep)
+        for item in lst[:-1]:
+            current_dict = current_dict.setdefault(item, {})
+        current_dict[lst[-1]] = lst[-1]
+    return tree
+
+def create_dirs(dir_tree, prefix):
+
+    file_xml = """<File Id='F{id}' ShortName='{id}' 
+                Name='{name}' Source='{file}' />\n"""
+
+    file_list = []
+    dir_dict  = {}
+    for key, value in dir_tree.iteritems():
+        if isinstance(value, dict):
+            dir_dict[key] = value
+        else:
+            file_list.append(value)
+
+    if file_list:
+        component_id = prefix+'_files'
+        args = {}
+        args['id'] = b64hexhash(component_id)
+        args['guid'] = uuid(component_id)
+        context.write("<Component Id='C{id}' Guid='{guid}'>\n".format(**args))
+        context.write("<CreateFolder />\n")
+        for key in file_list:
+                fargs = {}
+                fargs['id'] = b64hexhash(prefix + key)
+                fargs['name'] = key
+                fargs['file'] = os.path.join(prefix, key)
+                context.write(file_xml.format(**fargs))
+                
+        context.write("</Component>\n")
+
+
+    for key, value in dir_dict.iteritems():
+        args = {}
+        args['id'] = b64hexhash(prefix + key)
+        args['name'] = key
+        args['file'] = os.path.join(prefix, key)
+
+        context.write("<Directory Id='D{id}' Name='{name}'>\n".format(**args))
+        create_dirs(value, args['file'])
+        context.write("</Directory>\n")
+
+        
+
+
+
+COUNT = 0
+
+%>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Module Id="libext" Language="0" Version="1.2.3">
+
+        <Package Id="${uuid(CALLING_PROJECT+EXTRA_NAME)}" InstallerVersion="200"
+            Languages="0" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no"
+%if ARCH == "64":
+            Platform="x64"
+%endif
+            />
+
+
+        <Directory Id='TARGETDIR' Name='SourceDir'>
+%if ARCH == "64":
+            <Directory Id='ProgramFiles64Folder' Name='PFiles'>
+%else:
+            <Directory Id='ProgramFilesFolder' Name='PFiles'>
+%endif
+                <Directory Id='IRCAD' Name='IRCAD'>
+                    <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_VERSION_NAME}'>
+                            <% 
+                            targets = [t for t in TARGETS if '_win_32_' not in t and '_win_64_' not in t]
+                            if targets:
+                                prefix = targets[0].split(EXTRA_NAME)[0] 
+                                create_dirs(get_file_tree(targets, prefix), prefix)
+                            %> 
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+    </Module>
+</Wix>

@@ -925,6 +925,14 @@ class InstallableRacyProject(RacyProject):
             for path in libext.ABS_LIBPATH:
                 res += self.install_files(path, self.install_path, regex)
 
+        for framework in libext.frameworks:
+            for fwpath in libext.ABS_FRAMEWORKPATH:
+                fw = framework+'.framework'
+                res+=env.CopyFile(
+                        pathjoin(renv.dirs.install_lib,fw),
+                        source = pathjoin(fwpath, fw)
+                        )
+
         for group in install_matches:
             for src, dest in group:
                 res += env.CopyFile(

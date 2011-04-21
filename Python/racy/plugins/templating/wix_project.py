@@ -3,6 +3,9 @@ import uuid
 import functools
 from os.path import join as opjoin
 import racy
+import glob 
+import os.path 
+
 
 from racy.rproject import ConstructibleRacyProject, LibName
 from racy.rutils   import memoize, run_once
@@ -55,9 +58,9 @@ class WixProject(ConstructibleRacyProject):
         result = []
         self.configure_env()
         return result
-    
+
     def split_project_path(self, path):
-        
+
         res = []
         for i in racy.renv.dirs.code:
             if path.startswith(i):
@@ -66,7 +69,7 @@ class WixProject(ConstructibleRacyProject):
 
         res = temp.split(os.path.sep)
         res[0] = def_dir
-        
+
         return res
 
 
@@ -118,11 +121,11 @@ class WixProject(ConstructibleRacyProject):
             'CALLING_PROJECT_ICON' : icon_path,
             'DEPS_INCLUDES'   : prj.deps_include_path,
             'VERSION'         : prj.version,
+            'ARCH'         : self.prj.get_lower('ARCH'),
             'DEPS'            : prj_deps,
             'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path),
             'uuid' : functools.partial(uuid.uuid5, uuid.NAMESPACE_OID),
             }
-
 
         dico.update(dico_g)
 
@@ -132,12 +135,12 @@ class WixProject(ConstructibleRacyProject):
 
         racy.print_msg("Create {0} wix file".format(prj.base_name))
 
-    def create_libext(self):
-        targets = self.create_target()
+    def create_extra_dir(self, tuple_dir_targets):
+        folder,targets = tuple_dir_targets
 
         if not targets == []:
 
-            self.call_prj_deps['libext'] = {
+            self.call_prj_deps[folder] = {
                     'PRJ_NAME'      : '',
                     'PRJ_FULL_NAME' : '',
                     'PRJ_VERSION_NAME' : '',
@@ -148,6 +151,8 @@ class WixProject(ConstructibleRacyProject):
                 'CALLING_PROJECT' : self.prj.base_name,
                 'TARGETS':  targets,
                 'uuid' : functools.partial(uuid.uuid5, uuid.NAMESPACE_OID),
+                'EXTRA_NAME' : folder,
+                'ARCH'         : self.prj.get_lower('ARCH'),
             }
 
             dico.update(dico_g)
@@ -161,27 +166,48 @@ class WixProject(ConstructibleRacyProject):
                     ],
                 'template_prj':
                     [
-                        ('${TPL_DIR}/libext.wxs', '${WIX_DIR}/libext.wxs'),
+                        ('${TPL_DIR}/extra.wxs', '${WIX_DIR}/${EXTRA_NAME}.wxs'),
                     ]
             }
 
             self.gen_file(dico, dico_prj)
-        racy.print_msg("Create libext wix file")
+        racy.print_msg("Create "+ folder+ " wix file")
 
-
-    def create_target(self):
-        bin_dir = racy.renv.dirs.install_bin
-        targets = []
-
-        for i in os.listdir(bin_dir):
-            if not i.endswith('.exe'):
-                targets.append(os.path.join(bin_dir,i))
-
-
+#    def create_targets(path,self):
+#        targets = []
+#
+#        for i in os.listdir(bin_dir):
+#            if not i.endswith('.exe'):
+#                targets.append(os.path.join(bin_dir,i))
+#
+#
+#        return targets
+#
+    def create_targets(self,path):
+        targets=[]
+        l = glob.glob(path+'\\*')
+        for i in l:
+            if os.path.isdir(i):
+                targets.extend(self.create_targets(i))
+            else:
+                if not i.endswith('.exe'):
+                    targets.append(i)
         return targets
 
 
+    def create_install_targets(self,list_dir):
+        # list targets = [(dir, list_targets),...]
+        list_targets = []
+        install_dir = racy.renv.dirs.install
 
+        for tdir in list_dir:
+            dir_path = opjoin(install_dir,tdir)
+
+            if os.path.exists(dir_path):
+                targets = self.create_targets(dir_path)
+                list_targets.append((tdir,targets)) 
+
+        return list_targets
 
     def gen_file(self, dico_vars, dico_prj):
         # Added vars 
@@ -198,6 +224,7 @@ class WixProject(ConstructibleRacyProject):
             add_template_prj(dico_prj['template_prj'], dico_vars)
 
         return dico_vars
+
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
 
@@ -206,8 +233,13 @@ class WixProject(ConstructibleRacyProject):
             if i.get_lower('TYPE') in ['exec', 'bundle', 'shared']:
                 self.create_prj(i)
 
-        self.create_libext()
+        extra_dirs = ['bin','Python','PythonHome']
+
+        for i in self.create_install_targets(extra_dirs):
+            self.create_extra_dir(i)
 
         self.create_prj(self.prj)
 
         return result
+
+

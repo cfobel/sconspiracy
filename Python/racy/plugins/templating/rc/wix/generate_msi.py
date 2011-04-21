@@ -2,12 +2,13 @@ from __future__ import print_function
 import functools
 import multiprocessing
 import subprocess
+import sys
 
 
+def light_the_candle(prj,  light_opts=[]):
 
-def light_the_candle(prj, light_opts=[]):
 
-    candle = ['candle.exe', prj+'.wxs']
+    candle = ['candle.exe', '-arch' , "x${ARCH}", prj+'.wxs']
     light = ['light.exe', prj+'.wixobj'] + light_opts
     cp = subprocess.Popen(candle, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
@@ -41,7 +42,7 @@ if __name__ == '__main__':
     p = multiprocessing.Pool()
 
     apply_async = lambda x: p.apply_async(light_the_candle,[x])
-    results = map(apply_async, projects)
+    results = map(apply_async, projects )
 
     def process_output(args):
         prj, candlecmd, candleout, lightcmd, lightout = args

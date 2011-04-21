@@ -38,22 +38,8 @@ dico_prj_template = {
             'default_value': 'none',
             'allowed_value': ['none', 'eclipse', 'qtcreator', 'graphviz','vim','msvs'],
             'commandline_prj_opts': True,
-            'descriptions_opts':
-    """Preferencies formated project name.
-    You can use this variable like this:
-    $( VARIABLE )
-    PRJ_NAME           : project base name.
-    RACY_CMD           : racy command.
-    PRJ_TYPE           : project type.
-    OS_NAME            : os name.
-    SEP                : os depend separator (/ or \\).
-    PATHSEP            : path separator ( : ).
-    CALLING_PROJECT    : the main project.
-    PROJECT_SPLIT_PATH : list of element in prj_path,
-                         the first element is the last directory
-                         in RACY_SRC_DIR path.
-    """,
-        },
+            'descriptions_opts':"Create new developer project",
+         },
 
         'qtcreator' :
         {
@@ -196,7 +182,22 @@ dico_prj_template = {
             'default_value' : '$(PRJ_TYPE)_$(PRJ_NAME)',
             'commandline_prj_opts': True,
             'commandline_opts': True,
-            'descriptions_opts':"Create new developer project",
+            'descriptions_opts':
+    """Preferencies formated project name.
+    You can use this variable like this:
+    $( VARIABLE )
+    PRJ_NAME           : project base name.
+    RACY_CMD           : racy command.
+    PRJ_TYPE           : project type.
+    OS_NAME            : os name.
+    SEP                : os depend separator (/ or \\).
+    PATHSEP            : path separator ( : ).
+    CALLING_PROJECT    : the main project.
+    PROJECT_SPLIT_PATH : list of element in prj_path,
+                         the first element is the last directory
+                         in RACY_SRC_DIR path.
+    """,
+
         },
 
     }
@@ -325,6 +326,7 @@ dico_prj_template = {
             'dirs':
                 [
                     ('WIX_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/'),
+                    ('WIX_BITMAP_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/Bitmaps'),
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/wix/'),
                 ],

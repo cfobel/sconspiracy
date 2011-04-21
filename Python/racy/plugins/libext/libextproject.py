@@ -331,8 +331,9 @@ class LibextProject(ConstructibleRacyProject):
         prj = self
         env = self.env
         direct_deps = self.source_deps
-        all_deps    = self.source_rec_deps
+        all_deps    = set(self.source_rec_deps)
         indirect_deps = set(all_deps) - set(self.source_deps)
+        all_deps.add(self)
 
         ld_var = racy.renv.LD_VAR
         local_bins = [ opjoin(dep.local_dir, 'bin') for dep in all_deps ]

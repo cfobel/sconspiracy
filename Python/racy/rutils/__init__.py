@@ -187,6 +187,7 @@ def mkdir_p(path):
 def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
     import shutil
     action = lambda s, d : None
+    action_kwargs = {}
 
     #never true if symlinks not supported
     if preserve_links and os.path.islink(src):
@@ -205,6 +206,7 @@ def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
     elif os.path.isdir(src):
         #mkdir_p(dst)
         action = shutil.copytree
+        action_kwargs['symlinks'] = preserve_links
     else:
         action = shutil.copy
 
@@ -212,7 +214,7 @@ def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
     try:
         if not os.path.exists(os.path.split(dst)[0]):
             mkdir_p(os.path.split(dst)[0])
-        action(src, dst)
+        action(src, dst, **action_kwargs)
     except exceptions.OSError, e:
         import errno
         if not e.errno == errno.EEXIST:

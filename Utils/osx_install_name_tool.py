@@ -6,13 +6,17 @@
 #    -headerpad_max_install_names)
 
 
-import sys
+
+import fnmatch
 import os
+import re
+import sys
 
 from collections import defaultdict
-from fnmatch     import fnmatch
+from functools   import partial
 from subprocess  import Popen, PIPE
 
+def p(x): print "==",x.name,"=="
 
 usually_ignored = [
                 'AGL', 'AppKit', 'ApplicationServices', 'AudioToolbox',
@@ -37,32 +41,45 @@ def cached_property(func):
         self.__dict__.pop(name, None)
     return property(_get, None, _del)
 
+def try_remove_item(list_object):
+    def remove(item):
+        try:
+            list_object.remove(item)
+        except:
+            pass
+    return remove
 
 class DepFilter(object):
 
     @staticmethod
     def dep_filter(dep): 
-        return dep and not '.o):' in dep
+        return all([
+            dep,
+            not '.o):' in dep,
+            ])
 
     @staticmethod
     def no_executable_path_filter(dep):
             return (
-                dep
+                DepFilter.dep_filter(dep)
                 and not dep.startswith('@executable_path')
-                and not '.o):' in dep
              )
-
-    filter = no_executable_path_filter
 
 
 class BinaryFile(object):
 
     db = dict()
     ignored = defaultdict(set)
+    fw_re = re.compile('.*?(?P<fw>[^/]+\.framework.+)')
 
-    def __init__(self, path):
+    def __init__(self, path, dep_filter):
         self.path = path
-        self.name = os.path.basename(path)
+        m = BinaryFile.fw_re.match(path)
+        if m:
+            self.name = m.groupdict()['fw']
+        else:
+            self.name = os.path.basename(path)
+        self.dep_filter = dep_filter
 
     @cached_property
     def deps(self):
@@ -71,11 +88,11 @@ class BinaryFile(object):
         binfiles = []
         if not otool.returncode:
             binfiles = [l.strip().split()[0] for l in output.splitlines()[1:]]
-            binfiles = [BinaryFile(path=binfile) 
-                    for binfile in filter(DepFilter.filter, binfiles) ]
+            binfiles = [BinaryFile(binfile, self.dep_filter)
+                    for binfile in filter(self.dep_filter, binfiles) ]
             return dict((l.name, l) for l in binfiles)
         else:
-            return None
+            return {}
 
     def __repr__(self):
         return ''.join(['BinaryFile(path=', repr(self.path), ')'])
@@ -90,14 +107,18 @@ class BinaryFile(object):
         return hash(self.name)
 
     @staticmethod
-    def find(path, pattern='*.dylib'):
+    def find(path, pattern, dep_filter):
+        reg = fnmatch.translate(pattern)
+        reg = re.compile(reg + '|[^.]+\Z')
+        match = reg.match
         binfiles = []
         if os.path.isfile(path):
-            binfiles += [BinaryFile(path=path)]
+            binfiles += [BinaryFile(path, dep_filter)]
         else:
             for (root, dirs, files) in os.walk(path):
-                files = [BinaryFile(path=os.path.join(root,f)) for f in files]
-                binfiles += [f for f in files if fnmatch(f.name,pattern)]
+                map(try_remove_item(dirs), ['Headers','Resources'])
+                files = [BinaryFile(os.path.join(root,f), dep_filter) for f in files]
+                binfiles += [f for f in files if match(f.name)]
         return dict((l.name, l) for l in binfiles)
 
 
@@ -112,7 +133,7 @@ class BinaryFile(object):
             ignored_libs = [lib.name for lib in deps_set.difference(lib_set)]
             ignored.update(ignored_libs)
             for ig in ignored_libs:
-                BinaryFile.ignored[ig].add(self.path)
+                BinaryFile.ignored[ig].add(self)
         res = [
                 [ '-change', deps[lib.name].path,
                     path_func(self.db[lib.name].path) ] for lib in inter
@@ -133,7 +154,7 @@ def get_options(args):
 
     parser.add_option("-a", "--absolute-path", 
                     action="store_true", dest="abs_path", default=False,
-                    help=("Uses absolute path for install names will be "
+                    help=("Uses absolute path for install names that will be "
                           "relocated"),
                     )
 
@@ -160,6 +181,15 @@ def get_options(args):
     parser.add_option("-i", "--show-ignored",
                   action="store_true", dest="show_ignored", default=False,
                   help="show libraries that have not been relocated")
+
+
+    parser.add_option("-u", "--show-suspiciously-ignored",
+                  action="count", dest="show_suspiciously_ignored", 
+                  default=False,
+                  help="show libraries that have not been relocated "
+                  "and should have. Set it twice to have more details on "
+                  "wich libralibvtkVisuManagement.dylibries was requirering one of these.")
+
 
     parser.add_option("-v", "--verbose",
                   action="store_true", dest="verbose", default=False,
@@ -204,11 +234,19 @@ def main(options, args):
         progress_print_n = print_msg_n
 
 
-    for d in args:
-        BinaryFile.db.update(BinaryFile.find(d))
+    if options.force:
+        dep_filter = DepFilter.dep_filter
+    else:
+        dep_filter = DepFilter.no_executable_path_filter
 
-    for d in options.search_dirs:
-        BinaryFile.db.update(BinaryFile.find(d, options.search_pattern))
+    find_binary_files = partial(BinaryFile.find, dep_filter = dep_filter)
+    update_db = lambda pattern : lambda path : BinaryFile.db.update(
+                find_binary_files(path, pattern)
+                )
+
+    map(update_db('*.dylib'), args)
+    map(update_db('*.framework/Versions/*'), args)
+    map(update_db(options.search_pattern), options.search_dirs)
 
     relpath = os.path.relpath
     librelpath = lambda path : os.path.join( '@executable_path', relpath( path, options.exec_path ) )
@@ -221,12 +259,11 @@ def main(options, args):
     else:
         install_name_func = librelpath
 
-    if options.force:
-        DepFilter.filter = staticmethod(DepFilter.dep_filter)
 
     ignored = set()
     L = len(BinaryFile.db)
     files = set(BinaryFile.db.values())
+
     for n,lib in enumerate(files):
         lib_file = lib.path
         progress_print_n(' ', '{0}/{1}'.format(n+1,L),'\r')
@@ -236,19 +273,33 @@ def main(options, args):
             changes += lib.install_name_changes(files, install_name_func, ignored)
             verbose(lib_file)
             for change in changes:
+                os.chmod(lib_file, 0775)
                 cmd = ['install_name_tool',] + change + [lib_file,]
                 res = Popen(cmd, stdout=PIPE).communicate()[0]
                 if res: 
                     verbose(res)
     progress_print('')
 
+    if any([
+            options.show_ignored,
+            options.show_suspiciously_ignored,
+            ]):
+        ignored = sorted( map(str,ignored))
+
     if options.show_ignored:
-        ignored = sorted([''] + map(str,ignored))
         print 'ignored libraries:', (os.linesep+'  ').join(ignored)
 
-        suspicious = [''] + list(set(ignored) - set(usually_ignored))
-        #suspicious = [ ig+' '+str(BinaryFile.ignored.get(ig,'')) for ig in suspicious ]
-        print 'suspiciously ignored :', (os.linesep+'  ').join(suspicious)
+    if options.show_suspiciously_ignored:
+        suspicious = list(set(ignored) - set(usually_ignored))
+        libsep = (os.linesep+'  ')
+        depsep = (os.linesep+'    - ')
+        if options.show_suspiciously_ignored == 1:
+            print 'suspiciously ignored :', libsep + libsep.join(suspicious)
+        else:
+            si = [["<%s>"%s + ', required by :']
+                 + [l.name for l in BinaryFile.ignored[s]] for s in suspicious]
+            print 'suspiciously ignored :', (libsep
+                    + libsep.join(depsep.join(d) for d in si))
 
 
 if __name__ == '__main__':

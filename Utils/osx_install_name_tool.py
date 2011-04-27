@@ -19,12 +19,36 @@ from subprocess  import Popen, PIPE
 def p(x): print "==",x.name,"=="
 
 usually_ignored = [
-                'AGL', 'AppKit', 'ApplicationServices', 'AudioToolbox',
-                'Carbon', 'Cocoa', 'CoreFoundation', 'CoreServices',
-                'Foundation', 'IOKit', 'OpenGL', 'QuickTime',
-                'SystemConfiguration', 'WebKit', 'libSystem.B.dylib',
-                'libgcc_s.1.dylib', 'libobjc.A.dylib', 'libstdc++.6.dylib',
-                ]
+    'AGL',
+    'AppKit',
+    'ApplicationServices',
+    'AudioToolbox',
+    'AudioUnit',
+    'Carbon',
+    'Cocoa',
+    'CoreAudio',
+    'CoreFoundation',
+    'CoreServices',
+    'CoreVideo',
+    'CoreWLAN',
+    'Foundation',
+    'IOKit',
+    'OpenGL',
+    'OpenCL',
+    'QTKit',
+    'QuartzCore',
+    'QuickTime',
+    'Security',
+    'SystemConfiguration',
+    'WebKit',
+    'libSystem.B.dylib',
+    'libgcc_s.1.dylib',
+    'libiodbc',
+    'libobjc.A.dylib',
+    'libresolv',
+    'libstdc++.6.dylib',
+    ]
+
 
 def cached_property(func):
     from functools import wraps
@@ -290,7 +314,9 @@ def main(options, args):
         print 'ignored libraries:', (os.linesep+'  ').join(ignored)
 
     if options.show_suspiciously_ignored:
-        suspicious = list(set(ignored) - set(usually_ignored))
+        #suspicious = list(set(ignored) - set(usually_ignored))
+        match = lambda x : not any( ig in x for ig in usually_ignored )
+        suspicious = [ig for ig in ignored if match(ig)]
         libsep = (os.linesep+'  ')
         depsep = (os.linesep+'    - ')
         if options.show_suspiciously_ignored == 1:

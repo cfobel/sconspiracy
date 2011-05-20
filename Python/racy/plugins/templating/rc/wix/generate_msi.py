@@ -7,8 +7,11 @@ import sys
 
 def light_the_candle(prj,  light_opts=[]):
 
-
-    candle = ['candle.exe', '-arch' , "x${ARCH}", prj+'.wxs']
+    candle_arch = {
+                  '32':'x86',
+                  '64':'x64',
+                  }
+    candle = ['candle.exe', '-arch' , candle_arch['${ARCH}'], prj+'.wxs']
     light = ['light.exe', prj+'.wixobj'] + light_opts
     cp = subprocess.Popen(candle, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)

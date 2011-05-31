@@ -16,13 +16,21 @@ def apply_template( string, dico):
     return res
         
 def apply_file_template( name, dico):
-    temp = Template(filename = name)
-    res = ''
-    try:
-        res = temp.render(**dico)
-    except:
-        print exceptions.text_error_template().render()
-
+    if os.path.exists(name):
+        temp = Template(filename = name,disable_unicode=True, input_encoding='utf-8' )
+        res = ''
+        try:
+            res = temp.render(**dico)
+        except:
+            traceback = RichTraceback()
+            for (filename, lineno, function, line) in traceback.traceback:
+                print "File %s, line %s, in %s" % (filename, lineno, function)
+                print line, "\n"
+            print "%s: %s" % (str(traceback.error.__class__.__name__), 
+                              traceback.error)
+ 
+    else:
+        res='' 
     return res
 
 def add_vars_template( dico_vars_prj, dico_vars):
@@ -49,5 +57,7 @@ def add_template_prj( dico_template, dico_vars):
         temp_key             = apply_template(key, dico_vars)
         dico_vars[temp_key]  = apply_template(value, dico_vars)
         file_content = apply_file_template(temp_key, dico_vars)
-        rutils.put_file_content(dico_vars[temp_key] , file_content)
+
+        if file_content:
+            rutils.put_file_content(dico_vars[temp_key] , file_content)
 

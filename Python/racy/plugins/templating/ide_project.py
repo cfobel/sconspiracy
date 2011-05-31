@@ -103,6 +103,9 @@ class IdeProject(ConstructibleRacyProject):
             'PRJ_TYPE'        : prj.get_lower('TYPE'),
             'RACY_CLEAN_CMD'  : racy.get_racy_cmd(),
             'CALLING_PROJECT' : self.prj.base_name,
+            'CALLING_PROJECT_VERSION_NAME' : self.prj.versioned_name,
+
+            'CALLING_PROJECT_VERSION' : self.prj.version,
             'DEPS_INCLUDES'   : deps_include,
             'DEPS_INCLUDES_BASE' : prj.deps_include_path,
             'DEPS'            : prj_deps,
@@ -112,13 +115,21 @@ class IdeProject(ConstructibleRacyProject):
 
 
 
+        if self.prj.base_name == prj.base_name:
+            for i in prj_deps:
+                if i['PRJ_NAME'] == 'launcher':
+                    for target in i['PRJ_TARGET']:
+                        if target.endswith('.exe'):
+                            dico['CALLING_TARGET'] = target
+                            break
+                    break
+                else:
+                    dico['CALLING_TARGET'] = ''
+        else:
+            dico['CALLING_TARGET'] = ''
 
 
         dico.update(dico_g)
-
-        deps = prj.rec_deps
-        compiler_path = opjoin(racy.get_bin_path(), 'racy')
-
 
         ide_type = self.prj.get_lower('IDE')
         dico_vars = dico
@@ -134,11 +145,11 @@ class IdeProject(ConstructibleRacyProject):
                                         prj_format,dico_vars) 
 
         dico_prj = get_dico_prj(dico_prj_template['dico_ide'], ide_type)
-        
+
         # Added vars 
         if dico_prj.has_key('vars'):
-                dico_vars_template = add_vars(dico_prj['vars'], dico_vars)
-        
+                dico_vars_template = add_vars_template(dico_prj['vars'], dico_vars)
+
         racy.print_msg('Create {0} project : {1}'.format(
                                     ide_type , prj.base_name))
 
@@ -148,6 +159,8 @@ class IdeProject(ConstructibleRacyProject):
             dico_vars= add_dirs_template(dico_prj['dirs'], dico_vars)
 
          # Added template_prj
+
+
         if dico_prj.has_key('template_prj'):
             add_template_prj(dico_prj['template_prj'], dico_vars)
 
@@ -155,8 +168,8 @@ class IdeProject(ConstructibleRacyProject):
 
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
-        
-        
+
+
         for i in self.prj.rec_deps:
             if i.type in ['exec', 'bundle', 'shared']:
                 self.create_prj(i)

@@ -163,6 +163,6 @@ else:
  </data>
  <data>
   <variable>ProjectExplorer.Project.Updater.FileVersion</variable>
-  <value type="int">9</value>
+  <value type="int">4</value>
  </data>
 </qtcreator>

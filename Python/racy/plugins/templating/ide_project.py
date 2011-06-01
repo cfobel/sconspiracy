@@ -122,6 +122,8 @@ class IdeProject(ConstructibleRacyProject):
                         if target.endswith('.exe'):
                             dico['CALLING_TARGET'] = target
                             break
+                        elif not os.name == "nt":
+                            dico['CALLING_TARGET'] = target
                     break
                 else:
                     dico['CALLING_TARGET'] = ''

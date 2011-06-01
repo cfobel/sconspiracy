@@ -11,8 +11,10 @@ COUNT = 0
 
 if os.name == "nt":
     EXT = '.bat'
+    TOOLCHAIN='ProjectExplorer.ToolChain.Msvc:C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat..'
 else:
     EXT=''
+    TOOLCHAIN='ProjectExplorer.ToolChain.Gcc:/usr/bin/g++.x86-linux-generic-elf-64bit.'
 %>
 
 <qtcreator>
@@ -44,8 +46,8 @@ else:
    <value key="EditorConfiguration.inEntireDocument" type="bool">false</value>
   </valuemap>
  </data>
- 
- 
+
+
  <data>
   <variable>ProjectExplorer.Project.Target.0</variable>
   <valuemap type="QVariantMap">
@@ -61,7 +63,7 @@ else:
 
 %for name, option in step:
    <valuemap key="ProjectExplorer.Target.BuildConfiguration.${COUNT}" type="QVariantMap">
-    <value key="ProjectExplorer.BuildCOnfiguration.ToolChain" type="QString">ProjectExplorer.ToolChain.Msvc:C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat..</value>
+       <value key="ProjectExplorer.BuildCOnfiguration.ToolChain" type="QString">${TOOLCHAIN}</value>
     <valuemap key="ProjectExplorer.BuildConfiguration.BuildStepList.0" type="QVariantMap">
      <valuemap key="ProjectExplorer.BuildStepList.Step.0" type="QVariantMap">
       <value key="ProjectExplorer.ProcessStep.Arguments" type="QString">${option}</value>
@@ -100,7 +102,7 @@ else:
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration" type="int">2</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory" type="QString">${RACY_INSTALL_DIR}</value>
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="QString">ProjectExplorer.ToolChain.Msvc:C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat..</value>
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="QString">${TOOLCHAIN}</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">true</value>
    </valuemap>
 <% COUNT = COUNT + 1 %>
@@ -113,31 +115,57 @@ else:
    <valuemap key="ProjectExplorer.Target.DeployConfiguration.0" type="QVariantMap">
     <valuemap key="ProjectExplorer.BuildConfiguration.BuildStepList.0" type="QVariantMap">
      <value key="ProjectExplorer.BuildStepList.StepsCount" type="int">0</value>
-     <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">Déploiement</value>
+     <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">Dï¿½ploiement</value>
      <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString"></value>
      <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.BuildSteps.Deploy</value>
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.BuildStepListCount" type="int">1</value>
-    <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">Pas de déploiement</value>
+    <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">Pas de dï¿½ploiement</value>
     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString"></value>
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.DefaultDeployConfiguration</value>
    </valuemap>
    <value key="ProjectExplorer.Target.DeployConfigurationCount" type="int">1</value>
    <valuemap key="ProjectExplorer.Target.RunConfiguration.0" type="QVariantMap">
-    <value key="ProjectExplorer.CustomExecutableRunConfiguration.Arguments" type="QString">Bundles\${CALLING_PROJECT_VERSION_NAME}\profile.xml</value>
+%if not os.name == "nt":
+    <valuelist key="Analyzer.Valgrind.AddedSupressionFiles" type="QVariantList"/>
+    <value key="Analyzer.Valgrind.FilterExternalIssues" type="bool">true</value>
+    <value key="Analyzer.Valgrind.NumCallers" type="int">25</value>
+    <valuelist key="Analyzer.Valgrind.RemovedSupressionFiles" type="QVariantList"/>
+    <value key="Analyzer.Valgrind.TrackOrigins" type="bool">true</value>
+    <value key="Analyzer.Valgrind.ValgrindExecutable" type="QString">valgrind</value>
+    <valuelist key="Analyzer.Valgrind.VisibleErrorKinds" type="QVariantList">
+     <value type="int">0</value>
+     <value type="int">1</value>
+     <value type="int">2</value>
+     <value type="int">3</value>
+     <value type="int">4</value>
+     <value type="int">5</value>
+     <value type="int">6</value>
+     <value type="int">7</value>
+     <value type="int">8</value>
+     <value type="int">9</value>
+     <value type="int">10</value>
+     <value type="int">11</value>
+     <value type="int">12</value>
+     <value type="int">13</value>
+     <value type="int">14</value>
+    </valuelist>
+%endif
+    <value key="ProjectExplorer.CustomExecutableRunConfiguration.Arguments" type="QString">Bundles${SEP}${CALLING_PROJECT_VERSION_NAME}${SEP}profile.xml</value>
     <value key="ProjectExplorer.CustomExecutableRunConfiguration.BaseEnvironmentBase" type="int">2</value>
     <value key="ProjectExplorer.CustomExecutableRunConfiguration.Executable"
     type="QString">${CALLING_TARGET}</value>
     <value key="ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal" type="bool">false</value>
     <valuelist key="ProjectExplorer.CustomExecutableRunConfiguration.UserEnvironmentChanges" type="QVariantList"/>
     <value key="ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory" type="QString">${RACY_INSTALL_DIR}</value>
-    <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">Exécuter ${PRJ_NAME}</value>
+    <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">Exï¿½cuter ${PRJ_NAME}</value>
     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">${PRJ_NAME}</value>
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">ProjectExplorer.CustomExecutableRunConfiguration</value>
     <value key="RunConfiguration.QmlDebugServerPort" type="uint">3768</value>
     <value key="RunConfiguration.UseCppDebugger" type="bool">true</value>
     <value key="RunConfiguration.UseQmlDebugger" type="bool">false</value>
    </valuemap>
+%if os.name == "nt":
    <valuemap key="ProjectExplorer.Target.RunConfiguration.1" type="QVariantMap">
     <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">${PRJ_NAME}</value>
     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">${PRJ_NAME}</value>
@@ -154,6 +182,10 @@ else:
     <value key="RunConfiguration.UseQmlDebugger" type="bool">false</value>
    </valuemap>
    <value key="ProjectExplorer.Target.RunConfigurationCount" type="int">2</value>
+%else:
+   <value key="ProjectExplorer.Target.RunConfigurationCount" type="int">1</value>
+
+%endif
   </valuemap>
  </data>
  <data>

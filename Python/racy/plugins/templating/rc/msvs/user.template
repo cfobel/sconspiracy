@@ -1,139 +1,39 @@
 <?xml version="1.0" encoding="Windows-1252"?>
-<%
-TARGET = ""
-ARGUMENT = ""
-
-if PRJ_NAME == CALLING_PROJECT:
-    if PRJ_TYPE == 'exec':
-        TARGET = PRJ_TARGET[0]
-    elif PRJ_TYPE == 'bundle':
-        for i in DEPS:
-            if i['PRJ_NAME'] == "launcher":
-                TARGET = i['PRJ_TARGET'][0]
-
-        for i in OTHERS_FILE:
-            if i.endswith('xml') and i.count('profile') == 1:
-                ARGUMENT = i
-print TARGET
-print ARGUMENT
-%>
+%if PRJ_NAME == CALLING_PROJECT:
 <VisualStudioUserFile
-	ProjectType="Visual C++"
-	Version="9,00"
-	ShowAllFiles="false"
-	>
-	<Configurations>
-		<Configuration
-			Name="Debug|Win32"
-			>
-			<DebugSettings
-				Command="${TARGET}"
-				WorkingDirectory=""
-				CommandArguments="${ARGUMENT}"
-				Attach="false"
-				DebuggerType="3"
-				Remote="1"
-				RemoteMachine=""
-				RemoteCommand=""
-				HttpUrl=""
-				PDBPath=""
-				SQLDebugging=""
-				Environment=""
-				EnvironmentMerge="true"
-				DebuggerFlavor=""
-				MPIRunCommand=""
-				MPIRunArguments=""
-				MPIRunWorkingDirectory=""
-				ApplicationCommand=""
-				ApplicationArguments=""
-				ShimCommand=""
-				MPIAcceptMode=""
-				MPIAcceptFilter=""
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			>
-			<DebugSettings
-				Command="${TARGET}"
-				WorkingDirectory=""
-				CommandArguments="${ARGUMENT}"
-				Attach="false"
-				DebuggerType="3"
-				Remote="1"
-				RemoteMachine=""
-				RemoteCommand=""
-				HttpUrl=""
-				PDBPath=""
-				SQLDebugging=""
-				Environment=""
-				EnvironmentMerge="true"
-				DebuggerFlavor=""
-				MPIRunCommand=""
-				MPIRunArguments=""
-				MPIRunWorkingDirectory=""
-				ApplicationCommand=""
-				ApplicationArguments=""
-				ShimCommand=""
-				MPIAcceptMode=""
-				MPIAcceptFilter=""
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug no deps|Win32"
-			>
-			<DebugSettings
-				Command="${TARGET}"
-				WorkingDirectory=""
-				CommandArguments="${ARGUMENT}"
-				Attach="false"
-				DebuggerType="3"
-				Remote="1"
-				RemoteMachine=""
-				RemoteCommand=""
-				HttpUrl=""
-				PDBPath=""
-				SQLDebugging=""
-				Environment=""
-				EnvironmentMerge="true"
-				DebuggerFlavor="0"
-				MPIRunCommand=""
-				MPIRunArguments=""
-				MPIRunWorkingDirectory=""
-				ApplicationCommand=""
-				ApplicationArguments=""
-				ShimCommand=""
-				MPIAcceptMode=""
-				MPIAcceptFilter=""
-			/>
-		</Configuration>
-		<Configuration
-			Name="DOX BUILD=no|Win32"
-			>
-			<DebugSettings
-				Command="${TARGET}"
-				WorkingDirectory=""
-				CommandArguments="${ARGUMENT}"
-				Attach="false"
-				DebuggerType="3"
-				Remote="1"
-				RemoteMachine=""
-				RemoteCommand=""
-				HttpUrl=""
-				PDBPath=""
-				SQLDebugging=""
-				Environment=""
-				EnvironmentMerge="true"
-				DebuggerFlavor=""
-				MPIRunCommand=""
-				MPIRunArguments=""
-				MPIRunWorkingDirectory=""
-				ApplicationCommand=""
-				ApplicationArguments=""
-				ShimCommand=""
-				MPIAcceptMode=""
-				MPIAcceptFilter=""
-			/>
-		</Configuration>
-	</Configurations>
+    ProjectType="Visual C++"
+    Version="9,00"
+    ShowAllFiles="false"
+    >
+    <Configurations>
+        <Configuration
+            Name="racy|Win32"
+            >
+            <DebugSettings
+                Command="${CALLING_TARGET}"
+                WorkingDirectory=""
+                CommandArguments="Bundles\${CALLING_PROJECT_VERSION_NAME}\profile.xml"
+                Attach="false"
+                DebuggerType="3"
+                Remote="1"
+                RemoteMachine=""
+                RemoteCommand=""
+                HttpUrl=""
+                PDBPath=""
+                SQLDebugging=""
+                Environment=""
+                EnvironmentMerge="true"
+                DebuggerFlavor=""
+                MPIRunCommand=""
+                MPIRunArguments=""
+                MPIRunWorkingDirectory=""
+                ApplicationCommand=""
+                ApplicationArguments=""
+                ShimCommand=""
+                MPIAcceptMode=""
+                MPIAcceptFilter=""
+            />
+        </Configuration>
+    </Configurations>
 </VisualStudioUserFile>
+%endif

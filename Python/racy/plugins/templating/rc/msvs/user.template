@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 %if PRJ_NAME == CALLING_PROJECT:
+<%step =  [ ('racy' , PRJ_NAME),
+         ('racy/BUILDDEPS=no' , PRJ_NAME + '/BUILDDEPS=no'),
+         ('racy/DEBUG=release', PRJ_NAME + ' DEBUG=release'),
+       ]
+%>
 <VisualStudioUserFile
     ProjectType="Visual C++"
     Version="9,00"
     ShowAllFiles="false"
     >
     <Configurations>
+%for name, option in step:
         <Configuration
-            Name="racy|Win32"
+            Name="${name}|Win32"
             >
             <DebugSettings
                 Command="${CALLING_TARGET}"
-                WorkingDirectory=""
+                WorkingDirectory="${RACY_INSTALL_DIR}"
                 CommandArguments="Bundles\${CALLING_PROJECT_VERSION_NAME}\profile.xml"
                 Attach="false"
                 DebuggerType="3"
@@ -23,7 +29,7 @@
                 SQLDebugging=""
                 Environment=""
                 EnvironmentMerge="true"
-                DebuggerFlavor=""
+                DebuggerFlavor="0"
                 MPIRunCommand=""
                 MPIRunArguments=""
                 MPIRunWorkingDirectory=""
@@ -34,6 +40,7 @@
                 MPIAcceptFilter=""
             />
         </Configuration>
+%endfor
     </Configurations>
 </VisualStudioUserFile>
 %endif

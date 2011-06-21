@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <%
-INCLUDES= ';'.join(HEADERS)
+
 
 step =  [ ('racy' , PRJ_NAME),
          ('racy/BUILDDEPS=no' , PRJ_NAME + '/BUILDDEPS=no'),
@@ -41,7 +41,7 @@ step =  [ ('racy' , PRJ_NAME),
                 CleanCommandLine="racy - c appXML"
                 Output=""
                 PreprocessorDefinitions=""
-                IncludeSearchPath="${';'.join(DEPS_INCLUDES)}"
+                IncludeSearchPath="${';'.join(DEPS_INCLUDES) + ';' + PRJ_ROOT_DIR + "\\include"}"
                 ForcedIncludes=""
                 AssemblySearchPath=""
                 ForcedUsingAssemblies=""

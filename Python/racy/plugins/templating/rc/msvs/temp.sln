@@ -8,22 +8,21 @@ EndProject
 %endif
 %endfor
 Project("{${CALLING_PROJECT}}") = "${CALLING_PROJECT}", "${CALLING_PROJECT}\${CALLING_PROJECT}.vcproj", "${CALLING_PROJECT}"
+EndProject
 
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Win32 = Debug|Win32
-        Release|Win32 = Release|Win32
+        racy|Win32 = racy|Win32
     EndGlobalSection
     GlobalSection(ProjectConfigurationPlatforms) = postSolution
         %for i in DEPS:
         %if i['PRJ_TYPE'] in ['shared', 'bundle', 'exec','libext']:
-        {${i['PRJ_NAME']}}.racy|Win32.ActiveCfg = racy|Win32
-        {${i['PRJ_NAME']}}.racy|Win32.Build.0 = racy|Win32
-        {${i['PRJ_NAME']}}.racy|Win32.ActiveCfg = racye|Win32
-        {${i['PRJ_NAME']}}.racy|Win32.Build.0 = racy|Win32
+        {${i['PRJ_NAME']}}.racy|Win32.ActiveCfg = racy/BUILDDEPS=no|Win32
+        {${i['PRJ_NAME']}}.racy|Win32.Build.0 = racy/BUILDDEPS=no|Win32
         %endif
         %endfor
-        {${CALLING_PROJECT}}.Release|Win32.Build.0 = Release|Win32
+        {${CALLING_PROJECT}}.racy|Win32.ActiveCfg = racy/BUILDDEPS=no|Win32
+        {${CALLING_PROJECT}}.racy|Win32.Build.0 = racy/BUILDDEPS=no|Win32
     EndGlobalSection
     GlobalSection(SolutionProperties) = preSolution
         HideSolutionNode = FALSE

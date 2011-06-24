@@ -36,13 +36,15 @@ dico_prj_template = {
         'options':
         {
             'default_value': 'none',
-            'allowed_value': ['none', 'eclipse', 'qtcreator', 'graphviz','vim','msvs'],
+            'allowed_value': ['none', 'eclipse', 'qtcreator','qtcreator2-2', 
+                              'graphviz','vim','msvs'],
             'commandline_prj_opts': True,
             'descriptions_opts':"Create new developer project",
          },
 
         'qtcreator' :
         {
+
             'dirs':
                 [
                     ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator/${PRJ_NAME}/'),
@@ -58,6 +60,29 @@ dico_prj_template = {
                     ('${TPL_DIR}/template.pro.user',
                             '${QT_DIR}/${PRJ_NAME}.pro.user'),
                     ('${TPL_DIR}/template.qws'     ,
+                            '${OS_DIR}/${PRJ_NAME}.qws'     ),
+                ]
+
+        },
+        'qtcreator2-2' :
+        {
+
+            'dirs':
+                [
+                    ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator2-2/${PRJ_NAME}/'),
+                    ('TPL_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/' ),
+                    ('TPL_2_2_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator2-2/' ),
+                    ('OS_DIR'   , qt_default_dir                   ),
+                ]
+            ,
+            'template_prj':
+                [
+
+                    ('${TPL_DIR}/template.pro'     ,
+                            '${QT_DIR}/${PRJ_NAME}.pro'     ),
+                    ('${TPL_2_2_DIR}/template_pro_user.mako',
+                            '${QT_DIR}/${PRJ_NAME}.pro.user'),
+                    ('${TPL_2_2_DIR}/template.qws'     ,
                             '${OS_DIR}/${PRJ_NAME}.qws'     ),
                 ]
 
@@ -329,6 +354,7 @@ dico_prj_template = {
                     ('WIX_BITMAP_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/Bitmaps'),
                     ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/wix/'),
+                    ('DOC_DIR', '${PRJ_ROOT_DIR}/rc/documentations/')
                 ],
             'template_prj':
                 [

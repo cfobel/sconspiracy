@@ -1,0 +1,65 @@
+<!DOCTYPE QtCreatorSession>
+<% QTCREATOR_PRJ_DIR = IDE_INSTALL_DIR+SEP+'qtcreator2-2'+SEP 
+%>
+<qtcreator>
+ <data>
+  <variable>EditorSettings</variable>
+  <value type="QByteArray"></value>
+ </data>
+ <data>
+  <variable>OpenEditors</variable>
+  <value type="int">1</value>
+ </data>
+ <data>
+  <variable>ProjectDependencies</variable>
+  <valuemap type="QVariantMap"/>
+ </data>
+ <data>
+  <variable>ProjectList</variable>
+  <valuelist type="QVariantList">
+%for i in [i for i in DEPS if not i['PRJ_TYPE'] == 'bin_libext']:
+<% PRO = QTCREATOR_PRJ_DIR + i['PRJ_NAME'] + '/' + i['PRJ_NAME'] + '.pro'
+PRO = PRO.replace('\\', '/')%>
+    <value type="QString">${PRO}</value>
+%endfor
+<% CALLING_PRO = QTCREATOR_PRJ_DIR + CALLING_PROJECT + '/' + CALLING_PROJECT + '.pro'
+CALLING_PRO = CALLING_PRO.replace('\\', '/')%>
+    <value type="QString">${CALLING_PRO}</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>StartupProject</variable>
+  <value type="QString">${CALLING_PRO}</value>
+ </data>
+ <data>
+  <variable>value-ActiveMode</variable>
+  <value type="QString">Edit</value>
+ </data>
+ <data>
+  <variable>value-Breakpoints</variable>
+  <valuelist type="QVariantList"/>
+ </data>
+ <data>
+  <variable>value-DebuggerToolTips</variable>
+  <value type="QString"></value>
+ </data>
+ <data>
+  <variable>value-DefaultFormats</variable>
+  <valuemap type="QVariantMap"/>
+ </data>
+ <data>
+  <variable>value-Watchers</variable>
+  <valuelist type="QVariantList"/>
+ </data>
+ <data>
+  <variable>valueKeys</variable>
+  <valuelist type="QVariantList">
+   <value type="QString">ActiveMode</value>
+   <value type="QString">Breakpoints</value>
+   <value type="QString">DebuggerToolTips</value>
+   <value type="QString">DefaultFormats</value>
+   <value type="QString">Watchers</value>
+  </valuelist>
+ </data>
+</qtcreator>
+

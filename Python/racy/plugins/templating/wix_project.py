@@ -233,7 +233,7 @@ class WixProject(ConstructibleRacyProject):
             if i.get_lower('TYPE') in ['exec', 'bundle', 'shared']:
                 self.create_prj(i)
 
-        extra_dirs = ['bin','Python','PythonHome']
+        extra_dirs = ['bin','Python','PythonHome','qtplugins']
 
         for i in self.create_install_targets(extra_dirs):
             self.create_extra_dir(i)

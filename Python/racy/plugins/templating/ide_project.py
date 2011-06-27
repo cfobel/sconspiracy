@@ -87,8 +87,10 @@ class IdeProject(ConstructibleRacyProject):
                 target = i.target_path
                 deps_include.extend(i.include_path)
           
-            prj_deps.append( { 'PRJ_NAME' : i.base_name , 
-                'PRJ_TYPE' : i.get_lower('TYPE'), 'PRJ_TARGET': target, })
+            prj_deps.append( { 'PRJ_NAME'    : i.base_name , 
+                               'PRJ_TYPE'    : i.get_lower('TYPE'), 
+                               'PRJ_TARGET'  : target, 
+                             })
             
 
         # this dictionary contains all varibles for templates

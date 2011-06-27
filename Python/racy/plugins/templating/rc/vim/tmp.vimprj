@@ -1,12 +1,23 @@
-<%
-import glob
+<% import glob
 import racy.rutils as rutils
+import os
 if PRJ_NAME == CALLING_PROJECT:
     dep = glob.glob(VIM_DIR + '/' + '.*vimprj')
     deps= []
+    prj_dep = []
     for i in dep:
-        tmp = rutils.get_file_content(i)
-        deps.append(tmp) 
+        print i
+        name = os.path.split(i)[1]
+        prj_dep.append(name.split('_')[0])
+
+    prj_dep = sorted(prj_dep)
+        
+    for i in prj_dep:
+        for j in dep:
+            if i in j:
+                tmp = rutils.get_file_content(j)
+                deps.append(tmp) 
+                break
 %>
 %if PRJ_NAME == CALLING_PROJECT:
     %for i in deps:

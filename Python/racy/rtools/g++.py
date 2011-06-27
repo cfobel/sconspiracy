@@ -103,9 +103,10 @@ def generate(env):
     common.merge_flags(env, flags)
 
     env['TOOLINFO'] = {}
+    
     env['TOOLINFO']['NAME']    = 'gcc'
     env['TOOLINFO']['VERSION'] = env['CXXVERSION']
-
+    env['CXX'] = compiler
 
 def manage_options(env, prj, options):
     common.manage_options(env, prj, options)

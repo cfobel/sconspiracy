@@ -156,7 +156,7 @@ def manage_options(env, prj, options):
     flag_names = []
     if 'OPTIMIZATIONLEVEL' in options:
         env['OPTIMIZATIONLEVEL'] = options['OPTIMIZATIONLEVEL']
-        flag_names += [('OPTIMIZATIONLEVEL_FLAGS', 'CXXFLAGS')]
+        flag_names += [('OPTIMIZATION_FLAGS', 'CXXFLAGS')]
 
     if is_true(options.get('WARNINGSASERRORS', 'no')):
         flag_names += [('WARNINGSASERRORS_FLAGS', 'CXXFLAGS')]

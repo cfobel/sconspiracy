@@ -12,14 +12,14 @@ dico_g = {
     'RACY_SRC_DIR'    : racy.renv.dirs.code,
     'IDE_INSTALL_DIR' : opjoin(racy.renv.dirs.install, 'ide'), 
     'WIX_INSTALL_DIR' : opjoin(racy.renv.dirs.install, 'wix'), 
+    'CMAKE_INSTALL_DIR': opjoin(racy.renv.dirs.install, 'cmake'), 
     'RACY_CMD'        : racy.get_racy_cmd(),
     'RACY_BIN_PATH'   : racy.renv.dirs.install_bin,
     'RACY_BUNDLE_PATH': racy.renv.dirs.install_bundle,
     'OS_NAME'         : racy.renv.system(), #windows, darwin, linux
     'SEP'             : os.sep,
     'PATHSEP'         : os.pathsep,
-    'IDE_PLUGIN_PATH' : os.path.dirname(__file__),
-    'WIX_PLUGIN_PATH' : os.path.dirname(__file__),
+    'TEMPLATING_PLUGIN_PATH' : os.path.dirname(__file__),
     'CALLING_PROJECT_TARGET' : '',
 }
 
@@ -37,7 +37,7 @@ dico_prj_template = {
         {
             'default_value': 'none',
             'allowed_value': ['none', 'eclipse', 'qtcreator','qtcreator2-2', 
-                              'graphviz','vim','msvs'],
+                              'graphviz','vim','msvs','eclipse-indigo'],
             'commandline_prj_opts': True,
             'descriptions_opts':"Create new developer project",
          },
@@ -48,7 +48,7 @@ dico_prj_template = {
             'dirs':
                 [
                     ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator/${PRJ_NAME}/'),
-                    ('TPL_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/'     ),
+                    ('TPL_DIR' ,'${TEMPLATING_PLUGIN_PATH}/rc/qtcreator/'     ),
                     ('OS_DIR'   , qt_default_dir                   ),
                 ]
             ,
@@ -70,8 +70,8 @@ dico_prj_template = {
             'dirs':
                 [
                     ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator2-2/${PRJ_NAME}/'),
-                    ('TPL_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/' ),
-                    ('TPL_2_2_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator2-2/' ),
+                    ('TPL_DIR' ,'${TEMPLATING_PLUGIN_PATH}/rc/qtcreator/' ),
+                    ('TPL_2_2_DIR' ,'${TEMPLATING_PLUGIN_PATH}/rc/qtcreator2-2/' ),
                     ('OS_DIR'   , qt_default_dir                   ),
                 ]
             ,
@@ -99,7 +99,7 @@ dico_prj_template = {
                                      '${CALLING_PROJECT}/.metadata/.plugins/'
                                       'org.eclipse.debug.core/.launches/')
                    ),
-                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/eclipse/'       ),
+                   ( 'TPL_DIR'   , '${TEMPLATING_PLUGIN_PATH}/rc/eclipse/'       ),
                 ]
 
             ,
@@ -124,7 +124,7 @@ dico_prj_template = {
                                      '${CALLING_PROJECT}/.metadata/.plugins/'
                                       'org.eclipse.debug.core/.launches/')
                    ),
-                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/eclipse/'       ),
+                   ( 'TPL_DIR'   , '${TEMPLATING_PLUGIN_PATH}/rc/eclipse/'       ),
                 ]
 
             ,
@@ -139,6 +139,32 @@ dico_prj_template = {
                 ]
          },
 
+        'eclipse-indigo' :
+        { 
+            'dirs':
+                [
+                   ( 'TPL_DIR'      , '${TEMPLATING_PLUGIN_PATH}/rc/eclipse-ind/'     ),
+                   ( 'META_DIR'     , '${IDE_INSTALL_DIR}/indigo/.metadata/'   ),
+                   ( 'META_PRJ_DIR' , "${META_DIR}.plugins/org.eclipse.core.resources/.projects/${PRJ_NAME}"
+                                                                               ),
+                   ( 'META_WORK_DIR', 
+                        '${META_DIR}/.plugins/org.eclipse.ui.workbench/'       )
+                ]
+
+            ,
+            'template_prj':
+                [
+                    ('${TPL_DIR}/project.mako'       ,
+                        '${PRJ_ROOT_DIR}/.project'               ),
+                    ('${TPL_DIR}/cproject.mako'      ,
+                       '${PRJ_ROOT_DIR}/.cproject'               ),
+                    ('${TPL_DIR}/location.mako'      ,
+                        '${META_PRJ_DIR}/.location'              ),
+                    ('${TPL_DIR}/workingsets.mako',
+                        '${META_WORK_DIR}/workingsets.xml')
+
+                ]
+         },
          'graphviz' :
          {
             'dirs':
@@ -146,7 +172,7 @@ dico_prj_template = {
                    ( 'GRAPHVIZ_DIR' , ('${IDE_INSTALL_DIR}/graphviz/'
                                      '${CALLING_PROJECT}/'
                    )),
-                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/graphviz/'),
+                   ( 'TPL_DIR'   , '${TEMPLATING_PLUGIN_PATH}/rc/graphviz/'),
                 ],
             'template_prj':
                 [
@@ -161,7 +187,7 @@ dico_prj_template = {
                    ( 'VIM_DIR' , ('${IDE_INSTALL_DIR}/vim/'
                                      '${CALLING_PROJECT}/'
                    )),
-                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/vim/'),
+                   ( 'TPL_DIR'   , '${TEMPLATING_PLUGIN_PATH}/rc/vim/'),
                 ],
             'template_prj':
                 [
@@ -184,7 +210,7 @@ dico_prj_template = {
                    ( 'MSVS_DIR' , ('${IDE_INSTALL_DIR}/msvs/'
                                      '${CALLING_PROJECT}/${PRJ_NAME}'
                    )),
-                   ( 'TPL_DIR'   , '${IDE_PLUGIN_PATH}/rc/msvs/'),
+                   ( 'TPL_DIR'   , '${TEMPLATING_PLUGIN_PATH}/rc/msvs/'),
                 ],
             'template_prj':
                 [
@@ -240,7 +266,7 @@ dico_prj_template = {
 
             'dirs':
                 [
-                    ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
+                    ('ROOT_TMP_DIR', '${TEMPLATING_PLUGIN_PATH}/rc/dev/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/exec/'),
                     ('LICENSE_TMP_DIR', '${ROOT_TMP_DIR}/licenses/'),
                     ('SRC_DIR', '${PRJ_PATH}/src/${PRJ_NAME}'),
@@ -260,7 +286,7 @@ dico_prj_template = {
 
             'dirs':
                 [
-                    ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
+                    ('ROOT_TMP_DIR', '${TEMPLATING_PLUGIN_PATH}/rc/dev/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/bundle/'),
                     ('LICENSE_TMP_DIR', '${ROOT_TMP_DIR}/licenses/'),
                     ('SRC_DIR', '${PRJ_PATH}/src/${PRJ_NAME}'),
@@ -285,7 +311,7 @@ dico_prj_template = {
         {
             'dirs':
                 [
-                    ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
+                    ('ROOT_TMP_DIR', '${TEMPLATING_PLUGIN_PATH}/rc/dev/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/bundle/'),
                     ('LICENSE_TMP_DIR', '${ROOT_TMP_DIR}/licenses/'),
                     ('SRC_DIR', '${PRJ_PATH}/src/${PRJ_NAME}'),
@@ -319,7 +345,7 @@ dico_prj_template = {
         {
             'dirs':
                 [
-                    ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/dev/'),
+                    ('ROOT_TMP_DIR', '${TEMPLATING_PLUGIN_PATH}/rc/dev/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/srv/'),
                     ('SRC_DIR', 'src/${PRJ_NAME}/${SRV_PATH}/'),
                     ('INCLUDE_DIR', 'include/${PRJ_NAME}/${SRV_PATH}/'),
@@ -331,6 +357,36 @@ dico_prj_template = {
                     ('${TPL_DIR}/srv.cpp', '${SRC_DIR}${SRV_NAME}.cpp'),
                 ]
 
+        }
+    }
+    ,
+    'dico_cmake':
+    {
+        'options':
+        {
+            
+            'commandline_opts': False,
+            'default_value' : 'no',
+            'commandline_prj_opts': True,
+            'allowed_values':['yes', 'no'],
+            'descriptions_opts':"Create new cmakelist",
+        },
+
+        'yes':
+        {
+            'dirs':
+                [
+                   ( 'CMAKE_DIR' ,
+                    '${CMAKE_INSTALL_DIR}/${MASTER_PRJ.base_name}/'
+                    '${PRJ_NAME + "/" if not PRJ_NAME == MASTER_PRJ_NAME else ""}'
+                   ),
+                   ( 'TEMPLATE_DIR' , '${TEMPLATING_PLUGIN_PATH}/rc/cmake/'),
+                ],
+            'template_prj':
+                [
+                    ('${TEMPLATE_DIR}/cmakelists.mako',
+                     '${CMAKE_DIR}/CMakeLists.txt'),
+                ]
         }
     }
     ,
@@ -352,7 +408,7 @@ dico_prj_template = {
                 [
                     ('WIX_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/'),
                     ('WIX_BITMAP_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/Bitmaps'),
-                    ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/'),
+                    ('ROOT_TMP_DIR', '${TEMPLATING_PLUGIN_PATH}/rc/'),
                     ('TPL_DIR' , '${ROOT_TMP_DIR}/wix/'),
                     ('DOC_DIR', '${PRJ_ROOT_DIR}/rc/documentations/')
                 ],

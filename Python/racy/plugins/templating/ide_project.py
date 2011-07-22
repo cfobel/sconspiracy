@@ -69,6 +69,13 @@ class IdeProject(ConstructibleRacyProject):
 
     def create_prj (self, prj):
 
+        #Create user_prj_name
+        prj_format = self.prj.get_lower('PRJ_USER_FORMAT')
+        prj_format = prj_format.replace('(', '{')
+        prj_format = prj_format.replace(')', '}')
+        prj_format = prj_format.upper()
+
+
 
         # This dictionary contains all supported ide
 
@@ -90,6 +97,7 @@ class IdeProject(ConstructibleRacyProject):
             prj_deps.append( { 'PRJ_NAME'    : i.base_name , 
                                'PRJ_TYPE'    : i.get_lower('TYPE'), 
                                'PRJ_TARGET'  : target, 
+                               'PRJ_ROOT_DIR': i.root_path,
                              })
             
 
@@ -137,13 +145,6 @@ class IdeProject(ConstructibleRacyProject):
 
         ide_type = self.prj.get_lower('IDE')
         dico_vars = dico
-
-        #Create user_prj_name
-        prj_format = self.prj.get_lower('PRJ_USER_FORMAT')
-        prj_format = prj_format.replace('(', '{')
-        prj_format = prj_format.replace(')', '}')
-        prj_format = prj_format.upper()
-
 
         dico_vars['PRJ_USER_FORMAT'] = apply_template(
                                         prj_format,dico_vars) 

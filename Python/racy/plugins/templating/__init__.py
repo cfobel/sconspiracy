@@ -14,6 +14,7 @@ from os.path import join as opjoin
 from ide_project import IdeProject
 from dev_project import DevProject
 from wix_project import WixProject
+from cmake_project import CMakeProject
 from global_dico import *
 
 
@@ -86,6 +87,9 @@ class Plugin(racy.rplugins.Plugin):
         if not prj.get('IDE') == 'none':
             val = prj.get('IDE')
             res = val in self.allowed_values['IDE'][1:]
+        elif prj.get('CMAKE') == 'yes':
+            val = 'yes'
+            res = True
         else:
             val = prj.get_lower('CREATE_WIX')
             res = val == 'yes'
@@ -96,6 +100,8 @@ class Plugin(racy.rplugins.Plugin):
             return []
         if not prj.get_lower('IDE') == 'none':
             res = IdeProject(prj) 
+        elif prj.get_lower('CMAKE') == 'yes':
+            res = CMakeProject(prj)
         else:
             res = WixProject(prj)
         return [res]

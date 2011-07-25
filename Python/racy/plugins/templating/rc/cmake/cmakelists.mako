@@ -49,7 +49,6 @@ QT4_WRAP_CPP(PRJ_HEADERS_MOC
             ${cmake_normalized(inc)}
     %endfor
             )
-    <% print  PROJECT.get_others() %>
 #ui management
 QT4_WRAP_UI(PRJ_UI_FILES
 %for other_file in PROJECT.get_others():
@@ -177,7 +176,11 @@ target_link_libraries(${PROJECT.full_name}
 
 #copying Files
 %if PROJECT.get_lower('TYPE') == 'shared':
-    <%output_dir= 'lib'%>
+    %if os.name =="nt":
+        <%output_dir= 'bin'%>
+    %else:
+        <%output_dir= 'lib'%>
+    %endif
     <%output_prj_dir='/'.join(['share',PROJECT.versioned_name])%>
 %elif PROJECT.get_lower('TYPE') == 'exec':
     <%output_dir= 'bin'%>

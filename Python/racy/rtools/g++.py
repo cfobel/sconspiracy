@@ -106,7 +106,6 @@ def generate(env):
     
     env['TOOLINFO']['NAME']    = 'gcc'
     env['TOOLINFO']['VERSION'] = env['CXXVERSION']
-    env['CXX'] = compiler
 
 def manage_options(env, prj, options):
     common.manage_options(env, prj, options)

@@ -30,6 +30,7 @@ class CMakeProject(ConstructibleRacyProject):
 
         self.master_project = prj
         self.deps_set = set()
+        self.qt_used = False
 
         super(CMakeProject, self).__init__(
                                         build_options = opts,
@@ -101,6 +102,29 @@ class CMakeProject(ConstructibleRacyProject):
             add_template_prj(dico_prj['template_prj'], dico_vars)
 
 
+
+    def verify_qt_in_deps(self,prj):
+        if not self.qt_used:
+            for deps in prj.bin_deps:
+                if 'qt' in deps.full_name:
+                    self.qt_used = True
+                    self.qt_prj = deps
+                    break
+
+    def qt_in_deps(self,):
+        return self.qt_used
+
+
+    def create_qt_conf(self):
+        qt_path = os.path.split(self.qt_prj.bin_path)[0]
+        template_dict= {'QT_PKG_PATH': qt_path }
+        content = apply_file_template(
+                os.path.dirname(__file__) + '/rc/cmake/qt.conf',
+                template_dict)
+
+        rutils.put_file_content(qt_path + '/bin/qt.conf', content)
+
+
     def install (self, opts = ['rc', 'deps'] ):
         result = self.result(deps_results = 'deps' in opts)
 
@@ -108,8 +132,12 @@ class CMakeProject(ConstructibleRacyProject):
         for i in self.master_project.rec_deps:
             if i.type in ['exec', 'bundle', 'shared']:
                 racy.print_msg("Create {0} ##########".format(i.base_name))
+                self.verify_qt_in_deps(i)
                 self.create_cmake_file(i)
 
         self.create_cmake_file(self.master_project)
+
+        if self.qt_in_deps():
+            self.create_qt_conf()
         exit(0)
         return result

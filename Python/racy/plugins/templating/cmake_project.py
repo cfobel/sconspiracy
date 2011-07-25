@@ -131,7 +131,7 @@ class CMakeProject(ConstructibleRacyProject):
 
         for i in self.master_project.rec_deps:
             if i.type in ['exec', 'bundle', 'shared']:
-                racy.print_msg("Create {0} ##########".format(i.base_name))
+                racy.print_msg("Create {0} CMakeList.txt".format(i.base_name))
                 self.verify_qt_in_deps(i)
                 self.create_cmake_file(i)
 

@@ -26,7 +26,7 @@ USE_QT = False
 
 
 #cmake version
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 #master project
 project(${PRJ_USER_FORMAT})
@@ -49,6 +49,16 @@ QT4_WRAP_CPP(PRJ_HEADERS_MOC
             ${cmake_normalized(inc)}
     %endfor
             )
+    <% print  PROJECT.get_others() %>
+#ui management
+QT4_WRAP_UI(PRJ_UI_FILES
+%for other_file in PROJECT.get_others():
+    %if other_file.endswith('.ui'):
+        ${cmake_normalized(other_file)}
+    %endif
+%endfor
+          )
+INCLUDE_DIRECTORIES( <%escape("CMAKE_BINARY_DIR")%> )
 %endif
 
 
@@ -118,16 +128,19 @@ add_library(${PROJECT.full_name}
             SHARED 
 %if USE_QT:
             <%escape('PRJ_HEADERS_MOC') %>
+            <%escape('PRJ_UI_FILES') %>
 %endif
             <%escape(PROJECT.base_name)%>)
 %elif PROJECT.get_lower('TYPE') == 'exec':
 add_executable(${PROJECT.full_name} 
             <%escape('PRJ_HEADERS_MOC') %>
+            <%escape('PRJ_UI_FILES') %>
             <%escape(PROJECT.base_name)%>)
 %else :
 add_library(${PROJECT.full_name}
             SHARED
             <%escape('PRJ_HEADERS_MOC') %>
+            <%escape('PRJ_UI_FILES') %>
             <%escape(PROJECT.base_name)%>)
 %endif
 

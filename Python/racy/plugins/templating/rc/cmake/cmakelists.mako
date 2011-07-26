@@ -131,10 +131,11 @@ ADD_EXECUTABLE(${project.full_name}
 %else :
 ADD_LIBRARY(${project.full_name}
             SHARED
-    %if use_qt:
+%endif
+
+%if use_qt:
             <%escape('PRJ_HEADERS_MOC') %>
             <%escape('PRJ_UI_FILES') %>
-    %endif
 %endif
             <%escape(project.base_name)%>
 

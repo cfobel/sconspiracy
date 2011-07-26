@@ -54,6 +54,6 @@ global_dict.update(remove_first_level(tmp))
 
 tmp = get_file_tree(OTHERS_FILE,PRJ_ROOT_DIR)
 global_dict.update(remove_first_level(tmp))%>
-${PRJ_USER_FORMAT}=${PRJ_ROOT_DIR} {
+${PRJ_USER_FORMAT}=${PRJ_ROOT_DIR} { 
 <%create_dirs(global_dict,1)%>
 }

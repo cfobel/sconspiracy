@@ -16,9 +16,12 @@ if PRJ_NAME == CALLING_PROJECT:
         for j in dep:
             if i in j:
                 tmp = rutils.get_file_content(j)
+                tmp = tmp[1:-1]
+                print "#"*42
+                print tmp
+                print "#"*42
                 deps.append(tmp) 
-                break
-%>
+                break %>
 %if PRJ_NAME == CALLING_PROJECT:
     %for i in deps:
 ${i}

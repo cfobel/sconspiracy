@@ -1,7 +1,8 @@
 <%
 from string import Template
-import os
 project=PROJECT
+
+import os
 def escape(varname):
     context.write(''.join(['${',varname,'}']))
 
@@ -32,11 +33,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #master project
 project(${PRJ_USER_FORMAT})
 
+SET(ENV{PATH} "$ENV{PATH}:test")
+
 #qt check
 %for deps in project.bin_deps:
     %if 'qt' in deps.full_name and not use_qt:
-        <% use_qt = True
-qt_prj = deps%>
+        <% use_qt = True; qt_prj = deps%>
     %endif
 %endfor
 
@@ -44,6 +46,16 @@ qt_prj = deps%>
 SET(QT_QMAKE_EXECUTABLE ${cmake_normalized(qt_prj.bin_path)}/qmake)
 FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(<% escape("QT_USE_FILE")%>)
+
+%for dep in project.env['LIBPATH']:
+    %if isinstance(dep, str) and 'zlib' in dep:
+    <% print dep %>
+    <% zlib = os.path.split(dep)[0] 
+zlib = os.path.join(zlib, "bin")%>
+SET(ENV{PATH} "$ENV{PATH}:${cmake_normalized(zlib)}")
+    %endif
+%endfor
+
 QT4_WRAP_CPP(PRJ_HEADERS_MOC 
     %for inc in project.get_includes(False):
             ${cmake_normalized(inc)}
@@ -131,11 +143,10 @@ ADD_EXECUTABLE(${project.full_name}
 %else :
 ADD_LIBRARY(${project.full_name}
             SHARED
-%endif
-
-%if use_qt:
+    %if use_qt:
             <%escape('PRJ_HEADERS_MOC') %>
             <%escape('PRJ_UI_FILES') %>
+    %endif
 %endif
             <%escape(project.base_name)%>
 

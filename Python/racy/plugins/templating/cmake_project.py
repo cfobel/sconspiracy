@@ -139,5 +139,6 @@ class CMakeProject(ConstructibleRacyProject):
 
         if self.qt_in_deps():
             self.create_qt_conf()
+
         exit(0)
         return result

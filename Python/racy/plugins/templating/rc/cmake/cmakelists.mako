@@ -1,6 +1,7 @@
 <%
 from string import Template
 import os
+project=PROJECT
 def escape(varname):
     context.write(''.join(['${',varname,'}']))
 
@@ -12,46 +13,45 @@ def cmake_normalized(path):
 
     return normalized_path
 
-if PROJECT.get_lower('DEBUG') == 'full':
+if project.get_lower('DEBUG') == 'full':
     compile_mode = 'debug'
 else:
     compile_mode = 'release'
 
-CMAKE_INSTALL_PATH = cmake_normalized(CMAKE_INSTALL_DIR)
-OUTPUT_DIR = '/'.join([CMAKE_INSTALL_PATH, compile_mode, PROJECT.name])
+cmake_install_path = cmake_normalized(CMAKE_INSTALL_DIR)
+output_dir = '/'.join([cmake_install_path, compile_mode, project.name])
 
 
-USE_QT = False
+use_qt = False
 %>
 
 
 #cmake version
-cmake_minimum_required(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #master project
 project(${PRJ_USER_FORMAT})
 
 #qt check
-%for deps in PROJECT.bin_deps:
-    %if 'qt' in deps.full_name and not USE_QT:
-        <% USE_QT = True
-QT_PRJ = deps
-        %>
+%for deps in project.bin_deps:
+    %if 'qt' in deps.full_name and not use_qt:
+        <% use_qt = True
+qt_prj = deps%>
     %endif
 %endfor
 
-%if USE_QT:
-set(QT_QMAKE_EXECUTABLE ${cmake_normalized(QT_PRJ.bin_path)}/qmake)
-find_package(Qt4 REQUIRED)
-include(<% escape("QT_USE_FILE")%>)
+%if use_qt:
+SET(QT_QMAKE_EXECUTABLE ${cmake_normalized(qt_prj.bin_path)}/qmake)
+FIND_PACKAGE(Qt4 REQUIRED)
+INCLUDE(<% escape("QT_USE_FILE")%>)
 QT4_WRAP_CPP(PRJ_HEADERS_MOC 
-    %for inc in PROJECT.get_includes(False):
+    %for inc in project.get_includes(False):
             ${cmake_normalized(inc)}
     %endfor
             )
 #ui management
 QT4_WRAP_UI(PRJ_UI_FILES
-%for other_file in PROJECT.get_others():
+%for other_file in project.get_others():
     %if other_file.endswith('.ui'):
         ${cmake_normalized(other_file)}
     %endif
@@ -61,42 +61,42 @@ INCLUDE_DIRECTORIES( <%escape("CMAKE_BINARY_DIR")%> )
 %endif
 
 
-%if PROJECT.get_includes(false) or PROJECT.get_sources(false): #begin check if sources exist
+%if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
 
-set(EXECUTABLE_OUTPUT_PATH
-    ${OUTPUT_DIR}
+
+%if project.get_lower('TYPE') == 'exec':
+SET(EXECUTABLE_OUTPUT_PATH
+    ${output_dir}
    )
-
-set(LIBRARY_OUTPUT_PATH
-    ${OUTPUT_DIR}
+%else:
+SET(LIBRARY_OUTPUT_PATH
+    ${output_dir}
    )
+%endif
 
-include_directories(
-%for prj in PROJECT.rec_deps:
-    %for include in set(prj.include_path):
-    ${cmake_normalized(include)}
-    %endfor
-%endfor
-%for include_path in set(PROJECT.include_path):
-    ${cmake_normalized(include_path)}
+INCLUDE_DIRECTORIES(
+%for path in project.env['CPPPATH']:
+    %if isinstance(path, str) and '$' not in path:
+    ${cmake_normalized(path)}
+    %endif
 %endfor
                    )
                
-link_directories(
-%for prj in PROJECT.rec_deps:
+LINK_DIRECTORIES(
+%for prj in project.rec_deps:
     %if not prj.get_lower("TYPE") == 'bin_libext':
-    ${'/'.join([CMAKE_INSTALL_PATH, compile_mode, prj.base_name])}
+    ${'/'.join([cmake_install_path, compile_mode, prj.base_name])}
     %endif
 %endfor
-%for lib_path in PROJECT.env['LIBPATH']:
+%for lib_path in project.env['LIBPATH']:
     %if isinstance(lib_path, str) and '$' not in lib_path:
         ${cmake_normalized(lib_path)}
     %endif
 %endfor
                    )
 
-add_definitions(
-    %for var in PROJECT.env['CPPDEFINES']:
+ADD_DEFINITIONS(
+    %for var in project.env['CPPDEFINES']:
     %if isinstance(var, str):
     -D${var}
     %elif isinstance(var,list):
@@ -110,53 +110,44 @@ add_definitions(
                 )
 
 
-file(
+FILE(
     GLOB_RECURSE
-    ${PROJECT.base_name}
-    %for include_path in PROJECT.include_path:
+    ${project.base_name}
+    %for include_path in project.include_path:
     ${cmake_normalized(include_path)}/*
     %endfor
-    %for src_path in PROJECT.src_path:
+    %for src_path in project.src_path:
     ${cmake_normalized(src_path)}/*
     %endfor
     )
 
 #declaration of target
-%if PROJECT.get_lower('TYPE') == 'bundle':
-add_library(${PROJECT.full_name}
+%if project.get_lower('TYPE') == 'bundle':
+ADD_LIBRARY(${project.full_name}
             SHARED 
-%if USE_QT:
-            <%escape('PRJ_HEADERS_MOC') %>
-            <%escape('PRJ_UI_FILES') %>
-%endif
-            <%escape(PROJECT.base_name)%>)
-%elif PROJECT.get_lower('TYPE') == 'exec':
-add_executable(${PROJECT.full_name} 
-            <%escape('PRJ_HEADERS_MOC') %>
-            <%escape('PRJ_UI_FILES') %>
-            <%escape(PROJECT.base_name)%>)
-%else :
-add_library(${PROJECT.full_name}
-            SHARED
-            <%escape('PRJ_HEADERS_MOC') %>
-            <%escape('PRJ_UI_FILES') %>
-            <%escape(PROJECT.base_name)%>)
-%endif
+%elif project.get_lower('TYPE') == 'exec':
+ADD_EXECUTABLE(${project.full_name} 
 
+%else :
+ADD_LIBRARY(${project.full_name}
+            SHARED
+    %if use_qt:
+            <%escape('PRJ_HEADERS_MOC') %>
+            <%escape('PRJ_UI_FILES') %>
+    %endif
+%endif
+            <%escape(project.base_name)%>
+
+          )
 
 #add linked libraries
-target_link_libraries(${PROJECT.full_name}
-%for deps in PROJECT.rec_deps:
-    %if not deps.get_lower('TYPE') == 'bin_libext' and '$' not in deps.full_name:
-    ${deps.full_name}
-    %endif
-%endfor
-%for lib in PROJECT.env['LIBS']:
+TARGET_LINK_LIBRARIES(${project.full_name}
+%for lib in project.env['LIBS']:
     %if 'QT4' not in lib:
     ${lib}
     %endif
 %endfor
-%if USE_QT:
+%if use_qt:
     <%escape("QT_LIBRAIRIES")%> 
 %endif
     )
@@ -168,47 +159,47 @@ target_link_libraries(${PROJECT.full_name}
 %if PRJ_NAME == MASTER_PRJ_NAME:
     %for prj in PRJ_DEPS:
         %if prj.get_lower('TYPE') in ['exec', 'bundle','shared']:
-    add_subdirectory(${prj.base_name})
+    ADD_SUBDIRECTORY(${prj.base_name})
         %endif
     %endfor
 %endif
 
 
 #copying Files
-%if PROJECT.get_lower('TYPE') == 'shared':
+%if project.get_lower('TYPE') == 'shared':
     %if os.name =="nt":
         <%output_dir= 'bin'%>
     %else:
         <%output_dir= 'lib'%>
     %endif
-    <%output_prj_dir='/'.join(['share',PROJECT.versioned_name])%>
-%elif PROJECT.get_lower('TYPE') == 'exec':
+    <%output_prj_dir='/'.join(['share',project.versioned_name])%>
+%elif project.get_lower('TYPE') == 'exec':
     <%output_dir= 'bin'%>
-    <%output_prj_dir='/'.join(['share',PROJECT.versioned_name])%>
+    <%output_prj_dir='/'.join(['share',project.versioned_name])%>
 %else:
-    <%output_dir= '/'.join(['Bundles',PROJECT.versioned_name])%>
+    <%output_dir= '/'.join(['Bundles',project.versioned_name])%>
     <%output_prj_dir = output_dir%>
 %endif
 
-%if PROJECT.get_includes(false) or PROJECT.get_sources(false): #begin check if sources exist
+%if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
 
-get_target_property(target_path ${PROJECT.full_name} LOCATION)
-file(MAKE_DIRECTORY ${CMAKE_INSTALL_PATH}/Install/${output_dir})
-file(MAKE_DIRECTORY ${CMAKE_INSTALL_PATH}/Install/${output_prj_dir})
+GET_TARGET_PROPERTY(target_path ${project.full_name} LOCATION)
+FILE(MAKE_DIRECTORY ${cmake_install_path}/Install/${output_dir})
+FILE(MAKE_DIRECTORY ${cmake_install_path}/Install/${output_prj_dir})
 
-add_custom_command(TARGET ${PROJECT.full_name} POST_BUILD
+ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
         COMMAND <%escape("CMAKE_COMMAND")%> -E copy 
             <%escape("target_path")%> 
-            ${CMAKE_INSTALL_PATH}/Install/${output_dir})
+            ${cmake_install_path}/Install/${output_dir})
 
-add_custom_command(TARGET ${PROJECT.full_name} POST_BUILD
+ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
         COMMAND <%escape("CMAKE_COMMAND")%> -E copy 
             <%escape("target_path")%> 
-            ${CMAKE_INSTALL_PATH}/Install/${output_prj_dir})
+            ${cmake_install_path}/Install/${output_prj_dir})
 
 %endif #end check if sources exist
 
-%for o_file in PROJECT.get_others():
+%for o_file in project.get_others():
     <% o_file = cmake_normalized(o_file)%> 
     %if '/rc/' in o_file:
 <% 
@@ -219,8 +210,8 @@ else:
     name = path_rc
     path = ''
 %>
-file(MAKE_DIRECTORY ${CMAKE_INSTALL_PATH}/Install/${output_prj_dir}/${path})
-file(COPY ${o_file} DESTINATION ${CMAKE_INSTALL_PATH}/Install/${output_prj_dir}/${path})
+FILE(MAKE_DIRECTORY ${cmake_install_path}/Install/${output_prj_dir}/${path})
+FILE(COPY ${o_file} DESTINATION ${cmake_install_path}/Install/${output_prj_dir}/${path})
     %endif
 %endfor
 

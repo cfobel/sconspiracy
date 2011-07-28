@@ -46,26 +46,6 @@ SET(QT_QMAKE_EXECUTABLE ${cmake_normalized(qt_prj.bin_path)}/qmake)
 FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(<% escape("QT_USE_FILE")%>)
 
-%for dep in project.env['LIBPATH']:
-    %if isinstance(dep, str) and 'zlib' in dep:
-    <% zlib = os.path.split(dep)[0] 
-zlib = os.path.join(zlib, "bin")%>
-    %endif
-%endfor
-
-%if os.name == 'nt':
-execute_process(COMMAND set PATH_OLD= %PATH%
-                COMMAND set PATH=%PATH%;"${zlib}"
-               )
-
-%else:
-MESSAGE(STATUS "TEST")
-execute_process(COMMAND ls
-                COMMAND export "PATH_OLD=$PATH"
-                COMMAND export "PATH=$PATH:${zlib}"
-               )
-%endif
-
 QT4_WRAP_CPP(PRJ_HEADERS_MOC 
     %for inc in project.get_includes(False):
             ${cmake_normalized(inc)}
@@ -221,20 +201,6 @@ ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
         COMMAND <%escape("CMAKE_COMMAND")%> -E copy 
             <%escape("target_path")%> 
             ${cmake_install_path}/Install/${output_prj_dir})
-
-%if os.name == 'nt':
-ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
-                    COMMAND set PATH=%OLD_PATH%)
-ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
-                    COMMAND set OLD_PATH=)
-%else:
-
-ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
-                    COMMAND export PATH=%OLD_PATH%)
-
-ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
-                    COMMAND export OLD_PATH=)
-%endif
 
 
 %endif #end check if sources exist

@@ -31,9 +31,8 @@ use_qt = False
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #master project
-project(${PRJ_USER_FORMAT})
+PROJECT(${PRJ_USER_FORMAT})
 
-SET(ENV{PATH} "$ENV{PATH}:test")
 
 #qt check
 %for deps in project.bin_deps:
@@ -49,12 +48,23 @@ INCLUDE(<% escape("QT_USE_FILE")%>)
 
 %for dep in project.env['LIBPATH']:
     %if isinstance(dep, str) and 'zlib' in dep:
-    <% print dep %>
     <% zlib = os.path.split(dep)[0] 
 zlib = os.path.join(zlib, "bin")%>
-SET(ENV{PATH} "$ENV{PATH}:${cmake_normalized(zlib)}")
     %endif
 %endfor
+
+%if os.name == 'nt':
+execute_process(COMMAND set PATH_OLD= %PATH%
+                COMMAND set PATH=%PATH%;"${zlib}"
+               )
+
+%else:
+MESSAGE(STATUS "TEST")
+execute_process(COMMAND ls
+                COMMAND export "PATH_OLD=$PATH"
+                COMMAND export "PATH=$PATH:${zlib}"
+               )
+%endif
 
 QT4_WRAP_CPP(PRJ_HEADERS_MOC 
     %for inc in project.get_includes(False):
@@ -138,8 +148,11 @@ FILE(
 ADD_LIBRARY(${project.full_name}
             SHARED 
 %elif project.get_lower('TYPE') == 'exec':
-ADD_EXECUTABLE(${project.full_name} 
-
+    %if project.get_lower('CONSOLE'):
+ADD_EXECUTABLE(${project.full_name} WIN32 
+    %else:
+ADD_EXECUTABLE(${project.full_name} WIN32 
+    %endif
 %else :
 ADD_LIBRARY(${project.full_name}
             SHARED
@@ -208,6 +221,21 @@ ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
         COMMAND <%escape("CMAKE_COMMAND")%> -E copy 
             <%escape("target_path")%> 
             ${cmake_install_path}/Install/${output_prj_dir})
+
+%if os.name == 'nt':
+ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
+                    COMMAND set PATH=%OLD_PATH%)
+ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
+                    COMMAND set OLD_PATH=)
+%else:
+
+ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
+                    COMMAND export PATH=%OLD_PATH%)
+
+ADD_CUSTOM_COMMAND(TARGET ${project.full_name} POST_BUILD
+                    COMMAND export OLD_PATH=)
+%endif
+
 
 %endif #end check if sources exist
 

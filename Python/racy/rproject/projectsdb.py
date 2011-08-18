@@ -15,7 +15,7 @@ from racy.renv             import constants
 from racy.renv.options     import get_option
 from racy.rproject.project import ConstructibleRacyProject, \
                                   InstallableRacyProject
-from racy.rutils           import memoize, remove_vcs_dirs
+from racy.rutils           import memoize, remove_vcs_dirs, vcs
 
 all = ['RacyProjectsDB']
 
@@ -87,6 +87,9 @@ class RacyProjectsDB(object):
 
         if not directory_list:
             directory_list = racy.renv.dirs.code
+
+        vcs.get_repo_informations(directory_list)
+
         self.prj_path_list = find_files_in_dirs(directory_list, prj_file)
 
         for f in self.prj_path_list:

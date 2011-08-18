@@ -129,17 +129,18 @@ ADD_LIBRARY(${project.full_name}
             SHARED 
 %elif project.get_lower('TYPE') == 'exec':
     %if project.get_lower('CONSOLE'):
-ADD_EXECUTABLE(${project.full_name} WIN32 
+ADD_EXECUTABLE(${project.full_name}
     %else:
 ADD_EXECUTABLE(${project.full_name} WIN32 
     %endif
 %else :
 ADD_LIBRARY(${project.full_name}
             SHARED
-    %if use_qt:
-            <%escape('PRJ_HEADERS_MOC') %>
-            <%escape('PRJ_UI_FILES') %>
-    %endif
+%endif
+
+%if use_qt:
+        <%escape('PRJ_HEADERS_MOC') %>
+        <%escape('PRJ_UI_FILES') %>
 %endif
             <%escape(project.base_name)%>
 
@@ -153,7 +154,7 @@ TARGET_LINK_LIBRARIES(${project.full_name}
     %endif
 %endfor
 %if use_qt:
-    <%escape("QT_LIBRAIRIES")%> 
+    <%escape("QT_LIBRARIES")%> 
 %endif
     )
 

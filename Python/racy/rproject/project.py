@@ -21,7 +21,7 @@ from racy import ConfigVariantError,\
 
 from racy.renv.configs import get_config, allowedvalues
 from racy.renv         import constants
-from racy.rutils       import cached_property, memoize, run_once
+from racy.rutils       import cached_property, memoize, run_once, vcs
 
 
 def abspath_key(r): 
@@ -44,7 +44,7 @@ BINBUNDLE = ('bin_bundle', )
 BINEXEC   = ('bin_exec'  , )
 BINLIB    = BINSHARED + BINSTATIC
 
-TYPE_ALL       = LIBEXT + STATIC + LIB + EXEC
+TYPE_ALL       = LIBEXT + STATIC + LIB + EXEC + BUNDLE
 TYPE_ALLBIN    = BINLIBEXT + BINSTATIC + BINLIB + BINEXEC
 TYPE_ALLBUNDLE = BUNDLE + BINBUNDLE
 TYPE_ALLSTATIC = STATIC + BINSTATIC
@@ -989,7 +989,12 @@ class InstallableRacyProject(RacyProject):
         """Create the installation targets for project's ressources and return
         them.
         """
-        return self.install_files(self.rc_path, self.install_rc_path, ['.*'])
+        res = self.install_files(self.rc_path, self.install_rc_path, ['.*'])
+        if self.type in TYPE_ALL:
+            env = self.env
+            info_file = pathjoin(self.install_rc_path, 'rev.info')
+            res += env.WriteFile(info_file, vcs.get_repo_informations())
+        return res
 
 
     @memoize

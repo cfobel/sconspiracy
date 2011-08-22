@@ -444,7 +444,6 @@ class LibextProject(ConstructibleRacyProject):
 
         return kwargs
 
-    @run_once
     def configure_consumer(self, consumer):
         direct_deps = self.source_deps
 
@@ -472,6 +471,7 @@ class LibextProject(ConstructibleRacyProject):
         result = []
 
         class ConfigureMethods(object):
+            prj = self
             for name, f in self.env_functions.items():
                 locals()[name] = f
 

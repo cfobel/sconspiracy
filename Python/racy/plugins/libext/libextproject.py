@@ -444,15 +444,16 @@ class LibextProject(ConstructibleRacyProject):
 
         return kwargs
 
-    def configure_consumer(self, consumer):
+    def configure_consumer(self, consumer, self_configure = True):
         direct_deps = self.source_deps
 
         for d in direct_deps:
             d.configure_consumer(consumer)
 
-        configure = self.prj_locals.get('configure_consumer')
-        if configure is not None:
-            configure(consumer)
+        if self_configure:
+            configure = self.prj_locals.get('configure_consumer')
+            if configure is not None:
+                configure(consumer)
 
 
     @run_once
@@ -476,7 +477,7 @@ class LibextProject(ConstructibleRacyProject):
                 locals()[name] = f
 
         prj.configure_env()
-        prj.configure_consumer(ConfigureMethods)
+        prj.configure_consumer(ConfigureMethods, False)
         command = CommandWrapper(prj,'SysCommand')
         prj.prj_locals['generate']()
 

@@ -6,6 +6,7 @@ import string
 from os.path import join as opjoin
 import racy
 import racy.rutils as rutils
+import pprint
 
 from racy.renv     import constants
 from racy.rproject import ConstructibleRacyProject, LibName
@@ -139,6 +140,5 @@ class CMakeProject(ConstructibleRacyProject):
 
         if self.qt_in_deps():
             self.create_qt_conf()
-
         exit(0)
         return result

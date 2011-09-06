@@ -3,13 +3,23 @@ from string import Template
 project=PROJECT
 
 import os
+import platform
+
+def osname():
+    if platform.platform().startswith('Linux'):
+        return 'linux'
+    elif platform.platform().startswith('Darwin'):
+        return 'darwin'
+    else:
+        return 'nt'
+
 def escape(varname):
     return ''.join(['${',varname,'}'])
 
 def cmake_normalized(path):
     normalized_path = path
 
-    if os.name == 'nt':
+    if osname() == 'nt':
         normalized_path = path.replace('\\', '/')
 
     return normalized_path
@@ -38,9 +48,9 @@ def get_install_libs(libext_instance):
     list_libs = []
     list_dir = libext_instance.ABS_LIBPATH
 
-    if os.name == 'nt':
+    if osname() == 'nt':
         ext = '.dll'
-    elif os.name == 'darwin':
+    elif osname() == 'darwin':
         ext = '.dylib'
     else:
         ext = '.so'
@@ -54,7 +64,7 @@ cmake_install_path = cmake_normalized(CMAKE_INSTALL_DIR)
 output_dir = '/'.join([cmake_install_path, compile_mode, project.name])
 libext_list = [i.get('LIBEXTINSTANCE') for i in PROJECT.bin_rec_deps]
 
-if os.name == 'darwin':
+if osname() == 'darwin':
     frameworks = []
     for i in libext_list:
         frameworks.extends(i.frameworks)
@@ -141,7 +151,7 @@ LINK_DIRECTORIES(
     %endif
 %endfor
 %for lib in libext_list:
-    %if os.name == 'darwin':
+    %if osname() == 'darwin':
     ${'\n   '.join(lib.ABS_FRAMEWORKPATH)}
     %endif
 %endfor
@@ -201,7 +211,7 @@ TARGET_LINK_LIBRARIES(${project.full_name}
 %if use_qt:
     ${escape("QT_LIBRARIES")} 
 %endif
-%if os.name == 'darwin':
+%if osname() == 'darwin':
     ${'\n   '.join(frameworks)}
 %endif
     )
@@ -221,8 +231,10 @@ TARGET_LINK_LIBRARIES(${project.full_name}
 
 #copying Files
 %if project.get_lower('TYPE') == 'shared':
-    %if os.name =="nt":
+    %if osname() == "nt":
         <%output_dir= 'bin'%>
+    %elif osname() == "darwin":
+        <%output_dir= 'Librairies'%>
     %else:
         <%output_dir= 'lib'%>
     %endif
@@ -277,7 +289,7 @@ INSTALL(DIRECTORY ${src}/${directory[0]}
 %endfor
 %for bindeps in PROJECT.bin_rec_deps:
     %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
-INSTALL(FILES ${lib} DESTINATION ${cmake_install_path}/Install/${'bin' if os.name=='nt' else 'lib' } )
+INSTALL(FILES ${lib} DESTINATION ${cmake_install_path}/Install/${'bin' if osname()=='nt' else 'lib' } )
 
     %endfor
 %endfor

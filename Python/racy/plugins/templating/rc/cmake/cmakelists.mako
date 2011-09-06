@@ -54,11 +54,23 @@ def get_install_libs(libext_instance):
         ext = '.dylib'
     else:
         ext = '.so'
-
     for libname in libext_instance.libs:
         list_libs.extend(partial_matches_path(list_dir, libname, ext))
 
     return list_libs
+def get_framework_path(libext_instance):
+   
+    frameworks_path = libext_instance.ABS_FRAMEWORKPATH
+    result = ''
+    for f in frameworks_path:
+         for file in os.listdir(f):
+              if libext_instance.name.lower() in file.lower() and '.framework' in file.lower():
+                   result = os.path.join(f, file)
+                   break
+         if result:
+             break
+    return result
+
 
 cmake_install_path = cmake_normalized(CMAKE_INSTALL_DIR)
 output_dir = '/'.join([cmake_install_path, compile_mode, project.name])
@@ -67,8 +79,9 @@ libext_list = [i.get('LIBEXTINSTANCE') for i in PROJECT.bin_rec_deps]
 if osname() == 'darwin':
     frameworks = []
     for i in libext_list:
-        frameworks.extends(i.frameworks)
+        frameworks.extend(i.frameworks)
 
+    frameworks = [f for f in frameworks if 'Qt' not in f]
 
 use_qt = False
 qt_components = []
@@ -289,8 +302,27 @@ INSTALL(DIRECTORY ${src}/${directory[0]}
 %endfor
 %for bindeps in PROJECT.bin_rec_deps:
     %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
-INSTALL(FILES ${lib} DESTINATION ${cmake_install_path}/Install/${'bin' if osname()=='nt' else 'lib' } )
+INSTALL(FILES ${lib} 
+        %if osname() == 'nt':
+<% libdir = 'bin' %>
+        %elif osname() == 'darwin':
+<% libdir = 'Librairies' %>
+        %else:
+<% libdir = 'lib' %>
+        %endif
+        DESTINATION ${cmake_install_path}/Install/${libdir} 
+       )
 
     %endfor
 %endfor
+%if osname() == 'darwin':
+     %for i in project.bin_rec_deps:
+<% framework = get_framework_path(i.get('LIBEXTINSTANCE'))%>
+         %if framework:
+INSTALL(DIRECTORY ${framework}
+        DESTINATION ${cmake_install_path}/Install/Librairies
+       )
+         %endif
+     %endfor
+%endif
 %endif

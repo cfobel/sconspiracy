@@ -1,5 +1,6 @@
 <%
 from string import Template
+import glob
 project=PROJECT
 
 import os
@@ -72,6 +73,11 @@ def get_framework_path(libext_instance):
     return result
 
 
+def get_wildcard_directory(src, directory):
+    directory = os.path.join(src,directory)
+    return filter(os.path.isdir,glob.glob(directory))
+    
+
 cmake_install_path = cmake_normalized(CMAKE_INSTALL_DIR)
 output_dir = '/'.join([cmake_install_path, compile_mode, project.name])
 libext_list = [i.get('LIBEXTINSTANCE') for i in PROJECT.bin_rec_deps]
@@ -101,11 +107,9 @@ PROJECT(${PRJ_USER_FORMAT})
         <% use_qt = True; qt_prj = deps%>
     %endif
     %if 'qt' in deps.full_name:
-        <% qt_components.append(deps.base_name) %>
-        <% 
+        <% qt_components.append(deps.base_name) 
 libext_instance = deps.get("LIBEXTINSTANCE")
-qt_components = [ i.replace('qt', 'Qt') for i in libext_instance.depends_on if 'qt' in i]
-%>
+qt_components = [ i.replace('qt', 'Qt') for i in libext_instance.depends_on if 'qt' in i] %>
     %endif
 %endfor
 
@@ -296,8 +300,16 @@ libext_install = [i for i in libext_list if i.install]
 %for deps in libext_install:
 <% src= deps.basepath %>
     %for directory in deps.install:
+        %if not '*' in directory[0]: 
 INSTALL(DIRECTORY ${src}/${directory[0]} 
         DESTINATION ${cmake_install_path}/Install/${directory[1]})
+        %else:
+<% dirs = get_wildcard_directory(src,directory[0]) %>
+            %for dir_w in dirs:
+INSTALL(DIRECTORY ${dir_w} 
+        DESTINATION ${cmake_install_path}/Install/${directory[1]})
+            %endfor
+        %endif
     %endfor
 %endfor
 %for bindeps in PROJECT.bin_rec_deps:
@@ -312,7 +324,6 @@ INSTALL(FILES ${lib}
         %endif
         DESTINATION ${cmake_install_path}/Install/${libdir} 
        )
-
     %endfor
 %endfor
 %if osname() == 'darwin':

@@ -106,7 +106,7 @@ PROJECT(${PRJ_USER_FORMAT})
     %if 'qt' in deps.full_name and not use_qt:
         <% use_qt = True; qt_prj = deps%>
     %endif
-    %if 'qt' in deps.full_name:
+    %if 'qt' in deps.full_name or 'phonon' in deps.full_name:
         <% qt_components.append(deps.base_name) 
 libext_instance = deps.get("LIBEXTINSTANCE")
 qt_components = [ i.replace('qt', 'Qt') for i in libext_instance.depends_on if 'qt' in i] %>

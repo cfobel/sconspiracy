@@ -82,8 +82,8 @@ cmake_install_path = cmake_normalized(CMAKE_INSTALL_DIR)
 output_dir = '/'.join([cmake_install_path, compile_mode, project.name])
 libext_list = [i.get('LIBEXTINSTANCE') for i in PROJECT.bin_rec_deps]
 
+frameworks=[]
 if osname() == 'darwin':
-    frameworks = []
     for i in libext_list:
         frameworks.extend(i.frameworks)
 
@@ -98,6 +98,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #master project
 PROJECT(${PRJ_USER_FORMAT})
 
+%if "OpenCL" in frameworks:
+FIND_LIBRARY(OPENCL_LIBS
+    NAME OpenCL)
+FIND_PATH(OPENCL_INCLUDE OpenCL/cl.h)
+
+%endif
 
 #qt check
 %for deps in project.bin_rec_deps:
@@ -150,6 +156,9 @@ INCLUDE_DIRECTORIES(
 %for path in project.env['CPPPATH']:
     %if isinstance(path, str) and '$' not in path:
     ${cmake_normalized(path)}
+    %endif
+    %if "OpenCL" in frameworks:
+    ${escape("OPENCL_INCLUDE")}
     %endif
 %endfor
                    )
@@ -222,12 +231,12 @@ TARGET_LINK_LIBRARIES(${project.full_name}
     %if 'QT4' not in lib:
     ${lib}
     %endif
-%endfor
+%endfor${escape("OPENCL_LIBS")}
 %if use_qt:
     ${escape("QT_LIBRARIES")} 
 %endif
-%if osname() == 'darwin':
-    ${'\n   '.join(frameworks)}
+%if "OpenCL" in frameworks:
+    ${escape("OPENCL_LIBS")}
 %endif
     )
 

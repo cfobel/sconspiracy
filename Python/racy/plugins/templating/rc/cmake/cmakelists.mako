@@ -92,8 +92,6 @@ if osname() == 'darwin':
 use_qt = False
 qt_components = []
 %>
-
-
 #cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
@@ -107,9 +105,9 @@ PROJECT(${PRJ_USER_FORMAT})
         <% use_qt = True; qt_prj = deps%>
     %endif
     %if 'qt' in deps.full_name or 'phonon' in deps.full_name:
-        <% qt_components.append(deps.base_name) 
-libext_instance = deps.get("LIBEXTINSTANCE")
-qt_components = [ i.replace('qt', 'Qt') for i in libext_instance.depends_on if 'qt' in i] %>
+        <% libext_instance = deps.get("LIBEXTINSTANCE")
+print libext_instance.libs
+qt_components.extend([i for i in libext_instance.libs if 'qt' in i.lower() or 'phonon' in i.lower()]) %>
     %endif
 %endfor
 

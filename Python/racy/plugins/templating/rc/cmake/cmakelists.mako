@@ -106,8 +106,8 @@ PROJECT(${PRJ_USER_FORMAT})
     %endif
     %if 'qt' in deps.full_name or 'phonon' in deps.full_name:
         <% libext_instance = deps.get("LIBEXTINSTANCE")
-print libext_instance.libs
-qt_components.extend([i for i in libext_instance.libs if 'qt' in i.lower() or 'phonon' in i.lower()]) %>
+libs = libext_instance.libs + libext_instance.frameworks
+qt_components.extend([i for i in libs if 'qt' in i.lower() or 'phonon' in i.lower()]) %>
     %endif
 %endfor
 

@@ -158,11 +158,6 @@ dico_prj_template = {
                         '${PRJ_ROOT_DIR}/.project'               ),
                     ('${TPL_DIR}/cproject.mako'      ,
                        '${PRJ_ROOT_DIR}/.cproject'               ),
-                    ('${TPL_DIR}/location.mako'      ,
-                        '${META_PRJ_DIR}/.location'              ),
-                    ('${TPL_DIR}/workingsets.mako',
-                        '${META_WORK_DIR}/workingsets.xml')
-
                 ]
          },
          'graphviz' :

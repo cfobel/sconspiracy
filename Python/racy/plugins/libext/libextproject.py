@@ -234,7 +234,8 @@ class LibextProject(ConstructibleRacyProject):
     def CopyBuilder(self, source, to, **kwargs):
         env = self.env
         args = [source, to]
-        res = env.LibextCopyFile([marker('Copy',self.full_name, args)], [], ARGS=args)
+        marker_name = kwargs.get("marker_name", 'Copy')
+        res = env.LibextCopyFile([marker(marker_name, self.full_name, args)], [], ARGS=args)
         env.Clean(res, to)
         return res
 
@@ -550,7 +551,11 @@ class LibextProject(ConstructibleRacyProject):
             content  = rutils.get_file_content(initmodel)
             initfile = opjoin(prj.local_dir, '__init__.py')
             write    = prj.WriteBuilder(initfile, content)
-            copy  = prj.CopyBuilder('${LOCAL_DIR}', prj.install_pkg_path)
+            copy     = prj.CopyBuilder(
+                    '${LOCAL_DIR}',
+                    prj.install_pkg_path,
+                    marker_name='InstallPkgs'
+                    )
             env.Depends(copy, write)
         return [copy, write]
 

@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<%
+import os
+execution_type = [("racy", "racy", ""), ("racy BUILDDEPS=no", "racy", "BUILDDEPS=no")]
+if os.name == "nt":
+    EXT=".bat"
+else:
+    EXT=""
+%>
 <projectDescription>
     <name>${PRJ_USER_FORMAT}</name>
 	<comment></comment>
@@ -27,7 +35,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>
-					<value>racy</value>
+                    <value>${RACY_CMD}${EXT}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>

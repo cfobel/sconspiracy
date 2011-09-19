@@ -94,7 +94,7 @@ else:
     <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
         <buildTargets>
             <target name="racy" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>racy</buildCommand>
+                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
                 <buildArguments/>
                 <buildTarget>${PRJ_NAME}</buildTarget>
                 <stopOnError>true</stopOnError>
@@ -102,7 +102,7 @@ else:
                 <runAllBuilders>true</runAllBuilders>
             </target>
             <target name="racy BUILDDEPS=no" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>racy</buildCommand>
+                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
                 <buildArguments>BUILDDEPS=no</buildArguments>
                 <buildTarget>${PRJ_NAME}</buildTarget>
                 <stopOnError>true</stopOnError>
@@ -110,7 +110,7 @@ else:
                 <runAllBuilders>true</runAllBuilders>
             </target>
             <target name="racy DEBUG=release" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>racy</buildCommand>
+                <buildCommand>{RACY_CMD}${EXT}</buildCommand>
                 <buildArguments>DEBUG=release</buildArguments>
                 <buildTarget>${PRJ_NAME}</buildTarget>
                 <stopOnError>true</stopOnError>
@@ -118,7 +118,7 @@ else:
                 <runAllBuilders>true</runAllBuilders>
             </target>
             <target name="racy DOX=yes" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>racy</buildCommand>
+                <buildCommand>{RACY_CMD}${EXT}</buildCommand>
                 <buildArguments></buildArguments>
                 <buildTarget>${PRJ_NAME}/DOX=yes</buildTarget>
                 <stopOnError>true</stopOnError>

@@ -66,11 +66,11 @@ else:
                 </extensions>
             </storageModule>
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-                <configuration artifactName="shared_fwCore" buildProperties="" description="" id="0.945266578.837898353.967377430" name="racy" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+                <configuration artifactName="${PRJ_USER_FORMAT}" buildProperties="" description="" id="0.945266578.837898353.967377430" name="racy" parent="org.eclipse.cdt.build.core.prefbase.cfg">
                     <folderInfo id="0.945266578.837898353.967377430." name="/" resourcePath="">
                         <toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.772408819" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
                             <targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.772408819.1751368155" name=""/>
-                            <builder cleanBuildTarget="-c fwCore" command="${RACY_CMD}${EXT}" id="org.eclipse.cdt.build.core.settings.default.builder.1414762219" incrementalBuildTarget="${PRJ_NAME}" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+                            <builder cleanBuildTarget="-c ${PRJ_NAME}" command="${RACY_CMD}${EXT}" id="org.eclipse.cdt.build.core.settings.default.builder.1414762219" incrementalBuildTarget="${PRJ_NAME}" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
                             <tool id="org.eclipse.cdt.build.core.settings.holder.libs.543704817" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
                         </toolChain>
                     </folderInfo>
@@ -80,7 +80,7 @@ else:
         </cconfiguration>
     </storageModule>
     <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-        <project id="fwCore.null.1066214194" name="fwCore"/>
+        <project id="${PRJ_NAME}.null.1066214194" name="${PRJ_NAME}"/>
     </storageModule>
     <storageModule moduleId="scannerConfiguration">
         <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
@@ -89,7 +89,7 @@ else:
         </scannerConfigBuildInfo>
     </storageModule>
     <storageModule moduleId="refreshScope" versionNumber="1">
-        <resource resourceType="PROJECT" workspacePath="/fwCore"/>
+        <resource resourceType="PROJECT" workspacePath="/${PRJ_NAME}"/>
     </storageModule>
     <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
         <buildTargets>

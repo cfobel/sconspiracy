@@ -258,7 +258,7 @@ TARGET_LINK_LIBRARIES(${project.full_name}
     %if osname() == "nt":
         <%output_dir= 'bin'%>
     %elif osname() == "darwin":
-        <%output_dir= 'Librairies'%>
+        <%output_dir= 'Libraries'%>
     %else:
         <%output_dir= 'lib'%>
     %endif
@@ -325,7 +325,7 @@ INSTALL(FILES ${lib}
         %if osname() == 'nt':
 <% libdir = 'bin' %>
         %elif osname() == 'darwin':
-<% libdir = 'Librairies' %>
+<% libdir = 'Libraries' %>
         %else:
 <% libdir = 'lib' %>
         %endif
@@ -338,7 +338,7 @@ INSTALL(FILES ${lib}
 <% framework = get_framework_path(i.get('LIBEXTINSTANCE'))%>
          %if framework:
 INSTALL(DIRECTORY ${framework}
-        DESTINATION ${cmake_install_path}/Install/Librairies
+        DESTINATION ${cmake_install_path}/Install/Libraries
        )
          %endif
      %endfor

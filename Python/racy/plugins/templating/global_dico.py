@@ -375,7 +375,12 @@ dico_prj_template = {
                     '${CMAKE_INSTALL_DIR}/${MASTER_PRJ.base_name}/'
                     '${PRJ_NAME + "/" if not PRJ_NAME == MASTER_PRJ_NAME else ""}'
                    ),
-                   ( 'TEMPLATE_DIR' , '${TEMPLATING_PLUGIN_PATH}/rc/cmake/'),
+                   ( 'TEMPLATE_DIR' , '${TEMPLATING_PLUGIN_PATH}/rc/cmake'),
+                   ('CMAKE_BUILD_DIR',
+                    '${CMAKE_INSTALL_DIR}/${MASTER_PRJ.base_name}/build/'),
+                   ('CMAKE_INSTALL_OUTPUT',
+                    '${CMAKE_INSTALL_DIR}/Install/'
+                   )
                 ],
             'template_prj':
                 [

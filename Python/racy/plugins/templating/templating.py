@@ -4,6 +4,8 @@ from mako.template import Template
 from mako import exceptions
 from mako.exceptions import RichTraceback
 import racy.rutils as rutils
+from mako.lookup import TemplateLookup
+
 
 def apply_template( string, dico):
     temp = Template(string)
@@ -16,21 +18,25 @@ def apply_template( string, dico):
     return res
         
 def apply_file_template( name, dico):
-    if os.path.exists(name):
-        temp = Template(filename = name,disable_unicode=True, input_encoding='utf-8' )
-        res = ''
-        try:
-            res = temp.render(**dico)
-        except:
-            traceback = RichTraceback()
-            for (filename, lineno, function, line) in traceback.traceback:
-                print "File %s, line %s, in %s" % (filename, lineno, function)
-                print line, "\n"
-            print "%s: %s" % (str(traceback.error.__class__.__name__), 
-                              traceback.error)
+    template_path,template_name = os.path.split(name)
+
+    mylookup = TemplateLookup(directories=[template_path],
+            disable_unicode=True, 
+            input_encoding='utf-8',
+            )
+    temp = mylookup.get_template(template_name)
+
+    res = ''
+    try:
+        res = temp.render(**dico)
+    except:
+        traceback = RichTraceback()
+        for (filename, lineno, function, line) in traceback.traceback:
+            print "File %s, line %s, in %s" % (filename, lineno, function)
+            print line, "\n"
+        print "%s: %s" % (str(traceback.error.__class__.__name__), 
+                            traceback.error)
  
-    else:
-        res='' 
     return res
 
 def add_vars_template( dico_vars_prj, dico_vars):

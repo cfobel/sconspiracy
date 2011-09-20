@@ -1,97 +1,23 @@
+<%namespace file="definitions.mako" import="*"/>
 <%
 from string import Template
-import glob
 project=PROJECT
+cmake_dir=CMAKE_DIR
+use_qt=False
 
-import os
-import platform
+cmake_install_path = unix_path(CMAKE_INSTALL_DIR)
+output_dir = '/'.join([CMAKE_BUILD_DIR, project.name])
 
-def osname():
-    if platform.platform().startswith('Linux'):
-        return 'linux'
-    elif platform.platform().startswith('Darwin'):
-        return 'darwin'
-    else:
-        return 'nt'
-
-def escape(varname):
-    return ''.join(['${',varname,'}'])
-
-def cmake_normalized(path):
-    normalized_path = path
-
-    if osname() == 'nt':
-        normalized_path = path.replace('\\', '/')
-
-    return normalized_path
-
-if project.get_lower('DEBUG') == 'full':
-    compile_mode = 'debug'
-else:
-    compile_mode = 'release'
-
-
-def partial_matches_path(dirs, partial_filename, ext=''):
-    
-    list_file = []
-
-    if not ext:
-        ext = partial_filename
-
-    for directory in dirs:
-        for f in os.listdir(directory):
-            if partial_filename in f and ext in f:
-                list_file.append(os.path.join(directory,f))
-
-    return list_file
-
-def get_install_libs(libext_instance):
-    list_libs = []
-    list_dir = libext_instance.ABS_LIBPATH
-
-    if osname() == 'nt':
-        ext = '.dll'
-    elif osname() == 'darwin':
-        ext = '.dylib'
-    else:
-        ext = '.so'
-    for libname in libext_instance.libs:
-        list_libs.extend(partial_matches_path(list_dir, libname, ext))
-
-    return list_libs
-def get_framework_path(libext_instance):
-   
-    frameworks_path = libext_instance.ABS_FRAMEWORKPATH
-    result = ''
-    for f in frameworks_path:
-         for file in os.listdir(f):
-              if libext_instance.name.lower() in file.lower() and '.framework' in file.lower():
-                   result = os.path.join(f, file)
-                   break
-         if result:
-             break
-    return result
-
-
-def get_wildcard_directory(src, directory):
-    directory = os.path.join(src,directory)
-    return filter(os.path.isdir,glob.glob(directory))
-    
-
-cmake_install_path = cmake_normalized(CMAKE_INSTALL_DIR)
-output_dir = '/'.join([cmake_install_path, compile_mode, project.name])
 libext_list = [i.get('LIBEXTINSTANCE') for i in PROJECT.bin_rec_deps]
 
-frameworks=[]
-if osname() == 'darwin':
-    for i in libext_list:
-        frameworks.extend(i.frameworks)
+frameworks = create_framework_var(libext_list)
+for deps in project.bin_rec_deps:
+    if 'qt' in deps.full_name:
+        use_qt=True
+        break
 
-    frameworks = [f for f in frameworks if 'Qt' not in f]
-
-use_qt = False
-qt_components = []
 %>
+
 #cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
@@ -99,86 +25,64 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(${PRJ_USER_FORMAT})
 
 %if "OpenCL" in frameworks:
-
 FIND_LIBRARY(OPENCL_LIBS OpenCL)
 FIND_PATH(OPENCL_INCLUDE OpenCL/cl.h)
-
 %endif
 
-#qt check
-%for deps in project.bin_rec_deps:
-    %if 'qt' in deps.full_name and not use_qt:
-        <% use_qt = True; qt_prj = deps%>
-    %endif
-    %if 'qt' in deps.full_name or 'phonon' in deps.full_name:
-        <% libext_instance = deps.get("LIBEXTINSTANCE")
-libs = libext_instance.libs + libext_instance.frameworks
-qt_components.extend([i for i in libs if 'qt' in i.lower() or 'phonon' in i.lower()]) %>
-    %endif
-%endfor
-
 %if use_qt:
-SET(QT_QMAKE_EXECUTABLE ${cmake_normalized(qt_prj.bin_path)}/qmake)
+<%
+qt_components = get_qt_component(project)
+qt_bin_dir = get_qt_bin_dir(project)
+ui_files = [i for i in project.get_others() if i.endswith('.ui')]
+%>
+SET(QT_QMAKE_EXECUTABLE ${qt_bin_dir})
 FIND_PACKAGE(Qt4 COMPONENTS ${' '.join(set(qt_components))} REQUIRED)
 INCLUDE(${escape("QT_USE_FILE")})
 
 QT4_WRAP_CPP(PRJ_HEADERS_MOC
-    %for inc in project.get_includes(False):
-            ${cmake_normalized(inc)}
-    %endfor
+            ${format_list_paths(project.get_includes(False))}
             )
-#ui management
+%if ui_files:
 QT4_WRAP_UI(PRJ_UI_FILES
-%for other_file in project.get_others():
-    %if other_file.endswith('.ui'):
-        ${cmake_normalized(other_file)}
-    %endif
-%endfor
+        ${format_list_paths(ui_files)}
           )
+%endif
 INCLUDE_DIRECTORIES( ${escape("CMAKE_BINARY_DIR")} )
 %endif
 
 
 %if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
+<% 
+include_dirs= [i for i in project.env['CPPPATH'] if isinstance(i, str) and not '$' in i] 
+link_directories = [get_build_output_dir(i) for i in project.rec_deps if project.get_lower("TYPE") == 'bin_libext']
+link_directories.extend([i for i in project.env['LIBPATH'] if isinstance(i, str) and not '$' in i])
+src_dirs = [i + '/*' for i in project.src_path]
+include_path= [i + '/*' for i in project.include_path]
+libs = [ i for i in project.env['LIBS'] if not 'Qt' in i and 'QT' not in i]
+%>
 
 
-%if project.get_lower('TYPE') == 'exec':
-SET(EXECUTABLE_OUTPUT_PATH
-    ${output_dir}
-   )
-%else:
-SET(LIBRARY_OUTPUT_PATH
-    ${output_dir}
-   )
-%endif
+SET(${"EXECUTABLE_OUTPUT_PATH" if project.get_lower('TYPE') == 'exec' else "LIBRARY_OUTPUT_PATH"} 
+    ${get_build_output_dir(project)}
+    )
+
+
+
 
 INCLUDE_DIRECTORIES(
-%for path in project.env['CPPPATH']:
-    %if isinstance(path, str) and '$' not in path:
-    ${cmake_normalized(path)}
-    %endif
-    %if "OpenCL" in frameworks:
+    ${format_list_paths(include_dirs)}
+%if "OpenCL" in frameworks:
     ${escape("OPENCL_INCLUDE")}
-    %endif
-%endfor
-                   )
+%endif
+                    )
                
 LINK_DIRECTORIES(
-%for prj in project.rec_deps:
-    %if not prj.get_lower("TYPE") == 'bin_libext':
-    ${'/'.join([cmake_install_path, compile_mode, prj.base_name])}
-    %endif
-%endfor
-%for lib_path in project.env['LIBPATH']:
-    %if isinstance(lib_path, str) and '$' not in lib_path:
-        ${cmake_normalized(lib_path)}
-    %endif
-%endfor
-%for lib in libext_list:
-    %if osname() == 'darwin':
+    ${format_list_paths(link_directories)}
+%if osname() == 'darwin':
+    %for lib in libext_list:
     ${'\n   '.join(lib.ABS_FRAMEWORKPATH)}
-    %endif
-%endfor
+    %endfor
+%endif
     )
 
 ADD_DEFINITIONS(
@@ -190,116 +94,84 @@ ADD_DEFINITIONS(
     -D${'='.join(list_str)}
     %else:
     <% temp = Template(var[1])%>
-    -D${var[0]+'='+temp.substitute(prj.env)}
+    -D${var[0]+'='+temp.substitute(project.env)}
     %endif
 %endfor
+    %if use_qt:
+    ${escape("QT_DEFINITIONS")}
+    %endif
                 )
 
 
 FILE(
     GLOB_RECURSE
     ${project.base_name}
-    %for include_path in project.include_path:
-    ${cmake_normalized(include_path)}/*
-    %endfor
-    %for src_path in project.src_path:
-    ${cmake_normalized(src_path)}/*
-    %endfor
+    ${format_list_paths(include_path)}
+    ${format_list_paths(src_dirs)}
     )
 
 #declaration of target
-%if project.get_lower('TYPE') == 'bundle':
-ADD_LIBRARY(${project.full_name}
-            SHARED 
-%elif project.get_lower('TYPE') == 'exec':
+%if project.get_lower('TYPE') == 'exec':
 ADD_EXECUTABLE(${project.full_name} ${'WIN32' if project.get_lower('CONSOLE') else ''}
 %else :
 ADD_LIBRARY(${project.full_name}
             SHARED
 %endif
-
-%if use_qt:
         ${escape('PRJ_HEADERS_MOC')}
         ${escape('PRJ_UI_FILES')}
-%endif
-            ${escape(project.base_name)}
+        ${escape(project.base_name)}
           )
 
 #add linked libraries
 TARGET_LINK_LIBRARIES(${project.full_name}
-%for lib in project.env['LIBS']:
-    %if 'QT4' not in lib:
-    ${lib}
-    %endif
-%endfor${escape("OPENCL_LIBS")}
-%if use_qt:
-    ${escape("QT_LIBRARIES")} 
-%endif
-%if "OpenCL" in frameworks:
+${format_list_paths(libs)}
     ${escape("OPENCL_LIBS")}
-%endif
+    ${escape("QT_LIBRARIES")} 
     )
 
-%endif #end check if sources exist
-
-
-#add dependencies
-%if PRJ_NAME == MASTER_PRJ_NAME:
-    %for prj in PRJ_DEPS:
-        %if prj.get_lower('TYPE') in ['exec', 'bundle','shared']:
-    ADD_SUBDIRECTORY(${prj.base_name})
-        %endif
-    %endfor
-%endif
-
-
-#copying Files
-%if project.get_lower('TYPE') == 'shared':
-    %if osname() == "nt":
-        <%output_dir= 'bin'%>
-    %elif osname() == "darwin":
-        <%output_dir= 'Libraries'%>
-    %else:
-        <%output_dir= 'lib'%>
-    %endif
-    <%output_prj_dir='/'.join(['share',project.versioned_name])%>
-%elif project.get_lower('TYPE') == 'exec':
-    <%output_dir= 'bin'%>
-    <%output_prj_dir='/'.join(['share',project.versioned_name])%>
-%else:
-    <%output_dir= '/'.join(['Bundles',project.versioned_name])%>
-    <%output_prj_dir = output_dir%>
-%endif
-
-%if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
-
 GET_TARGET_PROPERTY(target_path ${project.full_name} LOCATION)
+ADD_CUSTOM_COMMAND(TARGET  ${project.full_name} 
+                   POST_BUILD
+                   COMMAND ${escape("CMAKE_COMMAND")} -E copy ${escape("target_path")}
+                   ${get_output_dir(project)}
+            )
 INSTALL(PROGRAMS ${escape("target_path")}
-        DESTINATION ${cmake_install_path}/Install/${output_dir})
+        DESTINATION ${get_install_output_dir(project)})
+
+
 INSTALL(FILES ${escape("target_path")}
-        DESTINATION ${cmake_install_path}/Install/${output_prj_dir})
-
-
+        DESTINATION ${get_library_output_dir()})
 
 %endif #end check if sources exist
 
 %for o_file in project.get_others():
-    <% o_file = cmake_normalized(o_file)%> 
     %if '/rc/' in o_file:
 <% 
-path_rc = o_file.split('/rc/')[1]
-if '/' in path_rc:
-    path,name = path_rc.rsplit('/', 1)
-else:
-    name = path_rc
-    path = ''
-%>
-INSTALL(FILES ${o_file} DESTINATION ${cmake_install_path}/Install/${output_prj_dir}/${path})
+o_file = unix_path(o_file)
+output_dir = get_others_file_output_dir(project) +'/' + split_rc_path(o_file)
+%> 
+INSTALL(FILES ${o_file} DESTINATION
+${get_install_output_dir(project) +'/' + split_rc_path(o_file)})
+
+FILE(MAKE_DIRECTORY ${output_dir})
+FILE(COPY ${o_file} 
+    DESTINATION ${output_dir}           
+            )
+
+
     %endif
 %endfor
 
 
-%if PRJ_NAME == MASTER_PRJ_NAME:
+%if not  PRJ_NAME == MASTER_PRJ_NAME:
+    <% return %>
+%endif
+
+%for prj in PRJ_DEPS:
+    %if prj.get_lower('TYPE') in ['exec', 'bundle','shared']:
+ADD_SUBDIRECTORY(${prj.base_name})
+    %endif
+%endfor
 #install rules
 <%  
 libext_install = [i for i in libext_list if i.install]
@@ -322,17 +194,11 @@ INSTALL(DIRECTORY ${dir_w}
 %for bindeps in PROJECT.bin_rec_deps:
     %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
 INSTALL(FILES ${lib} 
-        %if osname() == 'nt':
-<% libdir = 'bin' %>
-        %elif osname() == 'darwin':
-<% libdir = 'Libraries' %>
-        %else:
-<% libdir = 'lib' %>
-        %endif
-        DESTINATION ${cmake_install_path}/Install/${libdir} 
+        DESTINATION ${get_library_output_dir()} 
        )
     %endfor
 %endfor
+
 %if osname() == 'darwin':
      %for i in project.bin_rec_deps:
 <% framework = get_framework_path(i.get('LIBEXTINSTANCE'))%>
@@ -342,5 +208,4 @@ INSTALL(DIRECTORY ${framework}
        )
          %endif
      %endfor
-%endif
 %endif

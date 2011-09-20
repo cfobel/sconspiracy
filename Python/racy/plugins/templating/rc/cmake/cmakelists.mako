@@ -60,7 +60,7 @@ link_directories = [get_build_output_dir(i) for i in project.rec_deps if project
 link_directories.extend([i for i in project.env['LIBPATH'] if isinstance(i, str) and not '$' in i])
 src_dirs = [i + '/*' for i in project.src_path]
 include_path= [i + '/*' for i in project.include_path]
-libs = [ i for i in project.env['LIBS'] if not 'Qt' in i and 'QT' not in i]
+libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not in i]
 %>
 
 

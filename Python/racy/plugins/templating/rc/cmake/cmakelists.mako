@@ -124,6 +124,10 @@ ADD_LIBRARY(${escape("TARGET_NAME")}
         ${escape(project.base_name)}
           )
 
+ADD_CUSTOM_TARGET(${project.base_name}
+                  )
+ADD_DEPENDENCIES(${project.base_name} ${escape("TARGET_NAME")})
+
 #add linked libraries
 TARGET_LINK_LIBRARIES(${escape("TARGET_NAME")}
 ${format_list_paths(libs)}

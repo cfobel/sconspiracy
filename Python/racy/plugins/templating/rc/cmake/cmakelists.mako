@@ -22,7 +22,9 @@ for deps in project.bin_rec_deps:
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #master project
-PROJECT(${PRJ_USER_FORMAT})
+PROJECT(${project.base_name})
+
+SET(TARGET_NAME ${project.full_name})
 
 %if "OpenCL" in frameworks:
 FIND_LIBRARY(OPENCL_LIBS OpenCL)
@@ -112,9 +114,9 @@ FILE(
 
 #declaration of target
 %if project.get_lower('TYPE') == 'exec':
-ADD_EXECUTABLE(${project.full_name} ${'WIN32' if project.get_lower('CONSOLE') else ''}
+ADD_EXECUTABLE(${escape("TARGET_NAME")} ${'WIN32' if project.get_lower('CONSOLE') else ''}
 %else :
-ADD_LIBRARY(${project.full_name}
+ADD_LIBRARY(${escape("TARGET_NAME")}
             SHARED
 %endif
         ${escape('PRJ_HEADERS_MOC')}
@@ -123,14 +125,19 @@ ADD_LIBRARY(${project.full_name}
           )
 
 #add linked libraries
-TARGET_LINK_LIBRARIES(${project.full_name}
+TARGET_LINK_LIBRARIES(${escape("TARGET_NAME")}
 ${format_list_paths(libs)}
     ${escape("OPENCL_LIBS")}
+    %if use_qt:
     ${escape("QT_LIBRARIES")} 
+    %endif
     )
 
-GET_TARGET_PROPERTY(target_path ${project.full_name} LOCATION)
-ADD_CUSTOM_COMMAND(TARGET  ${project.full_name} 
+SET_TARGET_PROPERTIES(${escape("TARGET_NAME")}
+                        PROPERTIES OUTPUT_NAME ${project.full_name})
+
+GET_TARGET_PROPERTY(target_path ${escape("TARGET_NAME")} LOCATION)
+ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
                    POST_BUILD
                    COMMAND ${escape("CMAKE_COMMAND")} -E copy ${escape("target_path")}
                    ${get_output_dir(project)}
@@ -161,7 +168,6 @@ FILE(COPY ${o_file}
 
     %endif
 %endfor
-
 
 %if not  PRJ_NAME == MASTER_PRJ_NAME:
     <% return %>

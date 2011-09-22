@@ -144,7 +144,7 @@ GET_TARGET_PROPERTY(target_path ${escape("TARGET_NAME")} LOCATION)
 ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
                    POST_BUILD
                    COMMAND ${escape("CMAKE_COMMAND")} -E copy ${escape("target_path")}
-                   ${get_output_dir(project)}
+                   ${get_output_dir(project)}/
             )
 INSTALL(PROGRAMS ${escape("target_path")}
         DESTINATION ${get_install_output_dir(project)})
@@ -155,23 +155,17 @@ INSTALL(FILES ${escape("target_path")}
 
 %endif #end check if sources exist
 
-%for o_file in project.get_others():
-    %if '/rc/' in o_file:
-<% 
-o_file = unix_path(o_file)
-output_dir = get_others_file_output_dir(project) +'/' + split_rc_path(o_file)
-%> 
-INSTALL(FILES ${o_file} DESTINATION
-${get_install_output_dir(project) +'/' + split_rc_path(o_file)})
 
-FILE(MAKE_DIRECTORY ${output_dir})
-FILE(COPY ${o_file} 
-    DESTINATION ${output_dir}           
-            )
+FILE(GLOB RESSOURCES
+     ${unix_path(project.rc_path)}/*
+     )
 
+FILE(COPY
+    ${escape("RESSOURCES")}
+    DESTINATION
+    ${get_others_file_output_dir(project)}/
+    )
 
-    %endif
-%endfor
 
 %if not  PRJ_NAME == MASTER_PRJ_NAME:
     <% return %>

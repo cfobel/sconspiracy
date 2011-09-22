@@ -1,6 +1,7 @@
 <%!
 import platform
 import os
+import glob
 %>
 ## Write the os name : linux, darwin or nt
 <%def name="osname()">

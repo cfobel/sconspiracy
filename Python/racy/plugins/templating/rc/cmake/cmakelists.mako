@@ -20,10 +20,10 @@ for deps in project.bin_rec_deps:
 
 #cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-CMAKE_POLICY(SET CMP0015 NEW)
 
 #master project
 PROJECT(${project.base_name})
+SET(CMAKE_INCLUDE_DIRECTORIES_BEFORE ON)
 
 SET(TARGET_NAME ${project.full_name})
 
@@ -79,7 +79,7 @@ INCLUDE_DIRECTORIES(
 %endif
                     )
                
-LINK_DIRECTORIES(BEFORE
+LINK_DIRECTORIES(
     ${format_list_paths(link_directories)}
 %if osname() == 'darwin':
     %for lib in libext_list:

@@ -188,16 +188,17 @@ ADD_SUBDIRECTORY(${prj.base_name})
 <%  
 libext_install = [i for i in libext_list if i.install]
 %>
+
 %for deps in libext_install:
 <% src= deps.basepath %>
     %for directory in deps.install:
         %if not '*' in directory[0]: 
-INSTALL(DIRECTORY ${src}/${directory[0]} 
+INSTALL(DIRECTORY ${unix_path(src + '/' + directory[0])}
         DESTINATION ${cmake_install_path}/Install/${directory[1]})
         %else:
 <% dirs = get_wildcard_directory(src,directory[0]) %>
             %for dir_w in dirs:
-INSTALL(DIRECTORY ${dir_w} 
+INSTALL(DIRECTORY ${unix_path(dir_w)} 
         DESTINATION ${cmake_install_path}/Install/${directory[1]})
             %endfor
         %endif
@@ -205,7 +206,7 @@ INSTALL(DIRECTORY ${dir_w}
 %endfor
 %for bindeps in PROJECT.bin_rec_deps:
     %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
-INSTALL(FILES ${lib} 
+INSTALL(FILES ${unix_path(lib)} 
         DESTINATION ${get_library_output_dir()} 
        )
     %endfor
@@ -215,7 +216,7 @@ INSTALL(FILES ${lib}
      %for i in project.bin_rec_deps:
 <% framework = get_framework_path(i.get('LIBEXTINSTANCE'))%>
          %if framework:
-INSTALL(DIRECTORY ${framework}
+INSTALL(DIRECTORY ${unix_path(framework)}
         DESTINATION ${cmake_install_path}/Install/Libraries
        )
          %endif

@@ -125,9 +125,6 @@ ADD_LIBRARY(${escape("TARGET_NAME")}
         ${escape(project.base_name)}
           )
 
-ADD_CUSTOM_TARGET(${project.base_name}
-                  )
-ADD_DEPENDENCIES(${project.base_name} ${escape("TARGET_NAME")})
 
 #add linked libraries
 TARGET_LINK_LIBRARIES(${escape("TARGET_NAME")}
@@ -142,6 +139,9 @@ SET_TARGET_PROPERTIES(${escape("TARGET_NAME")}
                         PROPERTIES OUTPUT_NAME ${project.full_name})
 
 GET_TARGET_PROPERTY(target_path ${escape("TARGET_NAME")} LOCATION)
+
+FILE(MAKE_DIRECTORY(${get_output_dir(project)}/))
+
 ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
                    POST_BUILD
                    COMMAND ${escape("CMAKE_COMMAND")} -E copy ${escape("target_path")}

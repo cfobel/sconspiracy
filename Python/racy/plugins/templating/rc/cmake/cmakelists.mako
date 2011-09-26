@@ -1,6 +1,7 @@
 <%namespace file="definitions.mako" import="*"/>
 <%
 from string import Template
+import os
 project=PROJECT
 cmake_dir=CMAKE_DIR
 use_qt=False
@@ -16,6 +17,7 @@ for deps in project.bin_rec_deps:
         use_qt=True
         break
 
+link_rc = os.path.join(CMAKE_DIR, "rc")
 %>
 
 #cmake version
@@ -37,6 +39,7 @@ FIND_PATH(OPENCL_INCLUDE OpenCL/cl.h)
 qt_components = get_qt_component(project)
 qt_bin_dir = get_qt_bin_dir(project)
 ui_files = [i for i in project.get_others() if i.endswith('.ui')]
+
 %>
 SET(QT_QMAKE_EXECUTABLE ${qt_bin_dir})
 FIND_PACKAGE(Qt4 COMPONENTS ${' '.join(set(qt_components))} REQUIRED)
@@ -59,9 +62,17 @@ INCLUDE_DIRECTORIES( ${escape("CMAKE_BINARY_DIR")} )
 include_dirs= [i for i in project.env['CPPPATH'] if isinstance(i, str) and not '$' in i] 
 link_directories = [get_build_output_dir(i) for i in project.rec_deps if project.get_lower("TYPE") == 'bin_libext']
 link_directories.extend([i for i in project.env['LIBPATH'] if isinstance(i, str) and not '$' in i])
-src_dirs = [i + '/*' for i in project.src_path]
+src_dirs = project.src_path
 include_path= [i + '/*' for i in project.include_path]
 libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not in i]
+link_src =  os.path.join(CMAKE_DIR, "src")
+link_includes= os.path.join(CMAKE_DIR, "includes")
+link_bin= os.path.join(CMAKE_DIR, "bin")
+
+if len(project.include_path) == 1:
+    SYMBLINK(project.include_path[0], link_includes)
+
+SYMBLINK(project.bin_path, link_bin)
 %>
 
 
@@ -106,11 +117,21 @@ ADD_DEFINITIONS(
                 )
 
 
+
+%if len(src_dirs) > 1:
+    <% os.makedirs(link_src) %>
+    %for i in src_dirs:
+    <% SYMBLINK(i, os.path.join(link_src, os.path.split(i)[1])) %>
+    %endfor
+%else:
+<% SYMBLINK(src_dirs[0], link_src) %>
+%endif
+
 FILE(
     GLOB_RECURSE
     ${project.base_name}
-    ${format_list_paths(include_path)}
-    ${format_list_paths(src_dirs)}
+    FOLLOW_SYMLINKS
+    ${unix_path(link_src)}/*
     )
 
 #declaration of target
@@ -157,7 +178,9 @@ INSTALL(FILES ${escape("target_path")}
 %endif #end check if sources exist
 
 
+<% SYMBLINK(project.rc_path, link_rc) %>
 FILE(GLOB RESSOURCES
+    RESSOURCES
      ${unix_path(project.rc_path)}/*
      )
 
@@ -205,6 +228,7 @@ INSTALL(DIRECTORY ${unix_path(dir_w)}
         %endif
     %endfor
 %endfor
+
 %for bindeps in PROJECT.bin_rec_deps:
     %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
 INSTALL(FILES ${unix_path(lib)} 

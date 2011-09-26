@@ -20,9 +20,9 @@ def symblink(src, name):
         except:
             pass
     else:
-        import win32file
         try:
-            win32file.CreateSymbolicLink(name, src)
+            from win32file import CreateSymbolicLink
+            CreateSymbolicLink(name, src)
         except:
             racy.print_error("Unsuported",
                              'your platform is not yet supported')

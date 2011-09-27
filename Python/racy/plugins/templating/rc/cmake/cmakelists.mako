@@ -203,7 +203,13 @@ FOREACH(ARG ${escape("ARGS_LIST")})
 
 ADD_CUSTOM_TARGET(${escape('PROJECT_NAME')}_${escape('ARG')}
                 ${escape('EXEC')}  Bundles/${escape('PROJECT_VERSION_NAME')}/${escape('ARG')}
-                WORKING_DIR
+                DEPENDS
+%for i in project.rec_deps:
+%if not i.get_lower('TYPE') == 'bin_libext':
+                ${i.full_name}
+%endif
+%endfor
+                WORKING_DIRECTORY
                 ${unix_path(CMAKE_BUILD_DIR)}
                 SOURCES
                 ${escape('BIN')}

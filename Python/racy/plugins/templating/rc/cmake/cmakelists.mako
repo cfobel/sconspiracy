@@ -204,7 +204,7 @@ INSTALL(FILES ${escape("target_path")}
 ADD_CUSTOM_TARGET(${project.base_name +'_'+ os.path.split(exe[1])[1]}
                 ${exe[0]} ${exe[1]}
                 WORKING_DIR
-                ${CMAKE_BUILD_DIR}
+                ${unix_path(CMAKE_BUILD_DIR)}
                 SOURCES
                 ${escape('BIN')}
                 ${escape('RESSOURCES')}

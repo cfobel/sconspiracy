@@ -231,10 +231,21 @@ IF(WIN32)
     SET(CMAKE_CXX_FLAGS "${escape("CMAKE_CXX_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
     SET(CMAKE_C_FLAGS "${escape("CMAKE_C_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
 
+    
 ENDIF(WIN32)
 %if not  PRJ_NAME == MASTER_PRJ_NAME:
     <% return %>
 %endif
+
+IF(WIN32)
+
+%for bindeps in PROJECT.bin_rec_deps:
+    %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
+FILE(COPY ${unix_path(lib)}
+    DESTINATION ${get_library_output_dir()}/ )
+    %endfor
+%endfor
+ENDIF(WIN32)
 
 %for prj in PRJ_DEPS:
     %if prj.get_lower('TYPE') in ['exec', 'bundle','shared']:
@@ -268,6 +279,7 @@ INSTALL(FILES ${unix_path(lib)}
         DESTINATION ${get_library_output_dir()} 
        )
     %endfor
+
 %endfor
 
 %if osname() == 'darwin':

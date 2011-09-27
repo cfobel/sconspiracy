@@ -181,15 +181,6 @@ ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
                    COMMAND ${escape("CMAKE_COMMAND")} -E copy ${escape("target_path")}
                    ${get_output_dir(project)}/
             )
-INSTALL(PROGRAMS ${escape("target_path")}
-        DESTINATION ${get_install_output_dir(project)})
-
-
-INSTALL(FILES ${escape("target_path")}
-        DESTINATION ${get_library_output_dir()})
-
-
-
 %else:
 FILE(GLOB ARGS_LIST
     RELATIVE ${project.rc_path}
@@ -258,35 +249,49 @@ libext_install = [i for i in libext_list if i.install]
 %for deps in libext_install:
 <% src= deps.basepath %>
     %for directory in deps.install:
+<%
+
+try:
+    os.makedirs(os.path.join(CMAKE_BUILD_DIR, directory[1]))
+except:
+    pass
+    %>
         %if not '*' in directory[0]: 
-INSTALL(DIRECTORY ${unix_path(src + '/' + directory[0])}
-        DESTINATION ${cmake_install_path}/Install/${directory[1]})
+<%
+link_name = os.path.split(directory[0])[1]
+SYMBLINK(unix_path(src + '/' + directory[0]),
+         unix_path(CMAKE_BUILD_DIR+ '/' + directory[1] + '/' + link_name)
+        )%>
         %else:
 <% dirs = get_wildcard_directory(src,directory[0]) %>
+
             %for dir_w in dirs:
-INSTALL(DIRECTORY ${unix_path(dir_w)} 
-        DESTINATION ${cmake_install_path}/Install/${directory[1]})
+<% link_name = os.path.split(dir_w)[1]
+print dir_w
+SYMBLINK(unix_path(dir_w),
+         unix_path(CMAKE_BUILD_DIR+ '/' + directory[1] + '/' + link_name))
+%>
             %endfor
         %endif
     %endfor
 %endfor
 
-%for bindeps in PROJECT.bin_rec_deps:
-    %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
-INSTALL(FILES ${unix_path(lib)} 
-        DESTINATION ${get_library_output_dir()} 
-       )
-    %endfor
+##%for bindeps in PROJECT.bin_rec_deps:
+    ##%for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
+##INSTALL(FILES ${unix_path(lib)} 
+        ##DESTINATION ${get_library_output_dir()} 
+       ##)
+    ##%endfor
 
-%endfor
+##%endfor
 
-%if osname() == 'darwin':
-     %for i in project.bin_rec_deps:
-<% framework = get_framework_path(i.get('LIBEXTINSTANCE'))%>
-         %if framework:
-INSTALL(DIRECTORY ${unix_path(framework)}
-        DESTINATION ${cmake_install_path}/Install/Libraries
-       )
-         %endif
-     %endfor
-%endif
+##%if osname() == 'darwin':
+     ##%for i in project.bin_rec_deps:
+##<% framework = get_framework_path(i.get('LIBEXTINSTANCE'))%>
+         ##%if framework:
+##INSTALL(DIRECTORY ${unix_path(framework)}
+        ##DESTINATION ${cmake_install_path}/Install/Libraries
+       ##)
+         ##%endif
+     ##%endfor
+##%endif

@@ -87,6 +87,54 @@ dico_prj_template = {
                 ]
 
         },
+        
+        'qtcreator2-3' :
+        {
+
+            'dirs':
+                [
+                    ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator2-3/${PRJ_NAME}/'),
+                    ('TPL_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/' ),
+                    ('TPL_2_2_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator2-3/' ),
+                    ('OS_DIR'   , qt_default_dir                   ),
+                ]
+            ,
+            'template_prj':
+                [
+
+                    ('${TPL_DIR}/template.pro'     ,
+                            '${QT_DIR}/${PRJ_NAME}.pro'     ),
+                    ('${TPL_2_2_DIR}/template_pro_user.mako',
+                            '${QT_DIR}/${PRJ_NAME}.pro.user'),
+                    ('${TPL_2_2_DIR}/template.qws'     ,
+                            '${OS_DIR}/${PRJ_NAME}.qws'     ),
+                ]
+
+        },
+        
+        'qtcreator2-3' :
+        {
+
+            'dirs':
+                [
+                    ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator2-3/${PRJ_NAME}/'),
+                    ('TPL_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/' ),
+                    ('TPL_2_2_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator2-3/' ),
+                    ('OS_DIR'   , qt_default_dir                   ),
+                ]
+            ,
+            'template_prj':
+                [
+
+                    ('${TPL_DIR}/template.pro'     ,
+                            '${QT_DIR}/${PRJ_NAME}.pro'     ),
+                    ('${TPL_2_2_DIR}/template_pro_user.mako',
+                            '${QT_DIR}/${PRJ_NAME}.pro.user'),
+                    ('${TPL_2_2_DIR}/template.qws'     ,
+                            '${OS_DIR}/${PRJ_NAME}.qws'     ),
+                ]
+
+        },
 
         'eclipse' :
         { 

@@ -11,7 +11,7 @@ def symlink(src, dest):
     try:
         from win32file import CreateSymbolicLink
         CreateSymbolicLink(dest, src, 1)
-    except
+    except:
         try:
             process = subprocess.Popen(['mklink','/D', dest, src])
             process.communicate()

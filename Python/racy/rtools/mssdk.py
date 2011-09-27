@@ -33,9 +33,11 @@ class MssdkFlags(common.Flags):
                        ]
     CPPDEFINES_RELEASE = []
     CPPDEFINES_DEBUG   = []
-    LINKFLAGS      = [
+    LINKFLAGS      = ['/INCREMENTAL:NO']
+
+#    LINKFLAGS      = [
                       #'/verbose'
-                      ]
+ #                     ]
 
     WARNINGSASERRORS_FLAGS = ['/WX']
     OPTIMIZATION_FLAGS     = ['/O${OPTIMIZATIONLEVEL}']

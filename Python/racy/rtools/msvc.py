@@ -37,7 +37,7 @@ class MsvcFlags(common.Flags):
                        ]
     CPPDEFINES_RELEASE = []
     CPPDEFINES_DEBUG   = []
-    LINKFLAGS      = []
+    LINKFLAGS      = ['/INCREMENTAL:NO']
 
     WARNINGSASERRORS_FLAGS = ['/WX']
     OPTIMIZATION_FLAGS     = ['/O${OPTIMIZATIONLEVEL}']

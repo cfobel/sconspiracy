@@ -9,25 +9,10 @@ import racy.rutils as rutils
 
 from racy.renv     import constants
 from racy.rproject import ConstructibleRacyProject, LibName
-from racy.rutils   import cached_property, memoize, run_once
+from racy.rutils   import cached_property, memoize, run_once, symlink
 from global_dico import *
 from templating  import *
 
-def symblink(src, name):
-    if os.name == "posix":
-        try:
-            os.symlink(src, name)
-        except:
-            pass
-    else:
-        try:
-            from win32file import CreateSymbolicLink
-            CreateSymbolicLink(name, src)
-        except:
-            racy.print_error("Unsuported",
-                             'your platform is not yet supported')
-            exit(0)
-        
 
 class CmakeProjectError(racy.RacyProjectError):
     pass
@@ -92,7 +77,7 @@ class CMakeProject(ConstructibleRacyProject):
             'PRJ_NAME'        : prj.base_name,
             'PRJ_TYPE'        : prj.get_lower('TYPE'),
             'PRJ_DEPS'        : prj.rec_deps,
-            'SYMBLINK'        : symblink
+            'SYMBLINK'        : symlink
             }
 
         dico.update(dico_g)

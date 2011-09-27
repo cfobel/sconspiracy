@@ -219,6 +219,15 @@ def copy (src, dst, preserve_links=True, preserve_relative_links_only = True):
         import errno
         if not e.errno == errno.EEXIST:
             raise e
+        
+#------------------------------------------------------------------------------
+def symlink(src, dest):
+    if os.name == 'posix':
+        import posix as platform
+    else:
+        import win as platform
+
+    platform.symlink(src,dest)
 
 
 #------------------------------------------------------------------------------

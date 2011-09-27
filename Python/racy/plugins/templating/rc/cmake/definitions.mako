@@ -200,3 +200,28 @@ import glob
 paths = [unix_path(i) for i in list_paths]
 return '\n'.join(paths) %>
 </%def>
+
+
+
+<%def name="get_all_exec(project)">
+%if project.get_lower('TYPE') == 'bundle':
+    <%
+    profiles = [os.path.split(i)[1] for i in project.get_others() if "profile" in i]
+    launcher = ''
+    all_exec = []
+    for i in project.rec_deps:
+        if "launcher" in i.base_name:
+            launcher = os.path.join('./bin', i.full_name)
+            break
+
+    for i in profiles:
+        profile = os.path.split(i)[1]
+        arg = os.path.join('Bundles', project.versioned_name,profile)
+        all_exec.append((launcher ,arg))
+    return all_exec
+    %>
+%else:
+<% return  [(os.path.join('./bin', project.full_name),)]%>
+%endif
+
+</%def>

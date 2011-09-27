@@ -18,6 +18,9 @@ for deps in project.bin_rec_deps:
         break
 
 link_rc = os.path.join(CMAKE_DIR, "rc")
+SYMBLINK(project.rc_path, link_rc) 
+link_bin= os.path.join(CMAKE_DIR, "bin")
+SYMBLINK(project.bin_path, link_bin)
 %>
 
 #cmake version
@@ -57,6 +60,17 @@ INCLUDE_DIRECTORIES( ${escape("CMAKE_BINARY_DIR")} )
 %endif
 
 
+FILE(GLOB RESSOURCES
+    FOLLOW_SYMLINKS
+     ${unix_path(link_rc)}/*
+     )
+
+FILE(GLOB BIN 
+    FOLLOW_SYMLINKS
+     ${unix_path(link_bin)}/*
+     )
+
+
 %if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
 <% 
 include_dirs= [i for i in project.env['CPPPATH'] if isinstance(i, str) and not '$' in i] 
@@ -67,14 +81,35 @@ include_path= [i + '/*' for i in project.include_path]
 libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not in i]
 link_src =  os.path.join(CMAKE_DIR, "src")
 link_includes= os.path.join(CMAKE_DIR, "includes")
-link_bin= os.path.join(CMAKE_DIR, "bin")
 
-if len(project.include_path) == 1:
+if len(project.include_path) == 1 and os.path.exists(project.include_path[0]):
     SYMBLINK(project.include_path[0], link_includes)
 
-SYMBLINK(project.bin_path, link_bin)
+
 %>
 
+%if len(src_dirs) > 1:
+    <% os.makedirs(link_src) %>
+    %for i in src_dirs:
+    <% SYMBLINK(i, os.path.join(link_src, os.path.split(i)[1])) %>
+    %endfor
+%else:
+<% SYMBLINK(src_dirs[0], link_src) %>
+%endif
+
+FILE(
+    GLOB_RECURSE
+    SOURCES
+    FOLLOW_SYMLINKS
+    ${unix_path(link_src)}/*
+    )
+
+FILE(
+    GLOB_RECURSE
+    INCLUDES
+    FOLLOW_SYMLINKS
+    ${unix_path(link_includes)}/*
+    )
 
 SET(${"EXECUTABLE_OUTPUT_PATH" if project.get_lower('TYPE') == 'exec' else "LIBRARY_OUTPUT_PATH"} 
     ${get_build_output_dir(project)}
@@ -100,7 +135,7 @@ LINK_DIRECTORIES(
     )
 
 ADD_DEFINITIONS(
-    %for var in project.env['CPPDEFINES']:
+%for var in project.env['CPPDEFINES']:
     %if isinstance(var, str):
     -D${var}
     %elif isinstance(var,list):
@@ -118,22 +153,6 @@ ADD_DEFINITIONS(
 
 
 
-%if len(src_dirs) > 1:
-    <% os.makedirs(link_src) %>
-    %for i in src_dirs:
-    <% SYMBLINK(i, os.path.join(link_src, os.path.split(i)[1])) %>
-    %endfor
-%else:
-<% SYMBLINK(src_dirs[0], link_src) %>
-%endif
-
-FILE(
-    GLOB_RECURSE
-    ${project.base_name}
-    FOLLOW_SYMLINKS
-    ${unix_path(link_src)}/*
-    )
-
 #declaration of target
 %if project.get_lower('TYPE') == 'exec':
 ADD_EXECUTABLE(${escape("TARGET_NAME")} ${'WIN32' if project.get_lower('CONSOLE') else ''}
@@ -143,7 +162,10 @@ ADD_LIBRARY(${escape("TARGET_NAME")}
 %endif
         ${escape('PRJ_HEADERS_MOC')}
         ${escape('PRJ_UI_FILES')}
-        ${escape(project.base_name)}
+        ${escape('RESSOURCES')}
+        ${escape('INCLUDES')}
+        ${escape('BIN')}
+        ${escape('SOURCES')}
           )
 
 
@@ -175,14 +197,25 @@ INSTALL(PROGRAMS ${escape("target_path")}
 INSTALL(FILES ${escape("target_path")}
         DESTINATION ${get_library_output_dir()})
 
+
+
+%else:
+%for exe in get_all_exec(project):
+ADD_CUSTOM_TARGET(${project.base_name +'_'+ os.path.split(exe[1])[1]}
+                ${exe[0]} ${exe[1]}
+                WORKING_DIR
+                ${CMAKE_BUILD_DIR}
+                SOURCES
+                ${escape('BIN')}
+                ${escape('RESSOURCES')}
+                )
+%endfor
+
+
 %endif #end check if sources exist
 
 
-<% SYMBLINK(project.rc_path, link_rc) %>
-FILE(GLOB RESSOURCES
-    RESSOURCES
-     ${unix_path(project.rc_path)}/*
-     )
+
 
 FILE(COPY
     ${escape("RESSOURCES")}

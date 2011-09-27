@@ -9,13 +9,17 @@ import subprocess
 
 def symlink(src, dest):
     try:
-        process = subprocess.Popen(['mklink','/D', dest, src])
-        process.communicate()
-    except:
+        from win32file import CreateSymbolicLink
+        CreateSymbolicLink(dest, src, 1)
+    except
         try:
-            process = subprocess.Popen(['linkd', dest, src])
+            process = subprocess.Popen(['mklink','/D', dest, src])
             process.communicate()
         except:
-            raise Exception("No installation of mklink or linkd found")
+            try:
+                process = subprocess.Popen(['linkd', dest, src])
+                process.communicate()
+            except:
+                raise Exception("No installation of mklink or linkd found")
 
 

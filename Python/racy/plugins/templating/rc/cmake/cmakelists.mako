@@ -1,6 +1,5 @@
 <%namespace file="definitions.mako" import="*"/>
-<%
-from string import Template
+<% from string import Template
 import os
 project=PROJECT
 cmake_dir=CMAKE_DIR
@@ -20,8 +19,7 @@ for deps in project.bin_rec_deps:
 link_rc = os.path.join(CMAKE_DIR, "rc")
 SYMBLINK(project.rc_path, link_rc) 
 link_bin= os.path.join(CMAKE_DIR, "bin")
-SYMBLINK(project.bin_path, link_bin)
-%>
+SYMBLINK(project.bin_path, link_bin) %>
 
 #cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
@@ -38,12 +36,10 @@ FIND_PATH(OPENCL_INCLUDE OpenCL/cl.h)
 %endif
 
 %if use_qt:
-<%
-qt_components = get_qt_component(project)
+<% qt_components = get_qt_component(project)
 qt_bin_dir = get_qt_bin_dir(project)
-ui_files = [i for i in project.get_others() if i.endswith('.ui')]
+ui_files = [i for i in project.get_others() if i.endswith('.ui')] %>
 
-%>
 SET(QT_QMAKE_EXECUTABLE ${qt_bin_dir})
 FIND_PACKAGE(Qt4 COMPONENTS ${' '.join(set(qt_components))} REQUIRED)
 INCLUDE(${escape("QT_USE_FILE")})
@@ -84,8 +80,6 @@ link_includes= os.path.join(CMAKE_DIR, "includes")
 
 if len(project.include_path) == 1 and os.path.exists(project.include_path[0]):
     SYMBLINK(project.include_path[0], link_includes)
-
-
 %>
 
 %if len(src_dirs) > 1:
@@ -114,9 +108,6 @@ FILE(
 SET(${"EXECUTABLE_OUTPUT_PATH" if project.get_lower('TYPE') == 'exec' else "LIBRARY_OUTPUT_PATH"} 
     ${get_build_output_dir(project)}
     )
-
-
-
 
 INCLUDE_DIRECTORIES(
     ${format_list_paths(include_dirs)}
@@ -200,18 +191,25 @@ INSTALL(FILES ${escape("target_path")}
 
 
 %else:
-%for exe in get_all_exec(project):
-ADD_CUSTOM_TARGET(${project.base_name +'_'+ os.path.split(exe[1])[1]}
-                ${exe[0]} ${exe[1]}
+FILE(GLOB ARGS_LIST
+    RELATIVE ${project.rc_path}
+    ${project.rc_path}/*profile*.xml)
+
+SET(PROJECT_NAME ${project.base_name})
+SET(PROJECT_VERSION_NAME ${project.versioned_name})
+SET(EXEC ${get_exec_path(project)})
+
+FOREACH(ARG ${escape("ARGS_LIST")})
+
+ADD_CUSTOM_TARGET(${escape('PROJECT_NAME')}_${escape('ARG')}
+                ${escape('EXEC')}  Bundles/${escape('PROJECT_VERSION_NAME')}/${escape('ARG')}
                 WORKING_DIR
                 ${unix_path(CMAKE_BUILD_DIR)}
                 SOURCES
                 ${escape('BIN')}
                 ${escape('RESSOURCES')}
                 )
-%endfor
-
-
+ENDFOREACH(ARG)
 %endif #end check if sources exist
 
 
@@ -223,22 +221,16 @@ FILE(COPY
     ${get_others_file_output_dir(project)}/
     )
 
-
-
-
 IF(WIN32)
     SET(PROCESSOR_COUNT "$ENV{NUMBER_OF_PROCESSORS}")
     SET(CMAKE_CXX_FLAGS "${escape("CMAKE_CXX_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
     SET(CMAKE_C_FLAGS "${escape("CMAKE_C_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
-
-    
 ENDIF(WIN32)
 %if not  PRJ_NAME == MASTER_PRJ_NAME:
     <% return %>
 %endif
 
 IF(WIN32)
-
 %for bindeps in PROJECT.bin_rec_deps:
     %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
 FILE(COPY ${unix_path(lib)}

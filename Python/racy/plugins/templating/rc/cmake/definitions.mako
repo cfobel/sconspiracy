@@ -15,33 +15,26 @@ import glob
 </%def>
 
 ##convert all path in unix path style
-<%def name="unix_path(path)">
-    <% return path.replace('\\', '/').replace('//','/') %>
+<%def name="unix_path(path)"><% 
+return path.replace('\\', '/').replace('//','/') %>
 </%def>
 
-
 ##escape variables
-<%def name="escape(varname)"> <% return ''.join(['${',varname,'}']) %> </%def>
+<%def name="escape(varname)"><%return ''.join(['${',varname,'}'])%></%def>
 
 
-<%def name="partial_matches_path(dirs, partial_filename, ext='')">
-<%
+<%def name="partial_matches_path(dirs, partial_filename, ext='')"> <%
     list_file = []
-
     if not ext:
         ext = partial_filename
-
     for directory in dirs:
         for f in os.listdir(directory):
             if partial_filename in f and ext in f:
                 list_file.append(os.path.join(directory,f))
-
-    return list_file
-%>
+    return list_file %>
 </%def>
 
-<%def name="get_install_libs(libext_instance)">
-<%
+<%def name="get_install_libs(libext_instance)"><%
     list_libs = []
     list_dir = libext_instance.ABS_LIBPATH
 
@@ -54,8 +47,7 @@ import glob
     for libname in libext_instance.libs:
         list_libs.extend(partial_matches_path(list_dir, libname, ext))
 
-    return list_libs
-%>
+    return list_libs%>
 </%def>
 
 <%def name="get_framework_path(libext_instance)">
@@ -74,20 +66,18 @@ import glob
 </%def>
 
 
-<%def name="get_wildcard_directory(src, directory)">
-<%
+<%def name="get_wildcard_directory(src, directory)"><%
     directory = os.path.join(src,directory)
-    return filter(os.path.isdir,glob.glob(directory))
-%>
+    return filter(os.path.isdir,glob.glob(directory)) %>
 </%def>
 
 
-<%def name="create_framework_var(libext_list)">
-    <% frameworks = []%>
+<%def name="create_framework_var(libext_list)"><%
+    frameworks = []%>
     %if osname() == 'darwin':
         %for i in libext_list:
             <% frameworks.extend(i.frameworks) %>
-        <% frameworks = [f for f in frameworks if 'Qt' not in f] %>
+            <% frameworks = [f for f in frameworks if 'Qt' not in f] %>
         %endfor
     %endif
     <%return frameworks%>
@@ -148,27 +138,23 @@ import glob
     %endif
 </%def>
 
-<%def name="get_library_output_dir()" >
-    %if osname() == "nt":
-        <%output_lib= 'bin'%>
-    %elif osname() == "darwin":
-        <%output_lib= 'Libraries'%>
-    %else:
-        <%output_lib= 'lib'%>
-    %endif
-    <%return unix_path('/'.join([CMAKE_INSTALL_OUTPUT,output_lib]))%>
+<%def name="get_library_output_dir()" ><%
+if osname() == "nt":
+    output_lib= 'bin'
+elif osname() == "darwin":
+    output_lib= 'Libraries'
+else:
+    output_lib= 'lib'
+return unix_path('/'.join([CMAKE_INSTALL_OUTPUT,output_lib]))%>
 </%def>
 
-<%def name="split_rc_path(path)">
-<%
+<%def name="split_rc_path(path)"> <%
     tmp = path.split('/rc/')[1]
     path_rc = tmp.rsplit('/', 1)[0]
     if path_rc == tmp:
         return ""
     else:
-        return path_rc
-    
-%>
+        return path_rc %>
 </%def>
 
 <%def name="get_qt_bin_dir(prj)" >
@@ -195,34 +181,24 @@ import glob
 </%def>
 
 
-<%def name="format_list_paths(list_paths)"> 
-<%
-paths = [unix_path(i) for i in list_paths]
-return '\n'.join(paths) %>
+<%def name="format_list_paths(list_paths)"><%
+return '\n'.join([unix_path(i) for i in list_paths])%>
 </%def>
 
 
 
-<%def name="get_all_exec(project)">
-%if project.get_lower('TYPE') == 'bundle':
-    <%
-    profiles = [os.path.split(i)[1] for i in project.get_others() if "profile" in i]
+<%def name="get_args(project)">
+<% return [os.path.split(i)[1] for i in project.get_others() if "profile" in i] %>
+</%def>
+
+
+<%def name="get_exec_path(project)"><%
+if project.get_lower('TYPE') == 'bundle':
     launcher = ''
-    all_exec = []
     for i in project.rec_deps:
         if "launcher" in i.base_name:
             launcher = unix_path(os.path.join('./bin', i.full_name))
             break
-
-    for i in profiles:
-        profile = os.path.split(i)[1]
-        arg = unix_path(os.path.join('Bundles',
-                        project.versioned_name,profile))
-        all_exec.append((launcher ,arg))
-    return all_exec
-    %>
-%else:
-<% return  [(unix_path(os.path.join('./bin', project.full_name)),)]%>
-%endif
-
+    return launcher
+return  [(unix_path(os.path.join('./bin', project.full_name)),)]%> 
 </%def>

@@ -35,27 +35,6 @@ FIND_LIBRARY(OPENCL_LIBS OpenCL)
 FIND_PATH(OPENCL_INCLUDE OpenCL/cl.h)
 %endif
 
-%if use_qt:
-<% qt_components = get_qt_component(project)
-qt_bin_dir = get_qt_bin_dir(project)
-ui_files = [i for i in project.get_others() if i.endswith('.ui')] %>
-
-SET(QT_QMAKE_EXECUTABLE ${qt_bin_dir})
-FIND_PACKAGE(Qt4 COMPONENTS ${' '.join(set(qt_components))} REQUIRED)
-INCLUDE(${escape("QT_USE_FILE")})
-
-QT4_WRAP_CPP(PRJ_HEADERS_MOC
-            ${format_list_paths(project.get_includes(False))}
-            )
-%if ui_files:
-QT4_WRAP_UI(PRJ_UI_FILES
-        ${format_list_paths(ui_files)}
-          )
-%endif
-INCLUDE_DIRECTORIES( ${escape("CMAKE_BINARY_DIR")} )
-%endif
-
-
 FILE(GLOB RESSOURCES
     FOLLOW_SYMLINKS
      ${unix_path(link_rc)}/*
@@ -65,9 +44,41 @@ FILE(GLOB BIN
     FOLLOW_SYMLINKS
      ${unix_path(link_bin)}/*
      )
-
-
 %if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
+<% link_includes= os.path.join(CMAKE_DIR, "includes") 
+if len(project.include_path) == 1 and os.path.exists(project.include_path[0]):
+    SYMBLINK(project.include_path[0], link_includes)
+%>
+FILE(
+    GLOB_RECURSE
+    INCLUDES
+    FOLLOW_SYMLINKS
+    ${unix_path(link_includes)}/*
+    )
+
+    %if use_qt:
+<% qt_components = get_qt_component(project)
+qt_bin_dir = get_qt_bin_dir(project)
+ui_files = [i for i in project.get_others() if i.endswith('.ui')] %>
+
+SET(QT_QMAKE_EXECUTABLE ${qt_bin_dir})
+FIND_PACKAGE(Qt4 COMPONENTS ${' '.join(set(qt_components))} REQUIRED)
+INCLUDE(${escape("QT_USE_FILE")})
+
+QT4_WRAP_CPP(PRJ_HEADERS_MOC
+            ${escape('INCLUDES')}
+            )
+        %if ui_files:
+QT4_WRAP_UI(PRJ_UI_FILES
+        ${format_list_paths(ui_files)}
+          )
+        %endif
+INCLUDE_DIRECTORIES( ${escape("CMAKE_BINARY_DIR")} )
+    %endif
+
+
+
+
 <% 
 include_dirs= [i for i in project.env['CPPPATH'] if isinstance(i, str) and not '$' in i] 
 link_directories = [get_build_output_dir(i) for i in project.rec_deps if project.get_lower("TYPE") == 'bin_libext']
@@ -76,7 +87,6 @@ src_dirs = project.src_path
 include_path= [i + '/*' for i in project.include_path]
 libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not in i]
 link_src =  os.path.join(CMAKE_DIR, "src")
-link_includes= os.path.join(CMAKE_DIR, "includes")
 
 if len(project.include_path) == 1 and os.path.exists(project.include_path[0]):
     SYMBLINK(project.include_path[0], link_includes)
@@ -98,12 +108,6 @@ FILE(
     ${unix_path(link_src)}/*
     )
 
-FILE(
-    GLOB_RECURSE
-    INCLUDES
-    FOLLOW_SYMLINKS
-    ${unix_path(link_includes)}/*
-    )
 
 SET(${"EXECUTABLE_OUTPUT_PATH" if project.get_lower('TYPE') == 'exec' else "LIBRARY_OUTPUT_PATH"} 
     ${get_build_output_dir(project)}
@@ -141,7 +145,13 @@ ADD_DEFINITIONS(
     ${escape("QT_DEFINITIONS")}
     %endif
                 )
-
+%for i in project.get_includes(false):
+<% tmp = i.split('/include/')[1]
+group_name = os.path.split(tmp)[0].replace('/','\\')
+print group_name
+%>
+SOURCE_GROUP(group_name i)
+%endfor
 
 
 #declaration of target
@@ -153,7 +163,7 @@ ADD_LIBRARY(${escape("TARGET_NAME")}
 %endif
         ${escape('PRJ_HEADERS_MOC')}
         ${escape('PRJ_UI_FILES')}
-        ${escape('RESSOURCES')}
+        ##${escape('RESSOURCES')}
         ${escape('INCLUDES')}
         ${escape('BIN')}
         ${escape('SOURCES')}
@@ -183,8 +193,8 @@ ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
             )
 %else:
 FILE(GLOB ARGS_LIST
-    RELATIVE ${project.rc_path}
-    ${project.rc_path}/*profile*.xml)
+    RELATIVE ${unix_path(project.rc_path)}
+    ${unix_path(project.rc_path)}/*profile*.xml)
 
 SET(PROJECT_NAME ${project.base_name})
 SET(PROJECT_VERSION_NAME ${project.versioned_name})
@@ -204,9 +214,11 @@ ADD_CUSTOM_TARGET(${escape('PROJECT_NAME')}_${escape('ARG')}
                 ${unix_path(CMAKE_BUILD_DIR)}
                 SOURCES
                 ${escape('BIN')}
-                ${escape('RESSOURCES')}
+                ##${escape('RESSOURCES')}
                 )
 ENDFOREACH(ARG)
+
+
 %endif #end check if sources exist
 
 
@@ -231,7 +243,7 @@ IF(WIN32)
 %for bindeps in PROJECT.bin_rec_deps:
     %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
 FILE(COPY ${unix_path(lib)}
-    DESTINATION ${get_library_output_dir()}/ )
+    DESTINATION ${get_build_output_dir(project)}/ )
     %endfor
 %endfor
 ENDIF(WIN32)
@@ -267,7 +279,6 @@ SYMBLINK(unix_path(src + '/' + directory[0]),
 
             %for dir_w in dirs:
 <% link_name = os.path.split(dir_w)[1]
-print dir_w
 SYMBLINK(unix_path(dir_w),
          unix_path(CMAKE_BUILD_DIR+ '/' + directory[1] + '/' + link_name))
 %>
@@ -275,6 +286,7 @@ SYMBLINK(unix_path(dir_w),
         %endif
     %endfor
 %endfor
+
 
 ##%for bindeps in PROJECT.bin_rec_deps:
     ##%for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):

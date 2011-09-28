@@ -167,13 +167,18 @@ return unix_path('/'.join([CMAKE_INSTALL_OUTPUT,output_lib]))%>
 </%def>
 
 <%def name="get_qt_component(prj)" >
-<% qt_components = []%>
+<% 
+supported_component = ["QtGui", "QtSvg", "QtCore", "QtXml", "QtXmlPatterns",
+                       "QtSql", "QtScript", "QtNetwork","QtHelp", "QtOpenGL",
+                       "QtCLucene", "QtDBus", "QtUiTools", "phonon"]
+qt_components = []%>
 %for deps in prj.bin_rec_deps:
     %if 'qt' in deps.full_name or 'phonon' in deps.full_name:
     <% 
         libext_instance = deps.get("LIBEXTINSTANCE")
         libs = libext_instance.libs + libext_instance.frameworks
-        qt_components.extend([i for i in libs if 'qt' in i.lower() or 'phonon' in i.lower()]) 
+        for lib in libs:
+            qt_components.extend([i for i in supported_component if lib.startswith(i)]) 
     %>
     %endif
 %endfor

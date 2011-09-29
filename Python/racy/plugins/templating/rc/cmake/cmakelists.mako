@@ -2,11 +2,10 @@
 <% from string import Template
 import os
 project=PROJECT
-cmake_dir=CMAKE_DIR
+cmake_dir=unix_path(CMAKE_DIR)
 use_qt=False
 
 cmake_install_path = unix_path(CMAKE_INSTALL_DIR)
-output_dir = '/'.join([CMAKE_BUILD_DIR, project.name])
 
 libext_list = [i.get('LIBEXTINSTANCE') for i in PROJECT.bin_rec_deps]
 
@@ -17,12 +16,15 @@ for deps in project.bin_rec_deps:
         break
 
 link_rc = os.path.join(CMAKE_DIR, "rc")
-SYMBLINK(project.rc_path, link_rc) 
-link_bin= os.path.join(CMAKE_DIR, "bin")
-SYMBLINK(project.bin_path, link_bin) %>
+link_bin= os.path.join(CMAKE_DIR, "bin")%>
+
 
 #cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+INCLUDE(${CMAKE_MACRO_DIR}/macro.cmake)
+SYMLINK(${unix_path(project.rc_path)}  "rc"  ${cmake_dir})
+SYMLINK(${unix_path(project.bin_path)} "bin" ${cmake_dir})
 
 #master project
 PROJECT(${project.base_name})
@@ -44,16 +46,21 @@ FILE(GLOB BIN
     FOLLOW_SYMLINKS
      ${unix_path(link_bin)}/*
      )
+
 %if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
-<% link_includes= os.path.join(CMAKE_DIR, "includes") 
-if len(project.include_path) == 1 and os.path.exists(project.include_path[0]):
-    SYMBLINK(project.include_path[0], link_includes)
-%>
+
+<% count = 0 %>
+%for i in project.include_path:
+%if os.path.exists(i):
+SYMLINK(${i} "Include${count}" ${unix_path(os.path.join(cmake_dir, "includes"))})
+%endif
+<% count +=1 %>
+%endfor
 FILE(
     GLOB_RECURSE
     INCLUDES
     FOLLOW_SYMLINKS
-    ${unix_path(link_includes)}/*
+    ${unix_path(os.path.join(cmake_dir, "includes"))}/*.[a-t]*
     )
 
     %if use_qt:
@@ -81,25 +88,19 @@ INCLUDE_DIRECTORIES( ${escape("CMAKE_BINARY_DIR")} )
 
 <% 
 include_dirs= [i for i in project.env['CPPPATH'] if isinstance(i, str) and not '$' in i] 
-link_directories = [get_build_output_dir(i) for i in project.rec_deps if project.get_lower("TYPE") == 'bin_libext']
+link_directories = [escape("CMAKE_BINARY_DIR") +'/'+ get_build_output_dir(i) for i in project.rec_deps if project.get_lower("TYPE") == 'bin_libext']
 link_directories.extend([i for i in project.env['LIBPATH'] if isinstance(i, str) and not '$' in i])
 src_dirs = project.src_path
 include_path= [i + '/*' for i in project.include_path]
 libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not in i]
 link_src =  os.path.join(CMAKE_DIR, "src")
 
-if len(project.include_path) == 1 and os.path.exists(project.include_path[0]):
-    SYMBLINK(project.include_path[0], link_includes)
 %>
-
-%if len(src_dirs) > 1:
-    <% os.makedirs(link_src) %>
-    %for i in src_dirs:
-    <% SYMBLINK(i, os.path.join(link_src, os.path.split(i)[1])) %>
-    %endfor
-%else:
-<% SYMBLINK(src_dirs[0], link_src) %>
-%endif
+<% count = 0%>
+%for i in src_dirs:
+SYMLINK(${i} "Src${count}" ${link_src})
+<% count +=1 %>
+%endfor
 
 FILE(
     GLOB_RECURSE
@@ -110,7 +111,7 @@ FILE(
 
 
 SET(${"EXECUTABLE_OUTPUT_PATH" if project.get_lower('TYPE') == 'exec' else "LIBRARY_OUTPUT_PATH"} 
-    ${get_build_output_dir(project)}
+        ${escape("CMAKE_BINARY_DIR") +'/'+ get_build_output_dir(project)}
     )
 
 INCLUDE_DIRECTORIES(
@@ -145,13 +146,6 @@ ADD_DEFINITIONS(
     ${escape("QT_DEFINITIONS")}
     %endif
                 )
-%for i in project.get_includes(false):
-<% tmp = i.split('/include/')[1]
-group_name = os.path.split(tmp)[0].replace('/','\\')
-print group_name
-%>
-SOURCE_GROUP(group_name i)
-%endfor
 
 
 #declaration of target
@@ -164,11 +158,10 @@ ADD_LIBRARY(${escape("TARGET_NAME")}
         ${escape('PRJ_HEADERS_MOC')}
         ${escape('PRJ_UI_FILES')}
         ##${escape('RESSOURCES')}
-        ${escape('INCLUDES')}
         ${escape('BIN')}
         ${escape('SOURCES')}
+        ${escape('INCLUDES')}
           )
-
 
 #add linked libraries
 TARGET_LINK_LIBRARIES(${escape("TARGET_NAME")}
@@ -184,12 +177,12 @@ SET_TARGET_PROPERTIES(${escape("TARGET_NAME")}
 
 GET_TARGET_PROPERTY(target_path ${escape("TARGET_NAME")} LOCATION)
 
-FILE(MAKE_DIRECTORY(${get_output_dir(project)}/))
+FILE(MAKE_DIRECTORY(${escape("CMAKE_BINARY_DIR") +'/'+get_output_dir(project)}/))
 
 ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
                    POST_BUILD
                    COMMAND ${escape("CMAKE_COMMAND")} -E copy ${escape("target_path")}
-                   ${get_output_dir(project)}/
+                   ${escape("CMAKE_BINARY_DIR") +'/' +get_output_dir(project)}/
             )
 %else:
 FILE(GLOB ARGS_LIST
@@ -211,7 +204,7 @@ ADD_CUSTOM_TARGET(${escape('PROJECT_NAME')}_${escape('ARG')}
 %endif
 %endfor
                 WORKING_DIRECTORY
-                ${unix_path(CMAKE_BUILD_DIR)}
+                ${escape("CMAKE_BINARY_DIR")}
                 SOURCES
                 ${escape('BIN')}
                 ##${escape('RESSOURCES')}
@@ -222,37 +215,40 @@ ENDFOREACH(ARG)
 %endif #end check if sources exist
 
 
-
-
 FILE(COPY
     ${escape("RESSOURCES")}
     DESTINATION
-    ${get_others_file_output_dir(project)}/
+    ${escape("CMAKE_BINARY_DIR") +'/'+get_others_file_output_dir(project)}/
     )
 
 IF(WIN32)
     SET(PROCESSOR_COUNT "$ENV{NUMBER_OF_PROCESSORS}")
     SET(CMAKE_CXX_FLAGS "${escape("CMAKE_CXX_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
     SET(CMAKE_C_FLAGS "${escape("CMAKE_C_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
-ENDIF(WIN32)
 %if not  PRJ_NAME == MASTER_PRJ_NAME:
+ENDIF(WIN32)
     <% return %>
 %endif
 
-IF(WIN32)
+
+SET(LIST_LIBEXT
 %for bindeps in PROJECT.bin_rec_deps:
     %for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
-FILE(COPY ${unix_path(lib)}
-    DESTINATION ${get_build_output_dir(project)}/ )
+    ${unix_path(lib)}
     %endfor
 %endfor
+    )
+LIST_COPY("${escape('LIST_LIBEXT')}" ${escape("CMAKE_BINARY_DIR") +'/'+get_build_output_dir(project)}/ )
 ENDIF(WIN32)
 
+SET(SUBDIRECTORIES 
 %for prj in PRJ_DEPS:
     %if prj.get_lower('TYPE') in ['exec', 'bundle','shared']:
-ADD_SUBDIRECTORY(${prj.base_name})
+    ${prj.base_name}
     %endif
 %endfor
+    )
+ADD_SUBDIRECTORIES("${escape("SUBDIRECTORIES")}")
 #install rules
 <%  
 libext_install = [i for i in libext_list if i.install]
@@ -261,27 +257,21 @@ libext_install = [i for i in libext_list if i.install]
 %for deps in libext_install:
 <% src= deps.basepath %>
     %for directory in deps.install:
-<%
-
-try:
-    os.makedirs(os.path.join(CMAKE_BUILD_DIR, directory[1]))
-except:
-    pass
-    %>
         %if not '*' in directory[0]: 
-<%
-link_name = os.path.split(directory[0])[1]
-SYMBLINK(unix_path(src + '/' + directory[0]),
-         unix_path(CMAKE_BUILD_DIR+ '/' + directory[1] + '/' + link_name)
-        )%>
+<% link_name = os.path.split(directory[0])[1]%>
+SYMLINK(${unix_path(src + '/' + directory[0])}
+        ${link_name}
+        ${escape("CMAKE_BINARY_DIR")+"/"+ directory[1]}
+         )
         %else:
 <% dirs = get_wildcard_directory(src,directory[0]) %>
 
             %for dir_w in dirs:
-<% link_name = os.path.split(dir_w)[1]
-SYMBLINK(unix_path(dir_w),
-         unix_path(CMAKE_BUILD_DIR+ '/' + directory[1] + '/' + link_name))
-%>
+SYMLINK(${unix_path(dir_w)}
+         ${os.path.split(dir_w)[1]}
+         ${escape("CMAKE_BINARY_DIR") + "/"+ directory[1]}
+         )
+
             %endfor
         %endif
     %endfor

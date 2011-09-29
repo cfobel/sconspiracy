@@ -86,35 +86,29 @@ return path.replace('\\', '/').replace('//','/') %>
 
 <%def name="get_build_output_dir(prj)">
     %if osname() == "nt" or prj.get_lower("TYPE") == "exec":
-        <%return unix_path('/'.join([CMAKE_BUILD_DIR, 'bin']))%>
+        <%return 'bin'%>
     %elif osname()  == "linux":
-        <%return unix_path('/'.join([CMAKE_BUILD_DIR, 'lib']))%>
+        <%return 'lib'%>
     %else:
-        <%return unix_path('/'.join([CMAKE_BUILD_DIR, 'Libraries']))%>
+        <%return 'Libraries'%>
     %endif
 </%def>
 
 <%def name="get_output_dir(prj)">
     %if  prj.get_lower("TYPE") == "exec":
-        <%return unix_path('/'.join([CMAKE_BUILD_DIR, 'bin']))%>
+        <%return 'bin'%>
     %elif prj.get_lower("TYPE") == "bundle":
-        <%return unix_path('/'.join([CMAKE_BUILD_DIR,
-                                    'Bundles',
-                                    prj.versioned_name]))%>
+        <%return 'Bundles/'+ prj.versioned_name%>
     %else:
-        <%return unix_path('/'.join([CMAKE_BUILD_DIR,
-                                     "share",
-                                     prj.versioned_name]))%>
+        <%return "share/" + prj.versioned_name%>
     %endif
 </%def>
 
 <%def name="get_others_file_output_dir(prj)">
     %if prj.get_lower("TYPE") == 'bundle':
-        <%return unix_path('/'.join([CMAKE_BUILD_DIR,'Bundles',
-                                    prj.versioned_name]))%>
+        <%return 'Bundles/'+ prj.versioned_name%>
     %else:
-        <%return unix_path('/'.join([CMAKE_BUILD_DIR,'share',
-                   prj.versioned_name]))%>
+        <%return 'share/'  + prj.versioned_name%>
     %endif
 </%def>
 
@@ -170,7 +164,7 @@ return unix_path('/'.join([CMAKE_INSTALL_OUTPUT,output_lib]))%>
 <% 
 supported_component = ["QtGui", "QtSvg", "QtCore", "QtXml", "QtXmlPatterns",
                        "QtSql", "QtScript", "QtNetwork","QtHelp", "QtOpenGL",
-                       "QtCLucene", "QtDBus", "QtUiTools", "phonon"]
+                       "QtCLucene", "QtDBus", "QtUiTools", "QtWebKit", "phonon"]
 qt_components = []%>
 %for deps in prj.bin_rec_deps:
     %if 'qt' in deps.full_name or 'phonon' in deps.full_name:

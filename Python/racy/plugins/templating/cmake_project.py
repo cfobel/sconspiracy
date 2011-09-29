@@ -104,6 +104,8 @@ class CMakeProject(ConstructibleRacyProject):
             add_template_prj(dico_prj['template_prj'], dico_vars)
 
 
+        if dico_prj.has_key('copy_file'):
+            copy_files(dico_prj['copy_file'], dico_vars)
 
     def verify_qt_in_deps(self,prj):
         if not self.qt_used:

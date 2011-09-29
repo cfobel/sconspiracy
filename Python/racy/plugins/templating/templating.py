@@ -67,3 +67,11 @@ def add_template_prj( dico_template, dico_vars):
         if file_content:
             rutils.put_file_content(dico_vars[temp_key] , file_content)
 
+def copy_files(copy_files, dico_vars):
+    for key , value in copy_files:
+        src  = apply_template(key, dico_vars)
+        dest = apply_template(value, dico_vars)
+        
+        rutils.copy(src, dest)
+
+

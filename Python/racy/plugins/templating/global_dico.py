@@ -428,13 +428,22 @@ dico_prj_template = {
                     '${CMAKE_INSTALL_DIR}/${MASTER_PRJ.base_name}/build/'),
                    ('CMAKE_INSTALL_OUTPUT',
                     '${CMAKE_INSTALL_DIR}/Install/'
-                   )
+                   ),
+                   ('CMAKE_MACRO_DIR',
+                       '${CMAKE_INSTALL_DIR}/${MASTER_PRJ.base_name}/.cmake_macro/')
+
                 ],
             'template_prj':
                 [
                     ('${TEMPLATE_DIR}/cmakelists.mako',
                      '${CMAKE_DIR}/CMakeLists.txt'),
+                ],
+            'copy_file':
+                [
+                    ('${TEMPLATE_DIR}/macro/macro.cmake',
+                     '${CMAKE_MACRO_DIR}/macro.cmake')
                 ]
+
         }
     }
     ,

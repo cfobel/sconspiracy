@@ -58,16 +58,16 @@ FILE(GLOB BIN
 if os.path.exists(full_path):
 	path, name = os.path.split(i)
 	path = os.path.join(project.base_name,i)
-	if path:
-		mkdir_p(path)
-	symlink(full_path, path)
+	# if path:
+		# mkdir_p(path)
+	symlink(full_path, os.path.join(cmake_dir,i))
 %>
 %endfor
 FILE(
     GLOB_RECURSE
     INCLUDES
     FOLLOW_SYMLINKS
-    ${unix_path(os.path.join(cmake_dir))}/*.[hpp | h]
+    ${unix_path(cmake_dir)}*.[hpp | h]
     )
 
     %if use_qt:
@@ -106,9 +106,9 @@ libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not i
 if os.path.exists(full_path):
 	path, name = os.path.split(i)
 	path = os.path.join(project.base_name,i)
-	if path:
-		mkdir_p(path)
-	symlink(full_path, path)
+	# if path:
+		# mkdir_p(path)
+	symlink(full_path, os.path.join(cmake_dir,i))
 %>
 %endfor
 
@@ -116,7 +116,7 @@ FILE(
     GLOB_RECURSE
     SOURCES
     FOLLOW_SYMLINKS
-    ${unix_path(os.path.join(CMAKE_DIR))}/*
+    ${unix_path(cmake_dir)}*.c*
     )
 
 

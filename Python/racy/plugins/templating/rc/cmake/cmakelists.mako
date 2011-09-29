@@ -1,13 +1,17 @@
 <%namespace file="definitions.mako" import="*"/>
 <% from string import Template
 import os
+import racy
+from racy.rutils import symlink, mkdir_p
 project=PROJECT
+
 cmake_dir=unix_path(CMAKE_DIR)
 use_qt=False
 
 cmake_install_path = unix_path(CMAKE_INSTALL_DIR)
 
 libext_list = [i.get('LIBEXTINSTANCE') for i in PROJECT.bin_rec_deps]
+
 
 frameworks = create_framework_var(libext_list)
 for deps in project.bin_rec_deps:
@@ -17,7 +21,6 @@ for deps in project.bin_rec_deps:
 
 link_rc = os.path.join(CMAKE_DIR, "rc")
 link_bin= os.path.join(CMAKE_DIR, "bin")%>
-
 
 #cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
@@ -49,18 +52,22 @@ FILE(GLOB BIN
 
 %if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
 
-<% count = 0 %>
-%for i in project.include_path:
-%if os.path.exists(i):
-SYMLINK(${unix_path(i)} "Include${count}" ${unix_path(os.path.join(cmake_dir, "includes"))})
-%endif
-<% count +=1 %>
+
+%for i in project.include_dirs:
+<% full_path = os.path.join(project.get_path() , i)
+if os.path.exists(full_path):
+	path, name = os.path.split(i)
+	path = os.path.join(project.base_name,i)
+	if path:
+		mkdir_p(path)
+	symlink(full_path, path)
+%>
 %endfor
 FILE(
     GLOB_RECURSE
     INCLUDES
     FOLLOW_SYMLINKS
-    ${unix_path(os.path.join(cmake_dir, "includes"))}/*.[a-t]*
+    ${unix_path(os.path.join(cmake_dir))}/*.[hpp | h]
     )
 
     %if use_qt:
@@ -93,20 +100,23 @@ link_directories.extend([i for i in project.env['LIBPATH'] if isinstance(i, str)
 src_dirs = project.src_path
 include_path= [i + '/*' for i in project.include_path]
 libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not in i]
-link_src =  os.path.join(CMAKE_DIR, "src")
-
 %>
-<% count = 0%>
-%for i in src_dirs:
-SYMLINK(${unix_path(i)} "Src${count}" ${unix_path(link_src)})
-<% count +=1 %>
+%for i in project.src_dirs:
+<% full_path = os.path.join(project.get_path() , i)
+if os.path.exists(full_path):
+	path, name = os.path.split(i)
+	path = os.path.join(project.base_name,i)
+	if path:
+		mkdir_p(path)
+	symlink(full_path, path)
+%>
 %endfor
 
 FILE(
     GLOB_RECURSE
     SOURCES
     FOLLOW_SYMLINKS
-    ${unix_path(link_src)}/*
+    ${unix_path(os.path.join(CMAKE_DIR))}/*
     )
 
 
@@ -250,9 +260,7 @@ SET(SUBDIRECTORIES
     )
 ADD_SUBDIRECTORIES("${escape("SUBDIRECTORIES")}")
 #install rules
-<%  
-libext_install = [i for i in libext_list if i.install]
-%>
+<%  libext_install = [i for i in libext_list if i.install]%>
 
 %for deps in libext_install:
 <% src= deps.basepath %>

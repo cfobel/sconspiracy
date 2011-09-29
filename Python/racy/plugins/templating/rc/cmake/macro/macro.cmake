@@ -10,7 +10,7 @@ IF(WIN32)
                         ERROR_QUIET
                        )       
     ELSE(link_present)
-        MESSAGE(ERROR "No tools to create symlink in the path")
+        MESSAGE(WARNING "No link tool found.")
     ENDIF(link_present)
 
 ELSE(WIN32)
@@ -22,7 +22,7 @@ ELSE(WIN32)
                         ERROR_QUIET
                        )
     ELSE(link_present)
-        MESSAGE(ERROR "ld not present")
+		MESSAGE(WARNING "No link tool found.")
     ENDIF(link_present)
 ENDIF(WIN32)
 

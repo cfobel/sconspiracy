@@ -22,7 +22,7 @@ link_bin= os.path.join(CMAKE_DIR, "bin")%>
 #cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-INCLUDE(${CMAKE_MACRO_DIR}/macro.cmake)
+INCLUDE(${unix_path(CMAKE_MACRO_DIR)}/macro.cmake)
 SYMLINK(${unix_path(project.rc_path)}  "rc"  ${cmake_dir})
 SYMLINK(${unix_path(project.bin_path)} "bin" ${cmake_dir})
 
@@ -52,7 +52,7 @@ FILE(GLOB BIN
 <% count = 0 %>
 %for i in project.include_path:
 %if os.path.exists(i):
-SYMLINK(${i} "Include${count}" ${unix_path(os.path.join(cmake_dir, "includes"))})
+SYMLINK(${unix_path(i)} "Include${count}" ${unix_path(os.path.join(cmake_dir, "includes"))})
 %endif
 <% count +=1 %>
 %endfor
@@ -98,7 +98,7 @@ link_src =  os.path.join(CMAKE_DIR, "src")
 %>
 <% count = 0%>
 %for i in src_dirs:
-SYMLINK(${i} "Src${count}" ${link_src})
+SYMLINK(${unix_path(i)} "Src${count}" ${unix_path(link_src)})
 <% count +=1 %>
 %endfor
 

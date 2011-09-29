@@ -3,14 +3,12 @@ MACRO(SYMLINK src dest working_dir)
 FILE(MAKE_DIRECTORY ${working_dir})
 IF(WIN32)
     FIND_PROGRAM(link_present linkd.exe)
-    EXECUTE_PROCESS(COMMAND linkd.exe /D  ${dest} ${src}
+    IF(link_present)
+     EXECUTE_PROCESS(COMMAND linkd.exe  ${dest} ${src}
                         WORKING_DIRECTORY ${working_dir}
                         OUTPUT_QUIET
                         ERROR_QUIET
-                       )
-
-    IF(link_present)
-        
+                       )       
     ELSE(link_present)
         MESSAGE(ERROR "No tools to create symlink in the path")
     ENDIF(link_present)

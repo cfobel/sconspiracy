@@ -113,23 +113,19 @@ return path.replace('\\', '/').replace('//','/') %>
 </%def>
 
 
-<%def name="get_install_output_dir(prj)">
-    %if prj.get_lower("TYPE") == 'exec':
-        <%return unix_path('/'.join([CMAKE_INSTALL_OUTPUT, 'bin']))%>
-    %elif prj.get_lower("TYPE") == 'bundle':
-        <%return unix_path('/'.join([CMAKE_INSTALL_OUTPUT,'Bundles',
-                                    prj.versioned_name]))%>
-    %else:
-        %if osname() == "nt":
-            <%output_lib= 'bin'%>
-        %elif osname() == "darwin":
-            <%output_lib= 'Libraries'%>
-        %else:
-            <%output_lib= 'lib'%>
-        %endif
-        <%return unix_path('/'.join([CMAKE_INSTALL_OUTPUT,output_lib,
-                   prj.versioned_name]))%>
-    %endif
+<%def name="get_install_output_dir(prj)"><%
+    if prj.get_lower("TYPE") == 'exec':
+        return'bin'
+    elif prj.get_lower("TYPE") == 'bundle':
+        return '/'.join(['Bundles', prj.versioned_name])
+    else:
+        if osname() == "nt":
+            output_lib= 'bin'
+        elif osname() == "darwin":
+            output_lib= 'Libraries'
+        else:
+            output_lib= 'lib'
+        return output_lib %>
 </%def>
 
 <%def name="get_library_output_dir()" ><%
@@ -139,7 +135,7 @@ elif osname() == "darwin":
     output_lib= 'Libraries'
 else:
     output_lib= 'lib'
-return unix_path('/'.join([CMAKE_INSTALL_OUTPUT,output_lib]))%>
+return output_lib%>
 </%def>
 
 <%def name="split_rc_path(path)"> <%

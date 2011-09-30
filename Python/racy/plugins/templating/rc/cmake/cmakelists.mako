@@ -19,6 +19,8 @@ for deps in project.bin_rec_deps:
         use_qt=True
         break
 
+
+is_target = False
 link_rc = os.path.join(CMAKE_DIR, "rc")
 link_bin= os.path.join(CMAKE_DIR, "bin")%>
 
@@ -34,7 +36,9 @@ PROJECT(${project.base_name})
 SET(CMAKE_INCLUDE_DIRECTORIES_BEFORE ON)
 
 SET(TARGET_NAME ${project.full_name})
-
+IF(NOT INSTALL_DIR)
+    SET(INSTALL_DIR ${unix_path(CMAKE_INSTALL_OUTPUT)})
+ENDIF(NOT INSTALL_DIR)
 %if "OpenCL" in frameworks:
 FIND_LIBRARY(OPENCL_LIBS OpenCL)
 FIND_PATH(OPENCL_INCLUDE OpenCL/cl.h)
@@ -51,7 +55,7 @@ FILE(GLOB BIN
      )
 
 %if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
-
+<% is_target = True%>
 SET(INCLUDES "")
 %for i in project.include_dirs:
 <% full_path = os.path.join(project.get_path() , i)
@@ -78,8 +82,10 @@ SET(QT_QMAKE_EXECUTABLE ${qt_bin_dir})
 FIND_PACKAGE(Qt4 COMPONENTS ${' '.join(set(qt_components))} REQUIRED)
 INCLUDE(${escape("QT_USE_FILE")})
 
+EXTRACT_QT_HEADERS("${escape('INCLUDES')}")
+
 QT4_WRAP_CPP(PRJ_HEADERS_MOC
-            ${escape('INCLUDES')}
+            ${escape('qt_moc_headers')}
             )
         %if ui_files:
 QT4_WRAP_UI(PRJ_UI_FILES
@@ -198,7 +204,6 @@ ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
             )
 
 
-
 %else:
 FILE(GLOB ARGS_LIST
     RELATIVE ${unix_path(project.rc_path)}
@@ -240,6 +245,13 @@ IF(WIN32)
     SET(PROCESSOR_COUNT "$ENV{NUMBER_OF_PROCESSORS}")
     SET(CMAKE_CXX_FLAGS "${escape("CMAKE_CXX_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
     SET(CMAKE_C_FLAGS "${escape("CMAKE_C_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
+
+
+
+
+
+
+
 %if not  PRJ_NAME == MASTER_PRJ_NAME:
 ENDIF(WIN32)
     <% return %>
@@ -291,6 +303,9 @@ SYMLINK(${unix_path(dir_w)}
 %endfor
 
 
+
+
+###Libext install
 ##%for bindeps in PROJECT.bin_rec_deps:
     ##%for lib in get_install_libs(bindeps.get('LIBEXTINSTANCE')):
 ##INSTALL(FILES ${unix_path(lib)} 
@@ -300,6 +315,7 @@ SYMLINK(${unix_path(dir_w)}
 
 ##%endfor
 
+###Install specific darwin
 ##%if osname() == 'darwin':
      ##%for i in project.bin_rec_deps:
 ##<% framework = get_framework_path(i.get('LIBEXTINSTANCE'))%>
@@ -310,3 +326,9 @@ SYMLINK(${unix_path(dir_w)}
          ##%endif
      ##%endfor
 ##%endif
+
+###Install others_file
+##INSTALL(DIRECTORY ${escape("CMAKE_BINARY_DIR") +'/'+get_others_file_output_dir(project)}/
+        ##DESTINATION ${escape("INSTALL_DIR") +'/'+get_others_file_output_dir(project)}/
+     ##)
+

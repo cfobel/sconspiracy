@@ -44,3 +44,19 @@ MACRO(ADD_SUBDIRECTORIES list_directories)
         ADD_SUBDIRECTORY(${elem})
     ENDFOREACH(elem)
 ENDMACRO(ADD_SUBDIRECTORIES)
+
+
+MACRO(EXTRACT_QT_HEADERS list_headers)
+    MESSAGE(STATUS "Moc headers extractions")
+    SET (qt_moc_headers "" PARENT_SCOPE)
+
+    FOREACH(header ${list_headers})
+        FILE(READ ${header} header_content)
+        STRING(REGEX MATCH "Q_OBJECT" matched "${header_content}")
+
+        IF(NOT ${matched} STREQUAL "")
+            LIST(APPEND qt_moc_headers ${header})
+        ENDIF(NOT ${matched} STREQUAL "")
+
+    ENDFOREACH(header)
+ENDMACRO(EXTRACT_QT_HEADERS)

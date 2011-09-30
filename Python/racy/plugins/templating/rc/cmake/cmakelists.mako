@@ -160,7 +160,10 @@ ADD_DEFINITIONS(
 #declaration of target
 %if project.get_lower('TYPE') == 'exec':
 ADD_EXECUTABLE(${escape("TARGET_NAME")} ${'WIN32' if project.get_lower('CONSOLE') else ''}
-%else :
+%elif project.get_lower('TYPE') == 'static':
+ADD_LIBRARY(${escape("TARGET_NAME")}
+            STATIC
+            %else:
 ADD_LIBRARY(${escape("TARGET_NAME")}
             SHARED
 %endif
@@ -255,7 +258,7 @@ ENDIF(WIN32)
 
 SET(SUBDIRECTORIES 
 %for prj in PRJ_DEPS:
-    %if prj.get_lower('TYPE') in ['exec', 'bundle','shared']:
+    %if prj.get_lower('TYPE') in ['exec', 'bundle','shared','static']:
     ${prj.base_name}
     %endif
 %endfor

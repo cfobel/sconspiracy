@@ -63,6 +63,7 @@ class LibName(str):
     """
     SEP = constants.LIBNAME_SEP
 
+
     @cached_property
     def _splited(self):
         return self.split(LibName.SEP)
@@ -658,7 +659,7 @@ class RacyProject(object):
         callers.append(self)
         if not deps:
             deps = sum([list(getattr(self,attr)) for attr in attribs],[])
-            for lib in self.source_deps:
+            for lib in self.source_deps + tuple(deps):
                 deps += lib._get_rec_deps(callers, attribs)
             deps = tuple(sorted(set(deps), key=str))
             dbdeps[self] = deps

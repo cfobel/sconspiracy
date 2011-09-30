@@ -157,10 +157,13 @@ return output_lib%>
 </%def>
 
 <%def name="get_qt_component(prj)" >
+#QtCLucene is not include directly because it is only used by QTHelp
+#And Qt4 Find_Package find it (if QtCLucene is include directly, an
+#exception occured.
 <% 
 supported_component = ["QtGui", "QtSvg", "QtCore", "QtXml", "QtXmlPatterns",
                        "QtSql", "QtScript", "QtNetwork","QtHelp", "QtOpenGL",
-                       "QtCLucene", "QtDBus", "QtUiTools", "QtWebKit", "phonon"]
+                       "QtDBus", "QtUiTools", "QtWebKit", "phonon"]
 qt_components = []%>
 %for deps in prj.bin_rec_deps:
     %if 'qt' in deps.full_name or 'phonon' in deps.full_name:

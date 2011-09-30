@@ -26,8 +26,8 @@ link_bin= os.path.join(CMAKE_DIR, "bin")%>
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 INCLUDE(${unix_path(CMAKE_MACRO_DIR)}/macro.cmake)
-SYMLINK(${unix_path(project.rc_path)}  "rc"  ${cmake_dir})
-SYMLINK(${unix_path(project.bin_path)} "bin" ${cmake_dir})
+<% symlink(project.rc_path,  link_rc)%>
+<% symlink(project.bin_path, link_bin)%>
 
 #master project
 PROJECT(${project.base_name})
@@ -52,24 +52,23 @@ FILE(GLOB BIN
 
 %if project.get_includes(false) or project.get_sources(false): #begin check if sources exist
 
-
+SET(INCLUDES "")
 %for i in project.include_dirs:
 <% full_path = os.path.join(project.get_path() , i)
 if os.path.exists(full_path):
-	path, name = os.path.split(i)
-	path = os.path.join(project.base_name,i)
-	# if path:
-		# mkdir_p(path)
-	symlink(full_path, os.path.join(cmake_dir,i))
+    path, name = os.path.split(i)
+    path = os.path.join(project.base_name,i)
+    symlink(full_path, os.path.join(cmake_dir,i))
 %>
-%endfor
 FILE(
     GLOB_RECURSE
-    INCLUDES
+    INCLUDE_TMP
     FOLLOW_SYMLINKS
-    ${unix_path(cmake_dir)}*.[hpp | h]
+    ${unix_path(os.path.join(cmake_dir,i))}/*.h*
     )
+LIST(APPEND INCLUDES ${escape('INCLUDE_TMP')})
 
+%endfor
     %if use_qt:
 <% qt_components = get_qt_component(project)
 qt_bin_dir = get_qt_bin_dir(project)
@@ -89,35 +88,35 @@ QT4_WRAP_UI(PRJ_UI_FILES
         %endif
 INCLUDE_DIRECTORIES( ${escape("CMAKE_BINARY_DIR")} )
     %endif
-
-
-
-
 <% 
 include_dirs= [i for i in project.env['CPPPATH'] if isinstance(i, str) and not '$' in i] 
 link_directories = [escape("CMAKE_BINARY_DIR") +'/'+ get_build_output_dir(i) for i in project.rec_deps if project.get_lower("TYPE") == 'bin_libext']
 link_directories.extend([i for i in project.env['LIBPATH'] if isinstance(i, str) and not '$' in i])
 src_dirs = project.src_path
 include_path= [i + '/*' for i in project.include_path]
-libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not in i]
+libs = [ i for i in project.env['LIBS'] if not i.startswith('Qt') and 'QT' not
+        in i and not 'phonon' in i]
 %>
+SET(SOURCES "")
 %for i in project.src_dirs:
 <% full_path = os.path.join(project.get_path() , i)
 if os.path.exists(full_path):
-	path, name = os.path.split(i)
-	path = os.path.join(project.base_name,i)
-	# if path:
-		# mkdir_p(path)
-	symlink(full_path, os.path.join(cmake_dir,i))
+    path, name = os.path.split(i)
+    path = os.path.join(project.base_name,i)
+    symlink(full_path, os.path.join(cmake_dir,i))
 %>
-%endfor
 
 FILE(
     GLOB_RECURSE
-    SOURCES
+    SOURCE_TMP
     FOLLOW_SYMLINKS
-    ${unix_path(cmake_dir)}*.c*
+    ${unix_path(os.path.join(cmake_dir,i))}/*
     )
+
+LIST(APPEND SOURCES ${escape('SOURCE_TMP')})
+
+%endfor
+
 
 
 SET(${"EXECUTABLE_OUTPUT_PATH" if project.get_lower('TYPE') == 'exec' else "LIBRARY_OUTPUT_PATH"} 
@@ -194,6 +193,9 @@ ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
                    COMMAND ${escape("CMAKE_COMMAND")} -E copy ${escape("target_path")}
                    ${escape("CMAKE_BINARY_DIR") +'/' +get_output_dir(project)}/
             )
+
+
+
 %else:
 FILE(GLOB ARGS_LIST
     RELATIVE ${unix_path(project.rc_path)}

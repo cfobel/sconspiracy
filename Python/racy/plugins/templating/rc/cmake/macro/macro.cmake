@@ -47,7 +47,6 @@ ENDMACRO(ADD_SUBDIRECTORIES)
 
 
 MACRO(EXTRACT_QT_HEADERS list_headers)
-    MESSAGE(STATUS "Moc headers extractions")
     SET (qt_moc_headers "" PARENT_SCOPE)
 
     FOREACH(header ${list_headers})

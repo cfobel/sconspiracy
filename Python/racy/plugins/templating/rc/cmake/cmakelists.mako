@@ -27,6 +27,7 @@ link_bin= os.path.join(CMAKE_DIR, "bin")%>
 #cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+MESSAGE(STATUS "Beginning ${project.base_name} analyse")
 INCLUDE(${unix_path(CMAKE_MACRO_DIR)}/macro.cmake)
 <% symlink(project.rc_path,  link_rc)%>
 <% symlink(project.bin_path, link_bin)%>
@@ -126,7 +127,7 @@ LIST(APPEND SOURCES ${escape('SOURCE_TMP')})
 
 
 SET(${"EXECUTABLE_OUTPUT_PATH" if project.get_lower('TYPE') == 'exec' else "LIBRARY_OUTPUT_PATH"} 
-        ${escape("CMAKE_BINARY_DIR") +'/'+ get_build_output_dir(project)}
+        ${escape("CMAKE_BINARY_DIR") +'/'+ get_install_output_dir(project)}
     )
 
 INCLUDE_DIRECTORIES(
@@ -197,12 +198,6 @@ GET_TARGET_PROPERTY(target_path ${escape("TARGET_NAME")} LOCATION)
 
 FILE(MAKE_DIRECTORY(${escape("CMAKE_BINARY_DIR") +'/'+get_output_dir(project)}/))
 
-ADD_CUSTOM_COMMAND(TARGET  ${escape("TARGET_NAME")}
-                   POST_BUILD
-                   COMMAND ${escape("CMAKE_COMMAND")} -E copy ${escape("target_path")}
-                   ${escape("CMAKE_BINARY_DIR") +'/' +get_output_dir(project)}/
-            )
-
 
 %else:
 FILE(GLOB ARGS_LIST
@@ -234,7 +229,6 @@ ENDFOREACH(ARG)
 
 %endif #end check if sources exist
 
-
 FILE(COPY
     ${escape("RESSOURCES")}
     DESTINATION
@@ -245,10 +239,6 @@ IF(WIN32)
     SET(PROCESSOR_COUNT "$ENV{NUMBER_OF_PROCESSORS}")
     SET(CMAKE_CXX_FLAGS "${escape("CMAKE_CXX_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
     SET(CMAKE_C_FLAGS "${escape("CMAKE_C_FLAGS")} /MP${escape("CMAKE_CXX_MP_NUM_PROCESSORS")}")
-
-
-
-
 
 
 
@@ -301,8 +291,6 @@ SYMLINK(${unix_path(dir_w)}
         %endif
     %endfor
 %endfor
-
-
 
 
 ###Libext install

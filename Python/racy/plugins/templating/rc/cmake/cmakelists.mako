@@ -2,7 +2,7 @@
 <% from string import Template
 import os
 import racy
-from racy.rutils import symlink, mkdir_p
+from racy.rutils import symlink, mkdir_p,is_false
 project=PROJECT
 
 cmake_dir=unix_path(CMAKE_DIR)
@@ -166,7 +166,7 @@ ADD_DEFINITIONS(
 
 #declaration of target
 %if project.get_lower('TYPE') == 'exec':
-ADD_EXECUTABLE(${escape("TARGET_NAME")} ${'WIN32' if project.get_lower('CONSOLE') else ''}
+ADD_EXECUTABLE(${escape("TARGET_NAME")} ${'WIN32' if is_false(project.get_lower('CONSOLE')) else ''}
 %elif project.get_lower('TYPE') == 'static':
 ADD_LIBRARY(${escape("TARGET_NAME")}
             STATIC

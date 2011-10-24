@@ -37,7 +37,8 @@ dico_prj_template = {
         {
             'default_value': 'none',
             'allowed_value': ['none', 'eclipse', 'qtcreator','qtcreator2-2', 
-                              'graphviz','vim','msvs','eclipse-indigo'],
+                              'qtcreator2-3','graphviz','vim','msvs',
+                              'eclipse-indigo'],
             'commandline_prj_opts': True,
             'descriptions_opts':"Create new developer project",
          },
@@ -94,48 +95,29 @@ dico_prj_template = {
             'dirs':
                 [
                     ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator2-3/${PRJ_NAME}/'),
-                    ('TPL_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/' ),
-                    ('TPL_2_2_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator2-3/' ),
+                    ('TPL_DIR' ,'${TEMPLATING_PLUGIN_PATH}/rc/qtcreator/' ),
+                    ('TPL_2_3_DIR' ,'${TEMPLATING_PLUGIN_PATH}/rc/qtcreator2-3/' ),
                     ('OS_DIR'   , qt_default_dir                   ),
                 ]
             ,
             'template_prj':
                 [
 
-                    ('${TPL_DIR}/template.pro'     ,
-                            '${QT_DIR}/${PRJ_NAME}.pro'     ),
-                    ('${TPL_2_2_DIR}/template_pro_user.mako',
-                            '${QT_DIR}/${PRJ_NAME}.pro.user'),
-                    ('${TPL_2_2_DIR}/template.qws'     ,
-                            '${OS_DIR}/${PRJ_NAME}.qws'     ),
+                    ('${TPL_2_3_DIR}/template_config.mako'     ,
+                            '${QT_DIR}/${PRJ_NAME}.config'     ),
+                    ('${TPL_2_3_DIR}/template_creator.mako'     ,
+                            '${QT_DIR}/${PRJ_NAME}.creator'     ),
+                    ('${TPL_2_3_DIR}/template_files.mako'     ,
+                            '${QT_DIR}/${PRJ_NAME}.files'     ),
+                    ('${TPL_2_3_DIR}/template_includes.mako'     ,
+                            '${QT_DIR}/${PRJ_NAME}.includes'     ),
+                    ('${TPL_2_3_DIR}/template_qws.mako'     ,
+                            '${OS_DIR}/${CALLING_PROJECT}.qws'     ),
+                    ('${TPL_2_3_DIR}/template_creator_user.mako'     ,
+                            '${QT_DIR}/${PRJ_NAME}.creator.user'     ),
                 ]
 
         },
-        
-        'qtcreator2-3' :
-        {
-
-            'dirs':
-                [
-                    ('QT_DIR'   ,'${IDE_INSTALL_DIR}/qtcreator2-3/${PRJ_NAME}/'),
-                    ('TPL_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator/' ),
-                    ('TPL_2_2_DIR' ,'${IDE_PLUGIN_PATH}/rc/qtcreator2-3/' ),
-                    ('OS_DIR'   , qt_default_dir                   ),
-                ]
-            ,
-            'template_prj':
-                [
-
-                    ('${TPL_DIR}/template.pro'     ,
-                            '${QT_DIR}/${PRJ_NAME}.pro'     ),
-                    ('${TPL_2_2_DIR}/template_pro_user.mako',
-                            '${QT_DIR}/${PRJ_NAME}.pro.user'),
-                    ('${TPL_2_2_DIR}/template.qws'     ,
-                            '${OS_DIR}/${PRJ_NAME}.qws'     ),
-                ]
-
-        },
-
         'eclipse' :
         { 
             'dirs':

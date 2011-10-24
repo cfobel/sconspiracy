@@ -101,7 +101,7 @@ class IdeProject(ConstructibleRacyProject):
                              })
             
 
-        # this dictionary contains all varibles for templates
+        # this dictionary contains all variables for templates
         dico = {
             'PRJ_INSTALL_DIR' : prj.install_path,
             'PRJ_ROOT_DIR'    : prj.root_path,
@@ -120,6 +120,7 @@ class IdeProject(ConstructibleRacyProject):
             'DEPS_INCLUDES_BASE' : prj.deps_include_path,
             'DEPS'            : prj_deps,
             'PROJECT_SPLIT_PATH' : self.split_project_path(prj.root_path), 
+            'project': prj
             }
             
 

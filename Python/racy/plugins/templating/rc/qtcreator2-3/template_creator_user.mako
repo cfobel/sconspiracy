@@ -4,11 +4,18 @@ configuration = [
                 ('racy' , PRJ_NAME),
                 ('racy/BUILDDEPS=no' , PRJ_NAME + '/BUILDDEPS=no'),
                 ('racy/DEBUG=release', PRJ_NAME + ' DEBUG=release'),
-                ]%>
+                ]
+				
+if os.name == "nt":
+    TOOLCHAIN=r"ProjectExplorer.ToolChain.Msvc:C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars64.bat::"
+else:
+    TOOLCHAIN=r"ProjectExplorer.ToolChain.Gcc:/usr/bin/g++.x86-linux-generic-elf-64bit.gdb"				
+%>
+<!DOCTYPE QtCreatorProject>
 <qtcreator>
  <data>
   <variable>GenericProjectManager.GenericProject.Toolchain</variable>
-  <value type="QString">ProjectExplorer.ToolChain.Gcc:/usr/bin/g++.x86-linux-generic-elf-64bit.gdb</value>
+  <value type="QString">${TOOLCHAIN}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -102,7 +109,7 @@ configuration = [
 %for name, args in configuration:
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.${count}">
     <value type="QString" key="GenericProjectManager.GenericBuildConfiguration.BuildDirectory"></value>
-    <value type="QString" key="ProjectExplorer.BuildCOnfiguration.ToolChain">ProjectExplorer.ToolChain.Gcc:/usr/bin/g++.x86-linux-generic-elf-64bit.gdb</value>
+    <value type="QString" key="ProjectExplorer.BuildCOnfiguration.ToolChain">${TOOLCHAIN}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">${args}</value>
@@ -233,7 +240,7 @@ configuration = [
  </data>
  <data>
   <variable>ProjectExplorer.Project.Updater.EnvironmentId</variable>
-  <value type="QString">{9d949d86-d01d-4f09-b989-ea483233bbf0}</value>
+  <value type="QString"></value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.Updater.FileVersion</variable>

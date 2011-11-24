@@ -90,6 +90,7 @@ def generate(env):
     compiler = get_option("CXX")
     if compiler:
         gplusplus.compilers = [compiler]
+
     gplusplus.generate(env)
     env.__class__.ManageOption = manage_options
     env.__class__.InstallFileFilter = install_file_filter
@@ -102,6 +103,9 @@ def generate(env):
     flags = env.__class__.Flags = FlagsGenerator()
     common.merge_flags(env, flags)
 
+
+    if compiler:
+        env['CXX'] = compiler
     env['TOOLINFO'] = {}
     
     env['TOOLINFO']['NAME']    = 'gcc'

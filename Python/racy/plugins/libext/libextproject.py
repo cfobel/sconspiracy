@@ -234,7 +234,8 @@ class LibextProject(ConstructibleRacyProject):
     def CopyBuilder(self, source, to, **kwargs):
         env = self.env
         args = [source, to]
-        res = env.LibextCopyFile([marker('Copy',self.full_name, args)], [], ARGS=args)
+        marker_name = kwargs.get("marker_name", 'Copy')
+        res = env.LibextCopyFile([marker(marker_name, self.full_name, args)], [], ARGS=args)
         env.Clean(res, to)
         return res
 
@@ -444,16 +445,16 @@ class LibextProject(ConstructibleRacyProject):
 
         return kwargs
 
-    @run_once
-    def configure_consumer(self, consumer):
+    def configure_consumer(self, consumer, self_configure = True):
         direct_deps = self.source_deps
 
         for d in direct_deps:
             d.configure_consumer(consumer)
 
-        configure = self.prj_locals.get('configure_consumer')
-        if configure is not None:
-            configure(consumer)
+        if self_configure:
+            configure = self.prj_locals.get('configure_consumer')
+            if configure is not None:
+                configure(consumer)
 
 
     @run_once
@@ -472,11 +473,12 @@ class LibextProject(ConstructibleRacyProject):
         result = []
 
         class ConfigureMethods(object):
+            prj = self
             for name, f in self.env_functions.items():
                 locals()[name] = f
 
         prj.configure_env()
-        prj.configure_consumer(ConfigureMethods)
+        prj.configure_consumer(ConfigureMethods, False)
         command = CommandWrapper(prj,'SysCommand')
         prj.prj_locals['generate']()
 
@@ -549,7 +551,11 @@ class LibextProject(ConstructibleRacyProject):
             content  = rutils.get_file_content(initmodel)
             initfile = opjoin(prj.local_dir, '__init__.py')
             write    = prj.WriteBuilder(initfile, content)
-            copy  = prj.CopyBuilder('${LOCAL_DIR}', prj.install_pkg_path)
+            copy     = prj.CopyBuilder(
+                    '${LOCAL_DIR}',
+                    prj.install_pkg_path,
+                    marker_name='InstallPkgs'
+                    )
             env.Depends(copy, write)
         return [copy, write]
 

@@ -161,7 +161,7 @@ class WixProject(ConstructibleRacyProject):
                 'dirs':
                     [
                         ('WIX_DIR'   ,'${WIX_INSTALL_DIR}/${CALLING_PROJECT}/'),
-                        ('ROOT_TMP_DIR', '${IDE_PLUGIN_PATH}/rc/'),
+                        ('ROOT_TMP_DIR', '${TEMPLATING_PLUGIN_PATH}/rc/'),
                         ('TPL_DIR' , '${ROOT_TMP_DIR}/wix/'),
                     ],
                 'template_prj':

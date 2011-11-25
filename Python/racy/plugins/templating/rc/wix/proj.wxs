@@ -119,7 +119,12 @@ spe_file = [] %>
 
                             <Component Id="C${PRJ_NAME}_RC" Guid="${uuid(PRJ_NAME)}">
                                 <CreateFolder />
-                            %for i in [x for x in TARGET_SRC if not x.endswith('.pdb')] :
+<% 
+prj_alias = "install-"
+alias_name = "install-" + PRJ_NAME
+
+%>
+                            %for i in [x for x in TARGET_SRC if not x.endswith('.pdb') and not x.startswith(alias_name)] :
 <%
 FULL_NAME = os.path.split(i)[1] 
 ID = b64hexhash(FULL_NAME)

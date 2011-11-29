@@ -113,17 +113,17 @@ spe_file = [] %>
 
                         create_dirs(get_file_tree(others, prefix), prefix)
                     %>
-
-
-                        %if PRJ_TYPE  == 'bundle':
-
-                            <Component Id="C${PRJ_NAME}_RC" Guid="${uuid(PRJ_NAME)}">
-                                <CreateFolder />
 <% 
 prj_alias = "install-"
 alias_name = "install-" + PRJ_NAME
 
 %>
+
+                        %if PRJ_TYPE  == 'bundle':
+
+                            <Component Id="C${PRJ_NAME}_RC" Guid="${uuid(PRJ_NAME)}">
+                                <CreateFolder />
+
                             %for i in [x for x in TARGET_SRC if not x.endswith('.pdb') and not x.startswith(alias_name)] :
 <%
 FULL_NAME = os.path.split(i)[1] 
@@ -143,7 +143,7 @@ ID = str(ID).replace('-','_')
                                 <Component Id="C${PRJ_NAME}_DLL" Guid="${uuid(PRJ_NAME+'-bin')}">
                                     <CreateFolder />
                                %if not PRJ_TYPE  == 'bundle':
-                                %for i in TARGET_SRC:
+                                %for i in [x for x in TARGET_SRC if not x.startswith(alias_name)]:
 <%
 NAME = os.path.split(i)[1]
 EXT = os.path.splitext(NAME)[1]

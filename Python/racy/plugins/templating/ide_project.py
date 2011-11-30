@@ -70,10 +70,7 @@ class IdeProject(ConstructibleRacyProject):
     def create_prj (self, prj):
 
         #Create user_prj_name
-        prj_format = self.prj.get_lower('PRJ_USER_FORMAT')
-        prj_format = prj_format.replace('(', '{')
-        prj_format = prj_format.replace(')', '}')
-        prj_format = prj_format.upper()
+        prj_format = self.prj.get('PRJ_USER_FORMAT')
 
 
 
@@ -149,7 +146,7 @@ class IdeProject(ConstructibleRacyProject):
 
         dico_vars['PRJ_USER_FORMAT'] = apply_template(
                                         prj_format,dico_vars) 
-
+        
         dico_prj = get_dico_prj(dico_prj_template['dico_ide'], ide_type)
 
         # Added vars 

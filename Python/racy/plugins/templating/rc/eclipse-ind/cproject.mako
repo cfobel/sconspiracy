@@ -3,10 +3,47 @@
 
 <%
 import os
+
 if os.name == "nt":
     EXT=".bat"
 else:
     EXT=""
+
+CONFIG = project.get("CONFIG")
+
+LIST_TARGET = [
+                {'name':"racy",
+                 'cmd' : RACY_CMD + EXT,
+                 'args': ["CONFIG=" +CONFIG],
+                 'target':PRJ_NAME,
+                 'target_args':[''],
+                 },
+                {'name':"racy BUILDDEPS=no",
+                 'cmd' : RACY_CMD + EXT,
+                 'args':["BUILDDEPS=no", "CONFIG=" +CONFIG],
+                 'target':PRJ_NAME,
+                 'target_args':'',
+                 },
+                {'name':"racy DEBUG=release",
+                 'cmd' : RACY_CMD + EXT,
+                 'args':["DEBUG=release", "CONFIG=" +CONFIG],
+                 'target':PRJ_NAME,
+                 'target_args':[''],
+                 },
+                {'name':"racy doxygen",
+                 'cmd' : RACY_CMD + EXT,
+                 'args':["CONFIG=" +CONFIG],
+                 'target':PRJ_NAME,
+                 'target_args':['DOX=yes'],
+                 },
+                {'name':"racy cppunit",
+                 'cmd' : RACY_CMD + EXT,
+                 'args':["CONFIG=" +CONFIG],
+                 'target':PRJ_NAME,
+                 'target_args':['CPPUNIT=exec','CPPUNIT_RUN=yes'],
+                 },
+              ]
+
 %>
 <cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
     <storageModule moduleId="org.eclipse.cdt.core.settings">
@@ -92,46 +129,16 @@ else:
     </storageModule>
     <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
         <buildTargets>
-            <target name="racy" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
-                <buildArguments/>
-                <buildTarget>${PRJ_NAME}</buildTarget>
+% for config in LIST_TARGET:
+            <target name="${config['name']}" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+                <buildCommand>${config['cmd']}</buildCommand>
+                <buildArguments>${' '.join(config['args'])}</buildArguments>
+                <buildTarget>${config['target'] + '/' + '/'.join(config['target_args'])}</buildTarget>
                 <stopOnError>true</stopOnError>
                 <useDefaultCommand>false</useDefaultCommand>
                 <runAllBuilders>true</runAllBuilders>
             </target>
-            <target name="racy BUILDDEPS=no" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
-                <buildArguments>BUILDDEPS=no</buildArguments>
-                <buildTarget>${PRJ_NAME}</buildTarget>
-                <stopOnError>true</stopOnError>
-                <useDefaultCommand>false</useDefaultCommand>
-                <runAllBuilders>true</runAllBuilders>
-            </target>
-            <target name="racy DEBUG=release" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
-                <buildArguments>DEBUG=release</buildArguments>
-                <buildTarget>${PRJ_NAME}</buildTarget>
-                <stopOnError>true</stopOnError>
-                <useDefaultCommand>false</useDefaultCommand>
-                <runAllBuilders>true</runAllBuilders>
-            </target>
-            <target name="racy DOX=yes" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
-                <buildArguments></buildArguments>
-                <buildTarget>${PRJ_NAME}/DOX=yes</buildTarget>
-                <stopOnError>true</stopOnError>
-                <useDefaultCommand>false</useDefaultCommand>
-                <runAllBuilders>true</runAllBuilders>
-            </target>
-            <target name="racy CPPUNIT" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
-                <buildArguments></buildArguments>
-                <buildTarget>${PRJ_NAME}/CPPUNIT=exec/CPPUNIT_RUN=yes</buildTarget>
-                <stopOnError>true</stopOnError>
-                <useDefaultCommand>false</useDefaultCommand>
-                <runAllBuilders>true</runAllBuilders>
-            </target>
-        </buildTargets>
+%endfor
+             </buildTargets>
     </storageModule>
 </cproject>

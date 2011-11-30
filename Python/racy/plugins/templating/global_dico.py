@@ -255,13 +255,13 @@ dico_prj_template = {
     {
         'options':
         {
-            'default_value' : '$(PRJ_TYPE)_$(PRJ_NAME)',
+            'default_value' : '$[PRJ_TYPE]_$[PRJ_NAME]',
             'commandline_prj_opts': True,
             'commandline_opts': True,
             'descriptions_opts':
     """Preferencies formated project name.
     You can use this variable like this:
-    $( VARIABLE )
+    $[ VARIABLE ]
     PRJ_NAME           : project base name.
     RACY_CMD           : racy command.
     PRJ_TYPE           : project type.

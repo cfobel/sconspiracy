@@ -3,7 +3,6 @@
 
 <%
 import os
-execution_type = [("racy", "racy", ""), ("racy BUILDDEPS=no", "racy", "BUILDDEPS=no")]
 if os.name == "nt":
     EXT=".bat"
 else:

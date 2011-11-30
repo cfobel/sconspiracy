@@ -71,7 +71,9 @@ class IdeProject(ConstructibleRacyProject):
 
         #Create user_prj_name
         prj_format = self.prj.get('PRJ_USER_FORMAT')
-
+        prj_format = prj_format.replace("[", "{")
+        prj_format = prj_format.replace("]", "}")
+        
 
 
         # This dictionary contains all supported ide

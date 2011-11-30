@@ -6,6 +6,7 @@ if os.name == "nt":
     EXT=".bat"
 else:
     EXT=""
+
 %>
 <projectDescription>
     <name>${PRJ_USER_FORMAT}</name>

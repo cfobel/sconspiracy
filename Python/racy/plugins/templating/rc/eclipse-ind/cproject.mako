@@ -110,7 +110,7 @@ else:
                 <runAllBuilders>true</runAllBuilders>
             </target>
             <target name="racy DEBUG=release" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>{RACY_CMD}${EXT}</buildCommand>
+                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
                 <buildArguments>DEBUG=release</buildArguments>
                 <buildTarget>${PRJ_NAME}</buildTarget>
                 <stopOnError>true</stopOnError>
@@ -118,9 +118,17 @@ else:
                 <runAllBuilders>true</runAllBuilders>
             </target>
             <target name="racy DOX=yes" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                <buildCommand>{RACY_CMD}${EXT}</buildCommand>
+                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
                 <buildArguments></buildArguments>
                 <buildTarget>${PRJ_NAME}/DOX=yes</buildTarget>
+                <stopOnError>true</stopOnError>
+                <useDefaultCommand>false</useDefaultCommand>
+                <runAllBuilders>true</runAllBuilders>
+            </target>
+            <target name="racy CPPUNIT" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+                <buildCommand>${RACY_CMD}${EXT}</buildCommand>
+                <buildArguments></buildArguments>
+                <buildTarget>${PRJ_NAME}/CPPUNIT=exec/CPPUNIT_RUN=yes</buildTarget>
                 <stopOnError>true</stopOnError>
                 <useDefaultCommand>false</useDefaultCommand>
                 <runAllBuilders>true</runAllBuilders>

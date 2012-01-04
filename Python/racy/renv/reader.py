@@ -12,6 +12,7 @@ import ydefaults
 class ConfigReader(object):
 
     compiled = {}
+    checked = set()
 
     def __init__(self):
         mods = ydefaults.get_racy_option( "CONFIG_IMPORTED_MODULES" )
@@ -32,8 +33,10 @@ class ConfigReader(object):
 
         exec(self.compiled[_file], _globals, _locals)
 
-        import racy.renv.configs.default as defaults
-        defaults.check_deprecated(_locals, _file)
+        if _file not in self.checked:
+            import racy.renv.configs.default as defaults
+            defaults.check_deprecated(_locals, _file)
+            self.checked.add(_file)
 
         return _locals
 

@@ -13,6 +13,7 @@ import re
 
 from os.path import join, isfile, normpath
 
+from functools import wraps
 
 #------------------------------------------------------------------------------
 
@@ -260,11 +261,14 @@ def memoize(f, cache={}):
     *WARNING* : If tuple is used instead of tupleize, a parameter in args or
     kwargs or is unhashable, the decorated function will raise a TypeError
     """
+
+    @wraps(f)
     def g(*args, **kwargs):
-        key = ( f, tupleize(args), tupleize(kwargs.items()) )
+        key = ( f, repr(args), repr(kwargs.items()) )
         if key not in cache:
             cache[key] = f(*args, **kwargs)
         return cache[key]
+    
     return g
 
 
@@ -274,6 +278,7 @@ def cached_property(f):
     with setter and deleter uses (they shouldn't be used with a
     cached_property).
     """
+    @wraps(f)
     def func(self):
         prefix = '__racy_internal__cached_property'
         fullname = "_".join([prefix, f.__name__])
@@ -296,6 +301,7 @@ def run_once(f):
     """This decorator ensure that an instance method is executed once
     and return ever the same result, without any regards on arguments
     """
+    @wraps(f)
     def func(self, *a, **k):
         prefix = '__racy_internal__used'
         fullname = "_".join([prefix, f.__name__])
@@ -314,6 +320,7 @@ def time_it(func):
     import time
     func.__tot  = 0.
     func.__call = 0
+    @wraps(func)
     def _inner(*args, **kw):
         func.__call += 1
         start = time.time()

@@ -57,6 +57,18 @@ class Environment(Env):
 
         Env.__init__(self, *args, **kwargs)
 
+        FLAGS = (
+                  '$( ${{_concat(INCPREFIX, {0}, INCSUFFIX, '
+                  '__env__, RDirs, TARGET, SOURCE)}} $)'
+                 )
+
+        self['CPP_LIBEXT_PATH'] = []
+        self['_CPPINCFLAGS'] = (
+                FLAGS.format('CPPPATH')
+                + FLAGS.format('CPP_LIBEXT_PATH')
+                    )
+
+
         act = self.Action( CopyBuilder, "Install '$$SOURCE' as '$$TARGET'")
         self.__CopyBuilder__ = self.Builder(
                 action = act,

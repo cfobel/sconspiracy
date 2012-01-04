@@ -62,6 +62,7 @@ class CMakeProject(ConstructibleRacyProject):
 
     def create_cmake_file(self, prj):
         #Create user_prj_name
+        prj.configure_env()
         prj_format = self.master_project.get_lower('PRJ_USER_FORMAT')
         prj_format = prj_format.replace('(', '{')
         prj_format = prj_format.replace(')', '}')

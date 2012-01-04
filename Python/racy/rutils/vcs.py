@@ -14,51 +14,69 @@ def find_vcs_dirs(path, vcs=['.hg']):
 
     return found_dirs
 
-def get_hg_informations(path):
-    cmd_log = [
-            'log', '-r', '.',
-            ('--template=date: {date|isodate}\nchangeset: {node}\nbranch: '
-             '({branch})\ntags: {tags}\n')
-            ]
-    cmd_url = [ 'showconfig', 'paths.default']
 
-    def hg(cmd):
-        hg = ['hg', '--cwd', path]
-        p = subprocess.Popen(hg + cmd, stdout=subprocess.PIPE)
-        output = p.communicate()[0]
-        return output
+class HgInfo:
+    UNAVAILABLE = "repository informations unavailable"
 
-    res = map(hg, [cmd_url, cmd_log])
+    def __init__(self, dirs):
+        self.processes = {}
+        self.infos = None
 
-    url = res[0]
-    repo = path
-    if url:
-        repo = url.rstrip('/').split('/')[-1]
+        def get_hg_processes(path):
+            cmd_log = [
+                    'log', '-r', '.',
+                    ('--template=date: {date|isodate}\nchangeset: {node}\nbranch: '
+                    '({branch})\ntags: {tags}\n')
+                    ]
+            cmd_url = [ 'showconfig', 'paths.default']
 
-    res[0] = repo
-    return res
+            def hg(cmd):
+                hg = ['hg', '--cwd', path]
+                p = subprocess.Popen(hg + cmd, stdout=subprocess.PIPE)
+                return p
+
+            processes = self.processes[path] = map(hg, [cmd_url, cmd_log])
+            return processes
+
+        try:
+            map(get_hg_processes, dirs)
+        except Exception, e:
+            self.infos = self.UNAVAILABLE
+
+
+    def __call__(self):
+        if self.infos is None:
+            if self.processes:
+
+                def get_repo_info(args):
+                    path, processes = args
+                    res = [p.communicate()[0] for p in processes]
+
+                    url = res[0]
+                    repo = path
+                    if url:
+                        repo = url.rstrip('/').split('/')[-1]
+
+                    res[0] = repo
+                    return res
+
+                infos = map(get_repo_info, self.processes.items())
+
+                if infos:
+                    res = map(''.join, infos)
+                    self.infos = infos = '\n'.join(res)
+
+        return self.infos
+
+
+
+def init_repo_informations(dirs=None):
+    global get_repo_informations
+    get_repo_informations = HgInfo(dirs)
+
 
 
 def get_repo_informations(dirs=None):
-    try:
-        repos = [ path
-            for lst in map(find_vcs_dirs, dirs)
-            for path in lst]
-        infos = map(get_hg_informations, repos)
-
-        if infos:
-            res = map(''.join, infos)
-            infos = '\n'.join(res)
-
-    except Exception, e:
-        racy.print_warning("repo informations",
-                "Repository informations unavailable")
-        infos = "unavailable"
-
-
-    if infos:
-        global get_repo_informations
-        get_repo_informations = lambda x=None : infos
-        return infos
-
+    init_repo_informations(dirs)
+    return get_repo_informations()
 

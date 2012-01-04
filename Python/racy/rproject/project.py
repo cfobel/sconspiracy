@@ -211,7 +211,7 @@ class RacyProject(object):
 
 
     def __repr__(self):
-        return '{0.__class__.__name__} for {0.full_name}'.format(self)
+        return '{0.__class__.__name__} for {0.base_name}'.format(self)
 
     def __str__(self):
         return LibName(self.full_name)
@@ -1197,6 +1197,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
         env = self.env
         self.configure_env()
         result = []
+
         if prj.sources:
             if prj.is_exec:
                 result = env.Program(

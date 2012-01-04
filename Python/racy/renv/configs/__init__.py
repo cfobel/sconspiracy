@@ -69,6 +69,19 @@ def get_config(name,
     if not os.path.isfile(config_file):
         if raise_on_not_found:
             msg = 'Configuration <{0}> not available.'.format(config_file)
+
+            #import code, traceback, signal
+
+            #for t in  traceback.extract_stack():
+                #print t
+
+            #print ''
+            #traceback.print_stack(stack)
+            #print ''
+            #print ''
+            #print ''
+
+            #exit('haha ' + msg)
             raise ConfigVariantError, msg
     else:
         # exec 'default' first if needed
@@ -76,7 +89,8 @@ def get_config(name,
             source = _globals
             if include_defaults:
                 source = _locals
-            get_config(default_config, _locals = source)
+            get_config(default_config, _locals = source, 
+                    raise_on_not_found = False)
 
         if write_postfix:
             if 'POSTFIX' in _locals:

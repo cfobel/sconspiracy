@@ -29,9 +29,12 @@ def get_racy_default(opt, config,
     if config is None:
         config = get_option('CONFIG',config=configs.DEFAULT_CONFIG)
 
-    try:
-        defaults_source = configs.get_config(config)
-    except ConfigVariantError, e:
+    #try:
+        #defaults_source = configs.get_config(config)
+    #except ConfigVariantError, e:
+        #defaults_source = configs.get_config(configs.DEFAULT_CONFIG)
+    defaults_source = configs.get_config(config, raise_on_not_found = False)
+    if not defaults_source:
         defaults_source = configs.get_config(configs.DEFAULT_CONFIG)
 
 
@@ -77,21 +80,19 @@ def get_user_options(opt, config, default, prj=NotUsed, option_value=Undefined):
         ckconfig = ":".join([options_file, config])
     allowedvalues.check_value_with_msg(opt, res, ckconfig, exceptionnal_case)
 
-    try:
-        old_res = res
+    old_res = res
 
-        loc = renv.dirs.user_configs
-        source = configs.get_config(config, path=loc,
-                include_defaults = False)
+    loc = renv.dirs.user_configs
+    source = configs.get_config(config, path=loc,
+            include_defaults = False, raise_on_not_found = False)
 
+    if source:
         res = source.get(opt, res)
 
         if old_res != res:
             ckconfig = ":".join([loc,config])
             allowedvalues.check_value_with_msg(opt, res, ckconfig, 
-                                                exceptionnal_case)
-    except ConfigVariantError, e:
-        pass # user-config 'config' is inexistant
+                                            exceptionnal_case)
 
     return res
 

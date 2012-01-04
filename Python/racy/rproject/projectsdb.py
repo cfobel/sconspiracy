@@ -88,7 +88,7 @@ class RacyProjectsDB(object):
         if not directory_list:
             directory_list = racy.renv.dirs.code
 
-        vcs.get_repo_informations(directory_list)
+        vcs.init_repo_informations(directory_list)
 
         self.prj_path_list = find_files_in_dirs(directory_list, prj_file)
 

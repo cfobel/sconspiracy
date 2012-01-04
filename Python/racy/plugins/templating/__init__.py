@@ -33,7 +33,7 @@ class Plugin(racy.rplugins.Plugin):
         dico_options = get_dico_prj_options(dico_prj_template)
 
         for type_prj, options in dico_options.items():
-            
+
             if options.has_key('default_value'):
                 self.options[type_prj] = options['default_value']
             else:
@@ -44,7 +44,7 @@ class Plugin(racy.rplugins.Plugin):
 
             if options.has_key('commandline_opts') and options['commandline_opts']:
                 self.commandline_opts.append( type_prj )
- 
+
             if options.has_key('commandline_prj_opts') and options['commandline_prj_opts']:
                 self.commandline_prj_opts.append( type_prj)
 
@@ -66,7 +66,7 @@ class Plugin(racy.rplugins.Plugin):
         for i,j in racy.renv.ARGUMENTS.items():
             if i == 'CREATE_SRV' :
                res += prj.create_srv(j)
-        
+
         return res
 
     def has_env_addon(self, env):
@@ -101,6 +101,7 @@ class Plugin(racy.rplugins.Plugin):
         if not prj.get_lower('IDE') == 'none':
             res = IdeProject(prj) 
         elif prj.get_lower('CMAKE') == 'yes':
+            import racy.renv.configs.default
             res = CMakeProject(prj)
         else:
             res = WixProject(prj)

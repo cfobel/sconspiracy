@@ -235,7 +235,8 @@ class LibExt(object):
         conf = {}
         names = {
                 'LIBPATH'       : 'ABS_LIBPATH'      ,
-                'CPPPATH'       : 'ABS_CPPPATH'      ,
+                'CPP_LIBEXT_PATH'       : 'ABS_CPPPATH'      ,
+                #'CPPPATH'       : 'ABS_CPPPATH'      ,
                 'FRAMEWORKPATH' : 'ABS_FRAMEWORKPATH',
                 'LIBS'          : 'LIBS'             ,
                 'CPPDEFINES'    : 'CPPDEFINES'       ,
@@ -263,6 +264,7 @@ class LibExt(object):
                 if env.has_key(name):
                     env[name] = back_env[name]
 
+        
         env.PrependUnique(**conf)
 
 

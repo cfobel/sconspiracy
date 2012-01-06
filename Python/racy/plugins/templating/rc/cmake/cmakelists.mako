@@ -96,7 +96,7 @@ QT4_WRAP_UI(PRJ_UI_FILES
 INCLUDE_DIRECTORIES( ${escape("CMAKE_BINARY_DIR")} )
     %endif
 <% 
-include_dirs= [i for i in project.env['CPPPATH'] if isinstance(i, str) and not '$' in i] 
+include_dirs= [i for i in (project.env['CPPPATH'] + project.env['CPP_LIBEXT_PATH']) if isinstance(i, str) and not '$' in i] 
 link_directories = [escape("CMAKE_BINARY_DIR") +'/'+ get_build_output_dir(i) for i in project.rec_deps if project.get_lower("TYPE") == 'bin_libext']
 link_directories.extend([i for i in project.env['LIBPATH'] if isinstance(i, str) and not '$' in i])
 src_dirs = project.src_path

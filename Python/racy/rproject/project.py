@@ -5,6 +5,9 @@
 # ****** END LICENSE BLOCK ******
 
 import os
+import threading
+
+from collections import Counter
 from os.path import join as pathjoin, abspath, normpath
 
 
@@ -28,6 +31,34 @@ def abspath_key(r):
     return r.get_abspath()
 
 all = ['LibName', 'RacyProject', 'ConstructibleRacyProject']
+
+
+class Progress(object):
+    count = 0
+    progress_count = 0.
+    targets = []
+    lock = threading.Lock()
+
+    def __init__(self, target, use_count):
+        self.use_count = use_count
+        if use_count:
+            Progress.targets.append(target)
+
+
+    def postbuild(self, *a, **k):
+        Progress.lock.acquire(True)
+        if Progress.count == 0.:
+            Progress.count += len([ t for t in Progress.targets if t.changed() ])
+
+        target = k['target'][0]
+        if self.use_count:
+            Progress.progress_count += 1
+        progress = int((Progress.progress_count/Progress.count)*100)
+        progress_str = "[{0: >3.3g}%] {1}"
+        msg = target.abspath
+        progress_str = progress_str.format(progress, msg)
+        racy.print_msg(progress_str)
+        Progress.lock.release()
 
 
 LIBEXT    = ('libext', )
@@ -1217,6 +1248,15 @@ class ConstructibleRacyProject(InstallableRacyProject):
             else:
                 raise RacyProjectError( prj,
                     'Unknown project TYPE ({prj.type})')
+
+            if rutils.is_true(self.get('PROGRESS')):
+                def add_progress(use_count):
+                    def add(s):
+                        p = Progress(s, use_count)
+                        env.AddPostAction(s, p.postbuild)
+                    return add
+                map( add_progress(False), result[0].sources)
+                add_progress(True)(result[0])
 
             if prj.get('JOBS_LIMIT'):
                 limit = prj.get('JOBS_LIMIT')

@@ -97,6 +97,7 @@ DEPRECATED = {
     'TESTLIB'     : 'Use "CPPUNIT" instead, managed by cppunit plugin' ,
     }
 
+PROGRESS          = "no"
 
 NAME              = '' # Internal use only
 

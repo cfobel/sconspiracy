@@ -18,6 +18,8 @@ ALLOWED_COMMANDLINE_OPTIONS = [
         'USEVISIBILITY'    ,
         'CXX'              ,
 
+        'PROGRESS'         ,
+
         'RACY_DBFILE'      ,
         'RACY_BUILD_DIR'   ,
         'RACY_INSTALL_DIR' ,
@@ -64,6 +66,8 @@ COMMANDLINE_OPTIONS_DESC = {
         'RACY_INSTALL_DIR'  : 'Install dir path'                             ,
         'RACY_BINPKGS_DIR'  : 'Binaries packages path'                       ,
         'RACY_CODE_DIRS'    : 'List of path containing SConspiracy projects' ,
+
+        'PROGRESS'          : 'Enable progress' ,
 
         }
 

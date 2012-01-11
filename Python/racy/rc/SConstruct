@@ -10,7 +10,7 @@ import racy.rlog as rlog
 #import racy.rlibext as rlibext
 
 EnsureSConsVersion(1, 3, 0)
-EnsurePythonVersion(2, 6)
+EnsurePythonVersion(2, 7)
 
 # Empty the Default tools list, avoid useless lookup into it.  
 # Speed up about a few seconds

@@ -29,7 +29,7 @@ def header_has_qobject(file):
 
 
 def qressources(prj):
-    """Returns ui source files of the project"""
+    """Returns resource files of the project"""
     qrc = rutils.DeepGlob(
             ['qrc'],
             prj.src_path,
@@ -39,7 +39,7 @@ def qressources(prj):
 
 
 def includes(prj):
-    """Returns ui source files of the project"""
+    """Returns source files of the project"""
     includes = rutils.DeepGlob(
             constants.CXX_HEADER_EXT,
             prj.include_path,
@@ -68,25 +68,35 @@ def ui_sources(prj):
 class Plugin(racy.rplugins.Plugin):
     name = "qt"
 
+    additive  = True
+    env_addon = True
+
+    def has_env_addon(self, env):
+        return True
+
+    def get_env_addon(self, env):
+        localtoolpath = os.path.join(__path__[0], 'sconstools')
+        env.Tool('qt4', toolpath=[localtoolpath])
+        # add -name management
+        env['QT4_RCCCOM']   = '$QT4_RCC $QT4_QRCFLAGS $SOURCE -o $TARGET -name ${SOURCE.filebase}'
+        env['QT4_AUTOSCAN'] = 0
+
+        def configure(e):
+            zlib = rlibext.register.get_lib_for_prj('z', e.prj_db._prj_map.values()[0])
+            lib_path = zlib.ABS_LIBPATH
+            e.PrependENVPath( racy.renv.LD_VAR, lib_path, )
+
+        env._callbacks.append(configure)
+        return []
+
+
     def has_additive(self, prj):
-        return [use for use in prj.uses if use.startswith('qt')]
+        return any(use for use in prj.uses if use.startswith('qt'))
 
     def get_additive(self, prj):
         for builddir, incpath in zip( inc_build_dir(prj), prj.include_path ):
             prj.variant_dir( builddir, incpath )
         env = prj.env
-
-        localtoolpath = os.path.join(__path__[0], 'sconstools')
-        env.Tool('qt4', toolpath=[localtoolpath])
-
-        # add -name management
-        env['QT4_RCCCOM']   = '$QT4_RCC $QT4_QRCFLAGS $SOURCE -o $TARGET -name ${SOURCE.filebase}'
-        env['QT4_AUTOSCAN'] = 0
-
-        zlib = rlibext.register.get_lib_for_prj('z', prj)
-
-        lib_path = zlib.ABS_LIBPATH
-        env.PrependENVPath( racy.renv.LD_VAR, lib_path, )
 
         uic = [ env.Uic4(ui)  for ui  in ui_sources(prj) ]
         moc = [ env.Moc4(inc) for inc in includes(prj)   ]
@@ -98,20 +108,9 @@ class Plugin(racy.rplugins.Plugin):
                 prj.build_dir
                 )
 
-        #prj.special_source += uic
         prj.special_source += moc + qrc
 
         env.Depends(sources, uic)
         env.Append(CPPPATH = inc_build_dir(prj))
-
-        #env.Append(CPPDEFINES=[
-            #'QT_SHARED',
-            #'QT_WEBKIT_LIB',
-            #'QT_GUI_LIB',
-            #'QT_CORE_LIB',
-            #'_REENTRANT',
-            #'QT_NO_DEBUG',
-            #])
-
 
         return []

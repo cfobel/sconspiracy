@@ -74,6 +74,7 @@ CFLAGS            = []
 CXXFLAGS          = []
 LINKFLAGS         = []
 
+PLUGINS           = None
 
 
 import os

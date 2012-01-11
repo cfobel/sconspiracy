@@ -41,6 +41,7 @@ class Environment(Env):
         from racy.rproject     import RacyProjectsDB
 
         kwargs['toolpath'] = renv.toolpath() + kwargs.get('toolpath',[])
+        self._callbacks = []
 
         for opt in ['DEBUG', 'TOOL', 'MSVC_VERSION','MSSDK_VERSION']:
             kwargs[opt] = get_option(opt)
@@ -115,6 +116,9 @@ class Environment(Env):
         import os
         from racy.renv.configs.commandline import get_opts_help
         self.Help( (os.linesep*2).join(get_opts_help()) )
+
+        map(lambda f:f(self), self._callbacks)
+        del self._callbacks
 
 
 

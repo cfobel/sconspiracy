@@ -29,10 +29,6 @@ def get_racy_default(opt, config,
     if config is None:
         config = get_option('CONFIG',config=configs.DEFAULT_CONFIG)
 
-    #try:
-        #defaults_source = configs.get_config(config)
-    #except ConfigVariantError, e:
-        #defaults_source = configs.get_config(configs.DEFAULT_CONFIG)
     defaults_source = configs.get_config(config, raise_on_not_found = False)
     if not defaults_source:
         defaults_source = configs.get_config(configs.DEFAULT_CONFIG)
@@ -164,7 +160,7 @@ def get_overrided_project_value(opt, config, default, option_value,
 def check_deprecated(opt, config, prj, default=NotUsed, option_value=Undefined):
     deprecated = get_racy_default('DEPRECATED', config)
 
-    if deprecated.has_key(opt):
+    if opt in deprecated:
         import warnings
         msg = [
             ('<{0}> option is deprecated (config <{1}>) and not'
@@ -229,7 +225,7 @@ class Paths(object):
     def get_path(self, name):
         var_names = self.var_names
         res = None
-        if var_names.has_key(name):
+        if name in var_names:
             vn = var_names[name]
             if name == 'config':
                 res = get_racy_default(vn, configs.DEFAULT_CONFIG)

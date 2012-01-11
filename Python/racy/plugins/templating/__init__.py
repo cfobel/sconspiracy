@@ -29,13 +29,17 @@ except ImportError,e:
 
 else:
     class Plugin(racy.rplugins.Plugin):
-        name = 'TEMPLATING'
+        name = 'templating'
+        count = 0
 
         options = {}
         allowed_values= {}
         commandline_opts = []
         commandline_prj_opts = []
         descriptions_opts = {}
+
+        additive = True
+        env_addon   = True
 
 
         def __init__(self):
@@ -64,6 +68,18 @@ else:
                     self.descriptions_opts[type_prj] = '' 
 
 
+        def has_env_addon(self, env):
+            for i in racy.renv.TARGETS.values():
+
+                if i.opts.has_key('CREATE_PRJ'):
+                    return True
+
+            for i,j in racy.renv.ARGUMENTS.items():
+                if i == 'CREATE_SRV':
+                    return True
+
+            return False
+
         def get_env_addon(self, env):
             prj = DevProject()
             res = []
@@ -79,18 +95,6 @@ else:
 
             return res
 
-        def has_env_addon(self, env):
-            for i in racy.renv.TARGETS.values():
-
-                if i.opts.has_key('CREATE_PRJ'):
-                    return True
-
-            for i,j in racy.renv.ARGUMENTS.items():
-                if i == 'CREATE_SRV':
-                    return True
-
-
-            return False
 
 
         def has_additive(self, prj):
@@ -106,7 +110,7 @@ else:
             return res
 
         def get_additive(self, prj):
-            if prj.get_lower('TYPE') not in ['shared','exec', 'bundle']:
+            if prj.get_lower('TYPE') not in {'shared','exec','bundle'}:
                 return []
             if not prj.get_lower('IDE') == 'none':
                 res = IdeProject(prj) 

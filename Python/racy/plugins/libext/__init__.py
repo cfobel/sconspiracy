@@ -26,6 +26,9 @@ class Plugin(racy.rplugins.Plugin):
        'libext plugin : if no, downloaded files will not be removed on clean.'
     }
 
+    replacement = True
+    env_addon   = True
+
     def init(self):
         import racy.renv.configs.allowedvalues as allowed_values
         allowed_values.TYPE += LibextProject.LIBEXT

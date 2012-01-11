@@ -37,15 +37,18 @@ class Plugin(racy.rplugins.Plugin):
             RUN_KEYWORD : 'Run CppUnit Tests (xml and exec only)',
             }
 
+    additive = True
 
     def has_additive(self, prj):
         val         = prj.get(KEYWORD)
-        test_file   = CppUnitProject.get_options_file(prj)
-        file_exists = os.path.isfile(test_file)
-        return val in self.allowed_values[KEYWORD][1:] and file_exists
+        return val == 'yes'
 
     def get_additive(self, prj):
-        res = CppUnitProject( prj = prj )
+        test_file   = CppUnitProject.get_options_file(prj)
+        file_exists = os.path.isfile(test_file)
+        res = []
+        if file_exists:
+            res = CppUnitProject( prj = prj )
         return [res]
 
 

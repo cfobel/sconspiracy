@@ -116,9 +116,9 @@ class RacyProjectsDB(object):
 
 
     def get_additive_projects(self, prj):
-        res = []
-        for dep in (prj,) + prj.source_rec_deps:
-            res += rplug.register.get_additive_projects(dep)
+        get_adds = rplug.register.get_additive_projects
+        deps = (prj,) + prj.source_rec_deps
+        res = [p for dep in deps for p in get_adds(dep)]
         return res
 
     def register_prj(self, prj, raise_exception=True):

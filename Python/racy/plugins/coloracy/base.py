@@ -7,7 +7,6 @@
 
 
 ENABLE_COLORACY_KEYWORD = 'COLORACY'
-COLORACY_KEYWORD        = 'COLORACY_PATTERNS'
 
 COLORACY_PATTERN_HELP = """Defines colors and patterns that are used to
     colorize output.

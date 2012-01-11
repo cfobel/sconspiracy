@@ -19,6 +19,7 @@ ALLOWED_COMMANDLINE_OPTIONS = [
         'CXX'              ,
 
         'PROGRESS'         ,
+        'PLUGINS'          ,
 
         'RACY_DBFILE'      ,
         'RACY_BUILD_DIR'   ,
@@ -68,6 +69,7 @@ COMMANDLINE_OPTIONS_DESC = {
         'RACY_CODE_DIRS'    : 'List of path containing SConspiracy projects' ,
 
         'PROGRESS'          : 'Enable progress' ,
+        'PLUGINS'           : 'Comma separated list of plugin to enable' ,
 
         }
 

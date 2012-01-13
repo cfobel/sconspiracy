@@ -254,7 +254,7 @@ def generate(env):
     # TODO: 'Replace' should be 'SetDefault'
 #   env.SetDefault(
     env.Replace(
-        QTDIR  = _detect(env),
+        QTDIR  = env['QTDIR'],
         QT4_BINPATH = os.path.join('$QTDIR', 'bin'),
         QT4_CPPPATH = os.path.join('$QTDIR', 'include'),
         QT4_LIBPATH = os.path.join('$QTDIR', 'lib'),
@@ -266,7 +266,7 @@ def generate(env):
         QT4_LRELEASE = locateQt4Command(env,'lrelease', env['QTDIR']),
         QT4_LIB = '', # KLUDGE to avoid linking qt3 library
 
-        QT4_AUTOSCAN = 1, # Should the qt tool try to figure out, which sources are to be moc'ed?
+        QT4_AUTOSCAN = 0, # Should the qt tool try to figure out, which sources are to be moc'ed?
 
         # Some QT specific flags. I don't expect someone wants to
         # manipulate those ...
@@ -298,7 +298,7 @@ def generate(env):
             Action(checkMocIncluded,None)],
         QT4_LUPDATECOM = '$QT4_LUPDATE $SOURCE -ts $TARGET',
         QT4_LRELEASECOM = '$QT4_LRELEASE $SOURCE',
-        QT4_RCCCOM = '$QT4_RCC $QT4_QRCFLAGS $SOURCE -o $TARGET',
+        QT4_RCCCOM = '$QT4_RCC $QT4_QRCFLAGS $SOURCE -o $TARGET -name ${SOURCE.filebase}',
         )
 
     # Translation builder

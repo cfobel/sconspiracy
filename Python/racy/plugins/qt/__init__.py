@@ -10,10 +10,11 @@ import os
 
 import racy
 
-from racy.renv import constants
-from racy      import renv
-from racy      import rutils
-from racy      import rlibext
+from racy.renv     import constants
+from racy.rproject import RacyProjectsDB
+from racy          import renv
+from racy          import rutils
+from racy          import rlibext
 
 
 import re
@@ -76,22 +77,37 @@ class Plugin(racy.rplugins.Plugin):
 
     def get_env_addon(self, env):
         localtoolpath = os.path.join(__path__[0], 'sconstools')
-        env.Tool('qt4', toolpath=[localtoolpath])
-        # add -name management
-        env['QT4_RCCCOM']   = '$QT4_RCC $QT4_QRCFLAGS $SOURCE -o $TARGET -name ${SOURCE.filebase}'
-        env['QT4_AUTOSCAN'] = 0
+        try:
+            env.Tool('qt4', toolpath=[localtoolpath])
+        except Exception, e:
+            self.enabled = False
+            racy.print_warning(
+                    "Qt plugin",
+                    'Could not detect Qt 4 : Is Qt4 binary package missing ?'
+                    )
+        else:
+            self.enabled = True
+            def configure(e):
 
-        def configure(e):
-            zlib = rlibext.register.get_lib_for_prj('z', e.prj_db._prj_map.values()[0])
-            lib_path = zlib.ABS_LIBPATH
-            e.PrependENVPath( racy.renv.LD_VAR, lib_path, )
+                db = RacyProjectsDB.current_db
+                class FakePrj(object):
+                    compiler = db.prj_args['cxx']
+                    opts_source = 'Qt plugin'
+                    projects_db = db
+                    def __str__(self):
+                        return ''
 
-        env._callbacks.append(configure)
+                zlib = rlibext.register.get_lib_for_prj('z', FakePrj())
+                lib_path = zlib.ABS_LIBPATH
+                e.PrependENVPath( racy.renv.LD_VAR, lib_path, )
+            env._callbacks.append(configure)
         return []
 
 
     def has_additive(self, prj):
-        return any(use for use in prj.uses if use.startswith('qt'))
+        return self.enabled and any(
+                use for use in prj.uses if use.startswith('qt')
+                )
 
     def get_additive(self, prj):
         for builddir, incpath in zip( inc_build_dir(prj), prj.include_path ):

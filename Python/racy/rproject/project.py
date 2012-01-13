@@ -227,7 +227,7 @@ class RacyProject(object):
                         )
 
         self._platform  = platform
-        self._compiler  = rutils.Version(cxx)
+        self._compiler  = cxx
         self._debug     = debug
         self._config    = config
 

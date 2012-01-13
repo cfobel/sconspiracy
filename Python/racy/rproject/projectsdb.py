@@ -15,7 +15,7 @@ from racy.renv             import constants
 from racy.renv.options     import get_option
 from racy.rproject.project import ConstructibleRacyProject, \
                                   InstallableRacyProject
-from racy.rutils           import memoize, remove_vcs_dirs, vcs
+from racy.rutils           import memoize, remove_vcs_dirs, vcs, Version
 
 all = ['RacyProjectsDB']
 
@@ -63,6 +63,7 @@ def find_files_in_dirs(directory_list, filename):
 
 class RacyProjectsDB(object):
     """Build a map of all build options in a directory list"""
+    current_db = None
 
     def __init__(self, directory_list=[], env={}, 
             prj_file=constants.OPTS_FILE ):
@@ -82,7 +83,7 @@ class RacyProjectsDB(object):
         self.prj_args['platform']    = get_option('PLATFORM')
         self.prj_args['debug']       = get_option('DEBUG')
         self.prj_args['env']         = env
-        self.prj_args['cxx']         = cxx
+        self.prj_args['cxx']         = Version(cxx)
         self.prj_args['projects_db'] = self
 
         if not directory_list:
@@ -94,6 +95,8 @@ class RacyProjectsDB(object):
 
         for f in self.prj_path_list:
             self._register_prj_from_file(f)
+
+        RacyProjectsDB.current_db = self
 
 
     def __iter__(self):

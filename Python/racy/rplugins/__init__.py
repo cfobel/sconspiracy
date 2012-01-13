@@ -194,7 +194,7 @@ class PluginRegistry(object):
 
             plug = plugin.Plugin()
             plugin.Plugin = plug
-            name = plug.name
+            name = plug.name.lower()
             allowed_plugins = get_option('PLUGINS')
             if allowed_plugins is not None and name not in allowed_plugins:
                 return

@@ -16,7 +16,7 @@ from libextproject import LibextProject
 CLEAN_DOWNLOADS = 'CLEAN_DOWNLOADS'
 
 class Plugin(racy.rplugins.Plugin):
-    name = "Libext"
+    name = "libext"
 
     options              = { CLEAN_DOWNLOADS : 'no' }
     allowed_values       = { CLEAN_DOWNLOADS : ['no', 'yes'] }

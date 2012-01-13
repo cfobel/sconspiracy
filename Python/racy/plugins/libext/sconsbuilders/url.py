@@ -113,36 +113,70 @@ class Url(SCons.Node.Node):
         return csig
 
     def exists(self):
-        res = False
-        pieces = urlparse(self.name)
-        if not all([pieces.scheme, pieces.netloc]):
-            raise Exception, 'Malformed Url: {0}'.format(self.name)
         return True
 
-    def write_to_file(self, io, filename, file_mode=''):
-        size = 0
-        with open(filename, "wb" + file_mode) as local_file:
-            racy.rutils.buffered_copy(io, local_file)
-            size = local_file.tell()
 
-        racy.print_msg( 'Downloaded', self.name, size, 'bytes' )
+def check_url(url):
+    pieces = urlparse(url)
+    if not all([pieces.scheme, pieces.netloc]):
+        raise Exception, 'Malformed Url: "{0}"'.format(url)
+    return True
+
+
+
+def write_to_file(url, io, filename, file_mode=''):
+    size = 0
+    racy.print_msg( 'Downloading', url, '...' )
+    with open(filename, "wb" + file_mode) as local_file:
+        racy.rutils.buffered_copy(io, local_file)
+        size = local_file.tell()
+
+    racy.print_msg( 'Downloaded', url, ',', size, 'bytes' )
+    return size
 
 
 
 def Download(target, source, env):
-    if not len(target) == len(source):
-        raise Exception, ("Number of target ({0}) must be equal to the number "
-                          "of sources ({1})".format(len(target), len(sources)))
-    for s,t in zip(source, target):
-        stream = urllib2.urlopen(s.name, timeout=10)
-        s.write_to_file(stream, t.get_path(), file_mode='')
-        stream.close()
+    if not len(target) == 1:
+        raise Exception, (
+                "Number of target ({0}) must be equal 1".format(len(target))
+                )
+
+    if not len(source) > 0:
+        raise Exception, (
+                "'Download'"
+                " takes at least one url as source.".format(len(source))
+                )
+
+    t = target[0]
+    urls = source
+    stream = None
+    for url in urls:
+        url = url.name
+        try:
+            check_url(url)
+            stream = urllib2.urlopen(url, timeout=10)
+            break
+        except urllib2.URLError, e:
+            racy.print_msg( 
+                    'Download failed : ',
+                    url, ':', str(e), '. Trying next url...' )
+
+    if stream is None:
+        raise Exception, ('Was not able to retrieve any of {0}'.format(urls))
+
+    write_to_file(url, stream, t.get_path(), file_mode='')
+    stream.close()
+
     return None
 
 
 def DownloadString(target, source, env):
-    s = ' Downloading %s' % source[0]
+    s = ' Downloading %s' % target[0]
     return env.subst('[${CURRENT_PROJECT}]: ') + s
+    builder = env.Builder( action = action )
+    builder = env.Builder( action = action )
+    builder = env.Builder( action = action )
 
 
 def generate(env):

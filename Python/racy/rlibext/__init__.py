@@ -45,7 +45,7 @@ class register(object):
 
             if nv in self.libs[name][comp]:
                 overrided = self.libs[name][comp][nv]
-                msg = ('<{lib}-{comp}-{version}> libext will be overrided. '
+                msg = ('<{lib}-{comp}-{version}> libext will be overridden. '
                        'Previously defined in <"{fileorig}">. '
                        'New definition in <"{file}">.')
                 msg = msg.format(

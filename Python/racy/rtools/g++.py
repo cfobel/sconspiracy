@@ -111,6 +111,10 @@ def generate(env):
     env['TOOLINFO']['NAME']    = 'gcc'
     env['TOOLINFO']['VERSION'] = env['CXXVERSION']
 
+    env['FORCE_INCLUDE_PREFIX'] = '-include '
+    env['FORCE_INCLUDE_SUFFIX'] = ''
+    
+
 def manage_options(env, prj, options):
     common.manage_options(env, prj, options)
 

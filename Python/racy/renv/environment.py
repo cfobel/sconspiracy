@@ -82,6 +82,9 @@ class Environment(Env):
         if True in res:
             racy.exit_racy(0)
 
+        self['_FORCE_INCLUDE'] = '${_defines(FORCE_INCLUDE_PREFIX, FORCE_INCLUDE, FORCE_INCLUDE_SUFFIX, __env__)}'
+        self['_CCCOMCOM'] = self['_CCCOMCOM'] + ' ${_FORCE_INCLUDE}'
+
         if not self.GetOption('help'):
             tool = self['TOOL']
             if tool == 'auto':

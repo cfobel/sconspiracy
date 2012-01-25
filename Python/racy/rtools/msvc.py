@@ -116,6 +116,9 @@ def generate(env):
     env['TOOLINFO']['NAME']    = 'cl'
     env['TOOLINFO']['VERSION'] = MSVC_VERSION.replace('Exp','')
 
+    env['FORCE_INCLUDE_PREFIX'] = '/FI '
+    env['FORCE_INCLUDE_SUFFIX'] = ''
+
 
 
 def manage_options(env, prj, options):

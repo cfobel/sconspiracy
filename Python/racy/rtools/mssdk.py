@@ -107,6 +107,9 @@ def generate(env):
     env['TOOLINFO']['NAME']    = 'cl'
     env['TOOLINFO']['VERSION'] = sdk_to_msvc[sdk_version]
 
+    env['FORCE_INCLUDE_PREFIX'] = '/FI '
+    env['FORCE_INCLUDE_SUFFIX'] = ''
+
 #------------------------------------------------------------------------------
 
 def get_sdk_versions():

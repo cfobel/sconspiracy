@@ -40,7 +40,7 @@ class MsvcFlags(common.Flags):
     LINKFLAGS      = ['/INCREMENTAL:NO']
 
     WARNINGSASERRORS_FLAGS = ['/WX']
-    OPTIMIZATION_FLAGS     = ['/O${OPTIMIZATIONLEVEL}']
+    OPTIMIZATION_FLAGS     = ['${"/O" + str(OPTIMIZATIONLEVEL) if OPTIMIZATIONLEVEL in [1,2] else ""}']
 
     LINKFLAGS_NOCONSOLE  = ['/subsystem:windows']
     CPPDEFINES_NOCONSOLE = ['_WINDOWS']

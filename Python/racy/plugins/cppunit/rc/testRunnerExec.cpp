@@ -13,10 +13,15 @@
 #include <cppunit/TextTestProgressListener.h>
 #include <stdexcept>
 
+#ifndef CPPUNIT_INIT_BUNDLES_TESTS
+#define CPPUNIT_INIT_BUNDLES_TESTS
+#endif
 
  int
  main( int argc, char* argv[] )
  {
+   CPPUNIT_INIT_BUNDLES_TESTS;
+
    std::string testPath = (argc > 1) ? std::string(argv[1]) : "";
 
    // Create the event manager and test controller

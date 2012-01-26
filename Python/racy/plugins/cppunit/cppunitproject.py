@@ -48,6 +48,7 @@ class CppUnitProject(ConstructibleRacyProject):
 
         opt_file = self.get_options_file(prj)
 
+        self.associated_prj = prj
 
         super(CppUnitProject, self).__init__(
                                         build_options = opt_file, 
@@ -91,6 +92,9 @@ class CppUnitProject(ConstructibleRacyProject):
         testfiles  = [f for f in testfiles if os.path.basename(f) in files]
         testfiles += [ self.runner_src ]
 
+        if self.associated_prj.is_bundle:
+            testfiles += [ opjoin(self.runner_src_path, 'testBundle.cpp') ]
+
         return testfiles
 
     @cached_property
@@ -117,6 +121,15 @@ class CppUnitProject(ConstructibleRacyProject):
         val = super(CppUnitProject, self).get(opt)
         if opt == "USE":
             val = list(set(val + ['cppunit']))
+        is_bundle = self.associated_prj.is_bundle
+        # is_bundle = True
+        if is_bundle:
+            if opt == "USE":
+                val = list(set(val + ['boost']))
+            if opt == "LIB":
+                db = self.projects_db
+                val = list(set(val + [db['fwRuntime'].versioned_name]))
+                val = list(set(val + [db['fwServices'].versioned_name]))
         return val
 
 
@@ -130,7 +143,20 @@ class CppUnitProject(ConstructibleRacyProject):
     @memoize
     def result (self, deps_results):
         res = super(CppUnitProject, self).result(deps_results=deps_results)
+        if self.associated_prj.is_bundle:
+            env = self.env
+            if self.type == 'shared':
+                raise CppUnitError(self,
+                        "Cannot build a bundle test as a shared library.")
+            prj_version = r'\"{0.version}\"'.format(self)
+            env.AppendUnique(CPPDEFINES=('CPPUNIT_TEST_VERSION', prj_version))
+            bundle_test_header = opjoin(self.runner_src_path, 'testBundle.hpp')
+            env['FORCE_INCLUDE'] = bundle_test_header
+            env.Depends( res, env.File(bundle_test_header) )
+
+
         return res
+
 
     @memoize
     def install (self, opts = []):
@@ -138,6 +164,8 @@ class CppUnitProject(ConstructibleRacyProject):
             res = super(CppUnitProject, self).install(opts = opts)
         else:
             res = []
+
+        res += self.install_files(self.rc_path, self.install_rc_path, ['.*'])
 
         if self.get_lower(self.test_run_var_name) == 'yes':
             if self.type == 'shared':

@@ -41,7 +41,7 @@ class Plugin(racy.rplugins.Plugin):
 
     def has_additive(self, prj):
         val         = prj.get(KEYWORD)
-        return val == 'yes'
+        return val != 'no'
 
     def get_additive(self, prj):
         test_file   = CppUnitProject.get_options_file(prj)

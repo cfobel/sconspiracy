@@ -90,8 +90,9 @@ class Plugin(racy.rplugins.Plugin):
             def configure(e):
 
                 db = RacyProjectsDB.current_db
+                comp = db and db.prj_args['cxx'] or ''
                 class FakePrj(object):
-                    compiler = db.prj_args['cxx']
+                    compiler = comp
                     opts_source = 'Qt plugin'
                     projects_db = db
                     def __str__(self):

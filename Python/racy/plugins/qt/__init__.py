@@ -99,7 +99,7 @@ class Plugin(racy.rplugins.Plugin):
 
                 zlib = rlibext.register.get_lib_for_prj('z', FakePrj())
                 lib_path = zlib.ABS_LIBPATH
-                e.PrependENVPath( racy.renv.LD_VAR, lib_path, )
+                racy.renv.QT_TOOLS_ENV = ( racy.renv.LD_VAR, lib_path )
             env._callbacks.append(configure)
         return []
 
@@ -113,6 +113,8 @@ class Plugin(racy.rplugins.Plugin):
         for builddir, incpath in zip( inc_build_dir(prj), prj.include_path ):
             prj.variant_dir( builddir, incpath )
         env = prj.env
+
+        env.PrependENVPath( *racy.renv.QT_TOOLS_ENV )
 
         uic = [ env.Uic4(ui)  for ui  in ui_sources(prj) ]
         moc = [ env.Moc4(inc) for inc in includes(prj)   ]

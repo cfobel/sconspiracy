@@ -19,6 +19,7 @@ class GccFlags(common.Flags):
                         '-pipe',
                         '-Winvalid-pch',
                         '-Wunknown-pragmas',
+                        '-Werror=return-type'
                        ]
     CXXFLAGS_DEBUG   = ['-O0']
 

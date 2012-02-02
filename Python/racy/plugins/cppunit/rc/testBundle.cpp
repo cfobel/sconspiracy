@@ -27,12 +27,13 @@ MiniLauncher::MiniLauncher( ::boost::filesystem::path profilePath )
 
     m_profile->setParams(0, NULL);
     m_profile->start();
+    ::fwRuntime::profile::getCurrentProfile()->setup();
     // m_profile->run();
-
 }
 
 MiniLauncher::~MiniLauncher()
 {
+    ::fwRuntime::profile::getCurrentProfile()->cleanup();
     m_profile->stop();
     m_profile.reset();
     ::fwRuntime::profile::setCurrentProfile(m_profile);

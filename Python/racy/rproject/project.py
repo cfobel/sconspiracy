@@ -562,6 +562,12 @@ class RacyProject(object):
         return libnames
 
     @cached_property
+    def requirements(self):
+        """Returns projects that 'self' project depends on"""
+        return self._get_libnames('REQUIREMENTS')
+
+
+    @cached_property
     def bundles(self):
         """Returns bundles that project depends on"""
         return self._get_libnames('BUNDLES')
@@ -627,6 +633,13 @@ class RacyProject(object):
         """
         return self._get_deps('libs', src_projects = True)
 
+
+    @cached_property
+    def requirements_deps(self):
+        """Returns bundles provided as sources that project depends on.
+        """
+        return self._get_deps('requirements', src_projects = True,
+                                check_versions=False)
 
 
     @cached_property
@@ -1379,6 +1392,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         if 'deps' in opts:
             deps = prj.source_libs_deps + prj.source_bundles_deps
+            deps += prj.requirements_deps
             deps_results = []
             deps_results += [dep.install(opts) for dep in deps]
             bin_results = []

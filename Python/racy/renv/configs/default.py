@@ -56,6 +56,7 @@ VERSION           = '0-0'
 
 LIB               = []
 BUNDLES           = []
+REQUIREMENTS      = []
 USE               = []
 
 

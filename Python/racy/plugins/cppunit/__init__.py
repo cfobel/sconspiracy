@@ -48,7 +48,7 @@ class Plugin(racy.rplugins.Plugin):
         file_exists = os.path.isfile(test_file)
         res = []
         if file_exists:
-            res = CppUnitProject( prj = prj )
-        return [res]
+            res.append(CppUnitProject( prj = prj ))
+        return res
 
 

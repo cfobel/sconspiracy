@@ -107,7 +107,7 @@ spe_file = [] %>
                 %endif
                     %if OTHERS_FILE:
                     <% 
-                    others = [f for f in OTHERS_FILE if '\\rc\\' in f]
+                    others = [f for f in OTHERS_FILE if '\\rc\\' in f and '\\test\\tu' not in f]
                     if others:
                         prefix = others[0].split('\\rc\\')[0] + '\\rc\\'
 

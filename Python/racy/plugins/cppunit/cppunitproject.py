@@ -24,6 +24,8 @@ class CppUnitError(racy.RacyProjectError):
 CPPUNIT_PLUGIN_PATH = os.path.dirname(__file__)
 
 
+
+
 class CppUnitProject(ConstructibleRacyProject):
     cppunit_test_dir    = 'tu'
     cppunit_option_file = 'cppunit.options'
@@ -90,10 +92,7 @@ class CppUnitProject(ConstructibleRacyProject):
 
         testfiles = super(CppUnitProject,self).sources
         testfiles  = [f for f in testfiles if os.path.basename(f) in files]
-        testfiles += [ self.runner_src ]
-
-        if self.associated_prj.is_bundle:
-            testfiles += [ opjoin(self.runner_src_path, 'testBundle.cpp') ]
+        testfiles += self.runner_src
 
         return testfiles
 
@@ -109,7 +108,9 @@ class CppUnitProject(ConstructibleRacyProject):
             'xml'   :'testRunnerXML.cpp'   ,
             }
         runner = sources.get(self.test_type)
-        runner = opjoin(self.runner_build_dir, runner)
+        runner = [opjoin(self.runner_build_dir, runner)]
+        if self.associated_prj.is_bundle:
+            runner += [ opjoin(self.runner_build_dir, 'testBundle.cpp') ]
         return runner
 
 

@@ -18,6 +18,9 @@ ALLOWED_COMMANDLINE_OPTIONS = [
         'USEVISIBILITY'    ,
         'CXX'              ,
 
+        'PROGRESS'         ,
+        'PLUGINS'          ,
+
         'RACY_DBFILE'      ,
         'RACY_BUILD_DIR'   ,
         'RACY_INSTALL_DIR' ,
@@ -29,6 +32,7 @@ ALLOWED_COMMANDLINE_OPTIONS = [
         ]
 
 ALLOWED_COMMANDLINE_PRJ_OPTIONS = [
+        'JOBS_LIMIT'      ,
         'LOGLEVEL'        ,
         'BUILD'           ,
         'BUILDDEPS'       ,
@@ -41,6 +45,8 @@ COMMANDLINE_OPTIONS_DESC = {
         'ARCH'              : 'Architecture destination'                            ,
         'DEBUG'             : 'Debug mode'                                          ,
         'RACY_DEBUG'        : 'Switch SConspiracy to debug mode'                    ,
+        'JOBS_LIMIT'        : ('For the specified project, limit the number of'
+                               'simultaneously compiled files'),
         'LOGLEVEL'          : 'Log level'                                           ,
         'OPTIMIZATIONLEVEL' : 'Optimization level'                                  ,
         'WARNINGSASERRORS'  : 'Treat compilation warning as errors '                ,
@@ -61,6 +67,9 @@ COMMANDLINE_OPTIONS_DESC = {
         'RACY_INSTALL_DIR'  : 'Install dir path'                             ,
         'RACY_BINPKGS_DIR'  : 'Binaries packages path'                       ,
         'RACY_CODE_DIRS'    : 'List of path containing SConspiracy projects' ,
+
+        'PROGRESS'          : 'Enable progress' ,
+        'PLUGINS'           : 'Comma separated list of plugin to enable' ,
 
         }
 
@@ -114,7 +123,8 @@ def get_opts_help():
             opt_def = getattr(default, opt, Undef)
             if opt_def is Undef:
                 import racy
-                raise racy.OptionError, '"{0}" has no default value'
+                msg = '"{0}" has no default value'
+                raise racy.OptionError, msg.format(opt)
             allowed = getattr(allowedvalues, opt, Undef)
             current = opts.get_option(opt)
             help.append(get_opt_help(opt, desc, opt_def, allowed, current))

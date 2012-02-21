@@ -7,7 +7,6 @@
 
 
 ENABLE_COLORACY_KEYWORD = 'COLORACY'
-COLORACY_KEYWORD        = 'COLORACY_PATTERNS'
 
 COLORACY_PATTERN_HELP = """Defines colors and patterns that are used to
     colorize output.
@@ -41,7 +40,7 @@ scons_patterns = [
         ([cerror, cfile, cerror] , ['^.*?', '[^:\] ]+', '[:\]].*(interrupted|failed).*$']),
         ([cerror]                , ['^Build failed$']),
         ([cscons, cfile]         , ['^Removed', ' .*']),
-        ([cscons, cfile, cscons, cfile, cscons] , ['^Install file.+?[\'"]', '.*?', '[\'"].*?[\'"]', '.*?', '[\'"].*$']),
+        ([cscons, cfile, cscons, cfile, cscons] , ['^Install .+?[\'"]', '.*?', '[\'"].*?[\'"]', '.*?', '[\'"].*$']),
 
         # exception header : +-[Error]: PRJError =========
         ([yellow, red, yellow, magenta, yellow], ['^\+-\[', '[^\]]+', '\]: ', '\w+', '.*$']),

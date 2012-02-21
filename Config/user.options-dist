@@ -15,7 +15,7 @@ elif racy.renv.system() == 'darwin':
     dev_dir = '~/DEV'
 
 elif racy.renv.system() == 'windows':
-    MSVS_VERSION = "7.1"
+    MSVC_VERSION = "7.1"
     dev_dir = 'C:/DEV'
 
 from os.path import join

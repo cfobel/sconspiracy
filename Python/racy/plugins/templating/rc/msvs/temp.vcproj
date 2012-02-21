@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<%
+
+
+step =  [ ('racy' , PRJ_NAME),
+         ('racy/BUILDDEPS=no' , PRJ_NAME + '/BUILDDEPS=no'),
+         ('racy/DEBUG=release', PRJ_NAME + ' DEBUG=release'),
+       ]
+       
+ 
+%>
+<VisualStudioProject
+    ProjectType="Visual C++"
+    Version="9,00"
+    Name="${PRJ_USER_FORMAT}"
+    ProjectGUID="{${PRJ_NAME}}"
+    
+    Keyword="MakeFileProj"
+    TargetFrameworkVersion="196613"
+    >
+    <Platforms>
+        <Platform
+            Name="Win32"
+        />
+    </Platforms>
+    <ToolFiles>
+    </ToolFiles>
+    <Configurations>
+%for name, option in step:
+        <Configuration
+            Name="${name}|Win32"
+            OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+            IntermediateDirectory="$(ConfigurationName)"
+            ConfigurationType="0"
+
+             >
+            <Tool
+                Name="VCNMakeTool"
+                BuildCommandLine="${RACY_CMD}.bat ${option}"
+                ReBuildCommandLine="${RACY_CMD}.bat ${option}"
+                CleanCommandLine="racy - c appXML"
+                Output=""
+                PreprocessorDefinitions=""
+                IncludeSearchPath="${';'.join(DEPS_INCLUDES) + ';' + PRJ_ROOT_DIR + "\\include"}"
+                ForcedIncludes=""
+                AssemblySearchPath=""
+                ForcedUsingAssemblies=""
+                CompileAsManaged=""
+            />
+        </Configuration>
+%endfor
+    </Configurations>
+    <References>
+    </References>
+    <Files>
+        <Filter
+            Name="Sources"
+            Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx;py"
+            UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+            >
+            %for i in SOURCES :
+            <File
+                RelativePath="${i}"
+                >
+            </File>
+            %endfor
+            
+        </Filter>
+        <Filter
+            Name="Include"
+            Filter="h;hpp;hxx;hm;inl;inc;xsd"
+            UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+            >
+            %for i in HEADERS:
+            <File
+                RelativePath="${i}"
+                >
+            </File>
+            %endfor
+        </Filter>
+        <Filter
+            Name="Ressources"
+            Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;.bin"
+            UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+            >
+            %for i in OTHERS_FILE:
+            <File
+                RelativePath="${i}"
+                >
+            </File>
+            %endfor
+        </Filter>
+    </Files>
+    <Globals>
+    </Globals>
+</VisualStudioProject>

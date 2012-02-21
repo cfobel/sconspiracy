@@ -15,11 +15,11 @@ ARCH          = ['32','64']
 DEBUG         = ['full','release']
 DISTRIB       = ['yes','no']
 
-TOOL          = ['auto','g++','msvc']
+TOOL          = ['auto','g++','msvc','mssdk']
 
 TYPE          = [
                 'exec','shared','static','bundle',
-                'bin_shared', 'bin_bundle', 'bin_exec', 'bin_libext',
+                'bin_shared', 'bin_bundle', 'bin_exec', 'bin_libext'
                 ]
 
 
@@ -67,7 +67,7 @@ def check_value_with_msg(opt, val, location, exceptions = {},
                                                     loc   = location,
                                                     allow = allowed
                                                     )
-        raise except_class, msg
+        raise except_class(msg)
 
 def check_dict_with_msg(d, location, exceptions = {},
         except_class = ConfigError):

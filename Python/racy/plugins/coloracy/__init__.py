@@ -21,7 +21,6 @@ class Plugin(racy.rplugins.Plugin):
 
     options = {
             base.ENABLE_COLORACY_KEYWORD : 'auto',
-            base.COLORACY_KEYWORD        : None,
             }
 
     allowed_values = {
@@ -33,11 +32,11 @@ class Plugin(racy.rplugins.Plugin):
     descriptions_opts = {
             base.ENABLE_COLORACY_KEYWORD : 'Enable/disable coloracy plugin. '
                                            '"yes" forces color.',
-            base.COLORACY_KEYWORD        : base.COLORACY_PATTERN_HELP,
             }
 
     stdout = sys.stdout
     stderr = sys.stderr
+
 
     def __init__(self):
         user_pattern = self.get_patterns()
@@ -68,25 +67,4 @@ class Plugin(racy.rplugins.Plugin):
                                     type=type)
         return stream
 
-
-    def has_additive(self, prj):
-        user_option = prj.get(base.ENABLE_COLORACY_KEYWORD)
-        enable = user_option == 'auto'
-        force  = user_option == 'yes'
-
-        if enable or force:
-            user_ptrn = prj.get(base.COLORACY_KEYWORD)
-            user_ptrn = self.get_patterns(user_ptrn)
-            sys.stdout = self.get_proxy_stream(
-                    self.stdout, user_ptrn, force=force)
-            sys.stderr = self.get_proxy_stream(
-                    self.stderr, user_ptrn, type='stderr', force=force)
-        else:
-            sys.stdout = self.stdout
-            sys.stderr = self.stderr
-
-        sys.__stdout__ = sys.stdout
-        sys.__stderr__ = sys.stderr
-
-        return False
 

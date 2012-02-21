@@ -29,9 +29,8 @@ def get_racy_default(opt, config,
     if config is None:
         config = get_option('CONFIG',config=configs.DEFAULT_CONFIG)
 
-    try:
-        defaults_source = configs.get_config(config)
-    except ConfigVariantError, e:
+    defaults_source = configs.get_config(config, raise_on_not_found = False)
+    if not defaults_source:
         defaults_source = configs.get_config(configs.DEFAULT_CONFIG)
 
 
@@ -77,21 +76,19 @@ def get_user_options(opt, config, default, prj=NotUsed, option_value=Undefined):
         ckconfig = ":".join([options_file, config])
     allowedvalues.check_value_with_msg(opt, res, ckconfig, exceptionnal_case)
 
-    try:
-        old_res = res
+    old_res = res
 
-        loc = renv.dirs.user_configs
-        source = configs.get_config(config, path=loc,
-                include_defaults = False)
+    loc = renv.dirs.user_configs
+    source = configs.get_config(config, path=loc,
+            include_defaults = False, raise_on_not_found = False)
 
+    if source:
         res = source.get(opt, res)
 
         if old_res != res:
             ckconfig = ":".join([loc,config])
             allowedvalues.check_value_with_msg(opt, res, ckconfig, 
-                                                exceptionnal_case)
-    except ConfigVariantError, e:
-        pass # user-config 'config' is inexistant
+                                            exceptionnal_case)
 
     return res
 
@@ -149,9 +146,13 @@ def get_commandline_prj_options(opt, prj, default, option_value=Undefined,
 def get_overrided_project_value(opt, config, default, option_value,
                                         prj=NotUsed):
     override = get_racy_default('OVERRIDE_PROJECT_VALUE', config)
-    res = override.get(opt, option_value 
+    res = override.get(opt, option_value
             if option_value is not Undefined and option_value else default)
-    allowedvalues.check_value_with_msg(opt, res, config+":OVERRIDE_PROJECT_VALUE")
+    prjname = ''
+    if prj:
+        prjname = ':' + prj.base_name
+        allowedvalues.check_value_with_msg(opt, res,
+                config+':OVERRIDE_PROJECT_VALUE' + prjname)
     return res
 
 
@@ -159,7 +160,7 @@ def get_overrided_project_value(opt, config, default, option_value,
 def check_deprecated(opt, config, prj, default=NotUsed, option_value=Undefined):
     deprecated = get_racy_default('DEPRECATED', config)
 
-    if deprecated.has_key(opt):
+    if opt in deprecated:
         import warnings
         msg = [
             ('<{0}> option is deprecated (config <{1}>) and not'
@@ -199,7 +200,6 @@ def get_option(opt, prj=None, default=None, option_value=Undefined, config=None)
             ]
 
     for f in funcs:
-        avant = kwargs['default']
         kwargs['default'] = f(**kwargs)
 
     res = kwargs['default']
@@ -225,7 +225,7 @@ class Paths(object):
     def get_path(self, name):
         var_names = self.var_names
         res = None
-        if var_names.has_key(name):
+        if name in var_names:
             vn = var_names[name]
             if name == 'config':
                 res = get_racy_default(vn, configs.DEFAULT_CONFIG)

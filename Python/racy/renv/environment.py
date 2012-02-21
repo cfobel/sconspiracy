@@ -5,7 +5,6 @@
 # published by the Open Source Initiative.  
 # ****** END LICENSE BLOCK ******
 
-
 from SCons.Environment import Environment as Env
 from SCons import Action
 
@@ -32,6 +31,8 @@ class Environment(Env):
         from os.path           import abspath, dirname, join
 
         import racy
+
+
         import racy.renv as renv
         import racy.rlog as rlog
 
@@ -40,8 +41,9 @@ class Environment(Env):
         from racy.rproject     import RacyProjectsDB
 
         kwargs['toolpath'] = renv.toolpath() + kwargs.get('toolpath',[])
+        self._callbacks = []
 
-        for opt in ['DEBUG', 'TOOL', 'MSVS_VERSION']:
+        for opt in ['DEBUG', 'TOOL', 'MSVC_VERSION','MSSDK_VERSION']:
             kwargs[opt] = get_option(opt)
 
 
@@ -49,13 +51,39 @@ class Environment(Env):
         kwargs['tools'] += env_tools
         kwargs.update(env_vars)
 
+        kwargs['ARCH'] = get_option('ARCH')
+        cxx = get_option('CXX')
+        if cxx :
+            kwargs['CXX'] = cxx
+
         Env.__init__(self, *args, **kwargs)
 
+        FLAGS = (
+                  '$( ${{_concat(INCPREFIX, {0}, INCSUFFIX, '
+                  '__env__, RDirs, TARGET, SOURCE)}} $)'
+                 )
 
-        act = self.Action( CopyBuilder, "Install file '$$SOURCE' as '$$TARGET'")
-        self.__CopyBuilder__ = self.Builder(action = act)
+        self['CPP_LIBEXT_PATH'] = []
+        self['_CPPINCFLAGS'] = (
+                FLAGS.format('CPPPATH')
+                + FLAGS.format('CPP_LIBEXT_PATH')
+                    )
 
-        racy.rplugins.register.get_env_addons(self)
+
+        act = self.Action( CopyBuilder, "Install '$$SOURCE' as '$$TARGET'")
+        self.__CopyBuilder__ = self.Builder(
+                action = act,
+                source_factory = self.Entry,
+                target_factory = self.Entry,
+                )
+
+        res = racy.rplugins.register.get_env_addons(self)
+       
+        if True in res:
+            racy.exit_racy(0)
+
+        self['_FORCE_INCLUDE'] = '${_defines(FORCE_INCLUDE_PREFIX, FORCE_INCLUDE, FORCE_INCLUDE_SUFFIX, __env__)}'
+        self['_CCCOMCOM'] = self['_CCCOMCOM'] + ' ${_FORCE_INCLUDE}'
 
         if not self.GetOption('help'):
             tool = self['TOOL']
@@ -65,8 +93,10 @@ class Environment(Env):
 
             self.Decider('MD5-timestamp')
 
+
             self.prj_db = db = RacyProjectsDB(env = self)
             self.lookup_list.append( db.target_lookup )
+
 
         num_jobs = get_option('JOBS')
         if num_jobs == 'auto':
@@ -75,17 +105,9 @@ class Environment(Env):
         self.SetOption('num_jobs', num_jobs)
         
         # allow use of cached md5 after 600 sec (instead of 2 days).
-        # Speed up about a few seconds
         self.SetOption('max_drift', 600)
         
-        sconsign_file = self.GetOption('file')
-        if sconsign_file:
-            racy_sconsdir     = dirname(sconsign_file[0])
-        else:
-            racy_sconsdir     = '.'
-
-        racy_db_file_default = join(racy_sconsdir,'.sconsign.dblite')
-        racy_db_file_default = abspath(racy_db_file_default)
+        racy_db_file_default = join(racy.renv.dirs.build, '.sconsign.dblite')
 
         racy_db_file = get_option('RACY_DBFILE')
         if not racy_db_file:
@@ -97,6 +119,10 @@ class Environment(Env):
         import os
         from racy.renv.configs.commandline import get_opts_help
         self.Help( (os.linesep*2).join(get_opts_help()) )
+
+        map(lambda f:f(self), self._callbacks)
+        del self._callbacks
+
 
 
 

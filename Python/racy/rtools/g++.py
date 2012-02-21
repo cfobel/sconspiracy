@@ -8,96 +8,34 @@
 
 from racy.renv         import constants
 from racy.renv.options import get_option
-from racy.rtools       import get_tool
-from racy.rutils       import merge_lists_of_dict, is_true
+from racy.rtools       import common, get_tool
 
 gplusplus = get_tool('SCons.Tool.g++')
 
 exists = gplusplus.exists
 
+class GccFlags(common.Flags):
+    CXXFLAGS         = [
+                        '-pipe',
+                        '-Winvalid-pch',
+                        '-Wunknown-pragmas',
+                        '-Werror=return-type'
+                       ]
+    CXXFLAGS_DEBUG   = ['-O0']
 
-def generate(env):
-    """Add Builders and construction variables for g++ to an Environment."""
+    CFLAGS           = ['-pipe']
+    CFLAGS_DEBUG     = ['-O0']
 
-    compiler = get_option("CXX")
-    if compiler:
-        gplusplus.compilers = [compiler]
-    gplusplus.generate(env)
-    env.__class__.ManageOption = manage_options
-    env.__class__.InstallFileFilter = install_file_filter
 
-    CXXFLAGS = [
-            '-pipe'             ,
-            '-Winvalid-pch'     ,
-            '-Wunknown-pragmas' ,
-            ]
+    WARNINGSASERRORS_FLAGS = ['-Werror']
+    OPTIMIZATION_FLAGS     = ['-O${OPTIMIZATIONLEVEL}']
 
-    CPPDEFINES = []
-    LINKFLAGS  = []
-    
-    if get_option('PLATFORM') == constants.LINUX:
-        CPPDEFINES += [
-                '__linux' ,
-                'posix'   ,
+    CXXFLAGS_RACY_VISIBILITY = [
+                '-fvisibility=hidden',
+                '-fvisibility-inlines-hidden',
+                '-fvisibility-ms-compat',
                 ]
-        LINKFLAGS += [
-                '-fpic'               ,
-                '-fno-stric-aliasing' ,
-                '-fno-common'         ,
-                ]
-
-    elif get_option('PLATFORM') == constants.MACOSX:
-        LINKFLAGS += [
-                '-no-cpp-precomp'              ,
-                '-headerpad_max_install_names' ,
-                ]
-
-        CPPDEFINES += [
-                '__MACOSX__' ,
-                ]
-
-    if env.get('DEBUG') == 'release' :
-        merge_lists_of_dict(locals(), constants.COMMON_RELEASE)
-    else :
-        merge_lists_of_dict(locals(), constants.COMMON_DEBUG)
-
-        gdb_level = 'gdb3'
-        if get_option('PLATFORM') == constants.MACOSX:
-            gdb_level = 'gdb2'
-        CXXFLAGS  += [ '-O0', '-g' + gdb_level ]
-
-    env['TOOLINFO'] = {}
-    env['TOOLINFO']['NAME']    = 'gcc'
-    env['TOOLINFO']['VERSION'] = env['CXXVERSION']
-
-
-    if get_option('ARCH') == '32':
-        CXXFLAGS  += ['-m32']
-        LINKFLAGS += ['-m32']
-    elif get_option('ARCH') == '64':
-        CXXFLAGS  += ['-m64']
-        LINKFLAGS += ['-m64']
-        
-    CPPDEFINES += [ ('__ARCH__' , r'\"{0}\"'.format(get_option('ARCH'))) ]
-
-
-    names = ['CPPDEFINES','LINKFLAGS','CXXFLAGS']
-    attrs = [locals()[n] for n in names]
-    env.MergeFlags(dict(zip(names,attrs)), unique=True)
-
-
-def manage_options(env, prj, options):
-    CPPDEFINES = []
-    CXXFLAGS   = []
-
-    if is_true(options.get('WARNINGSASERRORS', 'no')):
-        CXXFLAGS += ['-Werror']
-
-    if 'OPTIMIZATIONLEVEL' in options:
-        CXXFLAGS += ['-O{0}'.format(options['OPTIMIZATIONLEVEL'])]
-
-    if options.get('USEVISIBILITY') == 'racy':
-        CPPDEFINES += [
+    CPPDEFINES_RACY_VISIBILITY = [
             ('_API_EXPORT'      , r'__attribute__\(\(visibility\(\"default\"\)\)\)'),
             ('_CLASS_API_EXPORT', r'__attribute__\(\(visibility\(\"default\"\)\)\)'),
 
@@ -107,37 +45,79 @@ def manage_options(env, prj, options):
             ('_TEMPL_API_EXPORT', ''),
             ('_TEMPL_API_IMPORT', r'extern\/\*\*\/\"C++\"'),
                 ]
-        CXXFLAGS += [
-                '-fvisibility=hidden'        ,
-                '-fvisibility-inlines-hidden',
-                '-fvisibility-ms-compat'     ,
-                ]
 
-    env.Append(CPPDEFINES = CPPDEFINES,
-               CXXFLAGS   = CXXFLAGS
-               )
-
-    if get_option('PLATFORM') == constants.MACOSX:
-        if prj.is_bundle or prj.is_shared:
-            import os
-            libname = ''.join(['lib',prj.full_name,'.dylib'])
-            if prj.is_bundle:
-                install_path = os.path.join('@executable_path', '..',
-                                        'Bundles', prj.versioned_name, libname)
-            else:
-                install_path = os.path.join('@executable_path', '..',
-                                        'Libraries', libname)
-
-            
-            flags = [
-                    '-dynamic',
-                    '-nostartfiles',
-                    '-install_name', install_path,
-                    '-multiply_defined','suppress',
-#                    '/usr/lib/dylib1.o', #??
+class GccFlagsOsX(GccFlags):
+    CFLAGS_DEBUG    = ['-ggdb2']
+    CXXFLAGS_DEBUG  = ['-ggdb2']
+    CPPDEFINES    = ['__MACOSX__']
+    LINKFLAGS     = [
+                     '-no-cpp-precomp',
+                     '-headerpad_max_install_names',
                     ]
-            env.Append(SHLINKFLAGS = flags)
 
+    ARCH_FLAGS         = ['-arch','${"i386" if ARCH=="32" else "x86_64"}']
+
+    LINKFLAGS_BUNDLE = [
+            '-dynamic',
+            '-nostartfiles',
+            '-install_name',
+            '@executable_path/../Bundles/${PRJ.versioned_name}/lib${PRJ.full_name}.dylib',
+            '-multiply_defined','suppress',
+            ]
+    LINKFLAGS_SHARED = [
+            '-dynamic',
+            '-nostartfiles',
+            '-install_name',
+            '@executable_path/../Libraries/lib${PRJ.full_name}.dylib',
+            '-multiply_defined','suppress',
+            ]
+
+class GccFlagsLinux(GccFlags):
+    CFLAGS_DEBUG    = ['-ggdb3']
+    CXXFLAGS_DEBUG  = ['-ggdb3']
+    CPPDEFINES    = ['__linux']
+    LINKFLAGS     = [
+                     '-fpic',
+                     '-fno-stric-aliasing',
+                     '-fno-common',
+                    ]
+    ARCH_FLAGS         = ['-m${ARCH}']
+
+
+
+def generate(env):
+    """Add Builders and construction variables for g++ to an Environment."""
+
+    compiler = get_option("CXX")
+    if compiler:
+        gplusplus.compilers = [compiler]
+
+    gplusplus.generate(env)
+    env.__class__.ManageOption = manage_options
+    env.__class__.InstallFileFilter = install_file_filter
+
+    if get_option('PLATFORM') == constants.LINUX:
+        FlagsGenerator = GccFlagsLinux
+    elif get_option('PLATFORM') == constants.MACOSX:
+        FlagsGenerator = GccFlagsOsX
+
+    flags = env.__class__.Flags = FlagsGenerator()
+    common.merge_flags(env, flags)
+
+
+    if compiler:
+        env['CXX'] = compiler
+    env['TOOLINFO'] = {}
+    
+    env['TOOLINFO']['NAME']    = 'gcc'
+    env['TOOLINFO']['VERSION'] = env['CXXVERSION']
+
+    env['FORCE_INCLUDE_PREFIX'] = '-include '
+    env['FORCE_INCLUDE_SUFFIX'] = ''
+    
+
+def manage_options(env, prj, options):
+    common.manage_options(env, prj, options)
 
 def install_file_filter(env, f):
     return hasattr(f,"get_path")

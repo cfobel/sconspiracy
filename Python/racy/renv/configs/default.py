@@ -21,6 +21,7 @@ TOOL              = 'auto'
 CONFIG            = 'default'
 
 JOBS              = 'auto'
+JOBS_LIMIT        = 0
 
 RACY_DEBUG        = 'no'
 
@@ -40,7 +41,8 @@ BUILDPKG          = "no"
 
 
 CXX               = ''
-MSVS_VERSION      = ''
+MSVC_VERSION      = ''
+MSSDK_VERSION     = ''
 
 USEVISIBILITY     = 'yes'
 CONSOLE           = 'no'
@@ -54,19 +56,26 @@ VERSION           = '0-0'
 
 LIB               = []
 BUNDLES           = []
+REQUIREMENTS      = []
 USE               = []
 
 
 DEF               = []
 INC               = []
 
+INCLUDE_DIRS      = ['include']
+SOURCE_DIRS       = ['src']
+SOURCE_FILES      = []
+
 STDLIBPATH        = []
 STDLIB            = []
 NOLIB             = []
 
+CFLAGS            = []
 CXXFLAGS          = []
 LINKFLAGS         = []
 
+PLUGINS           = None
 
 
 import os
@@ -80,6 +89,7 @@ ALLOW_USER_OPTIONS        = True
 OVERRIDE_PROJECT_VALUE = {}
 
 DEPRECATED = {
+    'MSVS_VERSION': 'Use "MSVC_VERSION" instead',
     'PATHLIB'     : 'Use "STDLIBPATH" instead.',
     'STDPATHLIB'  : 'Use "STDLIBPATH" instead.',
     'CPPFLAGS'    : 'Use "CXXFLAGS" instead.'  ,
@@ -89,6 +99,7 @@ DEPRECATED = {
     'TESTLIB'     : 'Use "CPPUNIT" instead, managed by cppunit plugin' ,
     }
 
+PROGRESS          = "no"
 
 NAME              = '' # Internal use only
 

@@ -24,6 +24,8 @@ class CppUnitError(racy.RacyProjectError):
 CPPUNIT_PLUGIN_PATH = os.path.dirname(__file__)
 
 
+
+
 class CppUnitProject(ConstructibleRacyProject):
     cppunit_test_dir    = 'tu'
     cppunit_option_file = 'cppunit.options'
@@ -48,6 +50,7 @@ class CppUnitProject(ConstructibleRacyProject):
 
         opt_file = self.get_options_file(prj)
 
+        self.associated_prj = prj
 
         super(CppUnitProject, self).__init__(
                                         build_options = opt_file, 
@@ -87,13 +90,9 @@ class CppUnitProject(ConstructibleRacyProject):
     def sources(self):
         files = ['{0}.cpp'.format(cls) for cls in self.classtest]
 
-        testfiles  = rutils.DeepGlob(
-                        constants.CXX_SOURCE_EXT, 
-                        self.src_path, 
-                        self.build_dir
-                        )
+        testfiles = super(CppUnitProject,self).sources
         testfiles  = [f for f in testfiles if os.path.basename(f) in files]
-        testfiles += [ self.runner_src ]
+        testfiles += self.runner_src
 
         return testfiles
 
@@ -109,7 +108,9 @@ class CppUnitProject(ConstructibleRacyProject):
             'xml'   :'testRunnerXML.cpp'   ,
             }
         runner = sources.get(self.test_type)
-        runner = opjoin(self.runner_build_dir, runner)
+        runner = [opjoin(self.runner_build_dir, runner)]
+        if self.associated_prj.is_bundle:
+            runner += [ opjoin(self.runner_build_dir, 'testBundle.cpp') ]
         return runner
 
 
@@ -117,10 +118,24 @@ class CppUnitProject(ConstructibleRacyProject):
     def runner_build_dir(self):
         return opjoin(self.build_dir, 'CPPUnit_runner')
 
+    def get(self, opt):
+        val = super(CppUnitProject, self).get(opt)
+        if opt == "USE":
+            val = list(set(val + ['cppunit']))
+        is_bundle = self.associated_prj.is_bundle
+        # is_bundle = True
+        if is_bundle:
+            if opt == "USE":
+                val = list(set(val + ['boost']))
+            if opt == "LIB":
+                db = self.projects_db
+                val = list(set(val + [db['fwRuntime'].versioned_name]))
+                val = list(set(val + [db['fwServices'].versioned_name]))
+        return val
+
+
     @run_once
     def configure_env(self):
-        racy.rlibext.register.configure(self, ['cppunit'])
-
         super(CppUnitProject, self).configure_env()
 
         self.variant_dir( self.runner_build_dir, self.runner_src_path )
@@ -129,11 +144,29 @@ class CppUnitProject(ConstructibleRacyProject):
     @memoize
     def result (self, deps_results):
         res = super(CppUnitProject, self).result(deps_results=deps_results)
+        if self.associated_prj.is_bundle:
+            env = self.env
+            if self.type == 'shared':
+                raise CppUnitError(self,
+                        "Cannot build a bundle test as a shared library.")
+            prj_version = r'\"{0.version}\"'.format(self)
+            env.AppendUnique(CPPDEFINES=('CPPUNIT_TEST_VERSION', prj_version))
+            bundle_test_header = opjoin(self.runner_src_path, 'testBundle.hpp')
+            env['FORCE_INCLUDE'] = bundle_test_header
+            env.Depends( res, env.File(bundle_test_header) )
+
+
         return res
+
 
     @memoize
     def install (self, opts = []):
-        res = super(CppUnitProject, self).install(opts = opts)
+        if rutils.is_true(self.get('BUILD')):
+            res = super(CppUnitProject, self).install(opts = opts)
+        else:
+            res = []
+
+        res += self.install_files(self.rc_path, self.install_rc_path, ['.*'])
 
         if self.get_lower(self.test_run_var_name) == 'yes':
             if self.type == 'shared':
@@ -141,18 +174,15 @@ class CppUnitProject(ConstructibleRacyProject):
             run_env = self.env.Clone()
 
             dirs = racy.renv.dirs
+            install_bin = opjoin(dirs.install,"bin")
             install_lib = opjoin(dirs.install,"lib")
 
-            env_var = {
-                    "linux"  : 'LD_LIBRARY_PATH'  ,
-                    "darwin" : 'DYLD_LIBRARY_PATH',
-                    "windows": 'PATH'             ,
-                    }
-            env_var = env_var[racy.renv.system()]
-
-            run_env.AppendENVPath(env_var, install_lib)
-            run_test = run_env.Alias('run'+self.name, res, res[0].abspath)
-            run_env.Depends(run_test, res[0])
+            run_env.Append(ENV = os.environ)
+            run_env.AppendENVPath(racy.renv.LD_VAR, install_lib)
+            execpath = opjoin(install_bin, self.full_name)
+            run_test = run_env.Alias('run-'+self.name, res, execpath)
+            if res:
+                run_env.Depends(run_test, res[0])
             run_env.AlwaysBuild(run_test)
 
             res += run_test

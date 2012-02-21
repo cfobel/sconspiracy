@@ -9,8 +9,8 @@ import racy
 import racy.rlog as rlog
 #import racy.rlibext as rlibext
 
-EnsureSConsVersion(1, 2, 0)
-EnsurePythonVersion(2, 6)
+EnsureSConsVersion(1, 3, 0)
+EnsurePythonVersion(2, 7)
 
 # Empty the Default tools list, avoid useless lookup into it.  
 # Speed up about a few seconds
@@ -61,6 +61,7 @@ rlog.info.log("Debug mode"  , racy.renv.options.get_option('DEBUG'))
 rlog.info.log("Nb jobs", env.GetOption('num_jobs'))
 
 
+rlog.info.log('ARCH', racy.renv.options.get_option('ARCH'))
 rlog.info.log('RACY_CONFIG_DIR' , racy.renv.dirs.config )
 rlog.info.log('RACY_BUILD_DIR'  , racy.renv.dirs.build  )
 rlog.info.log('RACY_INSTALL_DIR', racy.renv.dirs.install)
@@ -68,7 +69,6 @@ rlog.info.log('RACY_BINPKGS_DIR' , racy.renv.dirs.binpkg )
 rlog.info.log('RACY_CODE_DIRS'  , racy.renv.dirs.code   )
 
 racy.print_msg(rlog.info)
-
 
 import atexit
 def bf_to_str(bf):

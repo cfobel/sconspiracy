@@ -48,13 +48,16 @@ class LibExt(object):
 
     debug_suffix   = ''
 
+    install        = []
+
     scons_tools    = []
     scons_env      = {}
 
     name  = None
     debug = None
 
-    __src__ = None
+    _src            = None
+    _project_source = None
 
     def __init__(self, name, debug, infosource=None):
         platform_init = getattr(self, racy.renv.system(),
@@ -86,6 +89,7 @@ class LibExt(object):
                 'cxxflags'      , 'linkflags'     ,
                 'parse_configs' ,
                 'scons_tools'   , 'scons_env'     ,
+                'install'       ,
                 ]
         import copy
         for name in names:
@@ -103,7 +107,7 @@ class LibExt(object):
             if isinstance(attr,basestring) or hasattr(attr,'__iter__'):
                 setattr(self,name, copy.deepcopy(attr))
             else:
-                msg = ("libext members must be a allowed type (list, dict, str"
+                msg = ("libext members must be an allowed type (list, dict, str"
                        "), a callable, or a property. '{attr}' attribute type "
                        "({attrtype}) is invalid  in '{lib}' __init__.py file.")
                 raise LibExtException, msg.format(
@@ -140,11 +144,11 @@ class LibExt(object):
 
     @property
     def BINPATH(self):
-        return self.binpath
+        return map(LibExt.get_path, self.binpath)
 
     @property
     def LIBPATH(self):
-        return self.libpath
+        return map(LibExt.get_path, self.libpath)
 
     @property
     def LIBS(self):
@@ -159,7 +163,7 @@ class LibExt(object):
 
     @property
     def CPPPATH(self):
-        return self.cpppath
+        return map(LibExt.get_path, self.cpppath)
 
     @property
     def CPPDEFINES(self):
@@ -167,7 +171,24 @@ class LibExt(object):
 
     @property
     def FRAMEWORKPATH(self):
-        return self.frameworkpath
+        return map(LibExt.get_path, self.frameworkpath)
+
+    @property
+    def ABS_BINPATH(self):
+        return self.get_abs_path(self.binpath)
+
+    @property
+    def ABS_LIBPATH(self):
+        return self.get_abs_path(self.libpath)
+
+    @property
+    def ABS_CPPPATH(self):
+        return self.get_abs_path(self.cpppath)
+
+    @property
+    def ABS_FRAMEWORKPATH(self):
+        return self.get_abs_path(self.frameworkpath)
+
 
     @property
     def FRAMEWORKS(self):
@@ -192,10 +213,16 @@ class LibExt(object):
         return path
 
     @staticmethod
-    def get_libext_path(path):
+    def get_path(path):
         path = racy.rutils.iterize(path)
         path = os.path.join(*path)
         return path
+
+    def get_abs_path(self, pathlst):
+            pathlst = [LibExt.get_path(path) for path in pathlst]
+            pathlst = [LibExt.absolutize(path, self.basepath)
+                        for path in pathlst]
+            return pathlst
 
     def preconfigure(self, env, opts):
         pass
@@ -206,20 +233,23 @@ class LibExt(object):
 
         nolink = 'nolink' in opts
         conf = {}
-        names = [
-                'LIBPATH'      , 'LIBS'      ,
-                'CPPPATH'      , 'CPPDEFINES',
-                'FRAMEWORKPATH', 'FRAMEWORKS',
-                'CXXFLAGS'     , 'LINKFLAGS' ,
-                ]
+        names = {
+                'LIBPATH'       : 'ABS_LIBPATH'      ,
+                'CPP_LIBEXT_PATH'       : 'ABS_CPPPATH'      ,
+                #'CPPPATH'       : 'ABS_CPPPATH'      ,
+                'FRAMEWORKPATH' : 'ABS_FRAMEWORKPATH',
+                'LIBS'          : 'LIBS'             ,
+                'CPPDEFINES'    : 'CPPDEFINES'       ,
+                'FRAMEWORKS'    : 'FRAMEWORKS'       ,
+                'CXXFLAGS'      : 'CXXFLAGS'         ,
+                'LINKFLAGS'     : 'LINKFLAGS'        ,
+                }
 
-        for name in names:
-            attr = getattr(self, name)
+        for name, attr_name in names.items():
+            attr = getattr(self, attr_name)
             if attr:
-                if 'PATH' in name:
-                    attr = [self.get_libext_path(path) for path in attr]
-                    attr = [self.absolutize(path, self.basepath) for path in attr]
                 conf[name] = attr
+
 
         if self.parse_configs:
             try :
@@ -234,10 +264,11 @@ class LibExt(object):
                 if env.has_key(name):
                     env[name] = back_env[name]
 
-        env.AppendUnique(**conf)
+        
+        env.PrependUnique(**conf)
 
 
-        bin_path = [self.get_libext_path(path) for path in self.BINPATH]
+        bin_path = [self.get_path(path) for path in self.BINPATH]
         bin_path = [self.absolutize(path, self.basepath) for path in bin_path]
         env.PrependENVPath('PATH',bin_path)
 

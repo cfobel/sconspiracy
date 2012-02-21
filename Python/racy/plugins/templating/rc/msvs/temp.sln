@@ -1,0 +1,31 @@
+
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+%for i in DEPS:
+%if i['PRJ_TYPE'] in ['shared', 'bundle', 'exec','libext']:
+Project("{${CALLING_PROJECT}}") = "${i['PRJ_NAME']}", "${i['PRJ_NAME']}\${i['PRJ_NAME']}.vcproj", "{${i['PRJ_NAME']}}"
+EndProject
+%endif
+%endfor
+Project("{${CALLING_PROJECT}}") = "${CALLING_PROJECT}", "${CALLING_PROJECT}\${CALLING_PROJECT}.vcproj", "${CALLING_PROJECT}"
+EndProject
+
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        racy|Win32 = racy|Win32
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        %for i in DEPS:
+        %if i['PRJ_TYPE'] in ['shared', 'bundle', 'exec','libext']:
+        {${i['PRJ_NAME']}}.racy|Win32.ActiveCfg = racy/BUILDDEPS=no|Win32
+        {${i['PRJ_NAME']}}.racy|Win32.Build.0 = racy/BUILDDEPS=no|Win32
+        %endif
+        %endfor
+        {${CALLING_PROJECT}}.racy|Win32.ActiveCfg = racy/BUILDDEPS=no|Win32
+        {${CALLING_PROJECT}}.racy|Win32.Build.0 = racy/BUILDDEPS=no|Win32
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+EndGlobal
+

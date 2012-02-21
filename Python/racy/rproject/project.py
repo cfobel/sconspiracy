@@ -1,4 +1,3 @@
-# -*- coding: UTF8 -*-
 # ***** BEGIN LICENSE BLOCK *****
 # Sconspiracy - Copyright (C) IRCAD, 2004-2010.
 # Distributed under the terms of the BSD Licence as
@@ -6,7 +5,9 @@
 # ****** END LICENSE BLOCK ******
 
 import os
+import threading
 
+from collections import Counter
 from os.path import join as pathjoin, abspath, normpath
 
 
@@ -23,10 +24,41 @@ from racy import ConfigVariantError,\
 
 from racy.renv.configs import get_config, allowedvalues
 from racy.renv         import constants
-from racy.rutils       import cached_property, memoize, run_once
+from racy.rutils       import cached_property, memoize, run_once, vcs
 
+
+def abspath_key(r): 
+    return r.get_abspath()
 
 all = ['LibName', 'RacyProject', 'ConstructibleRacyProject']
+
+
+class Progress(object):
+    count = 0
+    progress_count = 0.
+    targets = []
+    lock = threading.Lock()
+
+    def __init__(self, target, use_count):
+        self.use_count = use_count
+        if use_count:
+            Progress.targets.append(target)
+
+
+    def postbuild(self, *a, **k):
+        Progress.lock.acquire(True)
+        if Progress.count == 0.:
+            Progress.count += len([ t for t in Progress.targets if t.changed() ])
+
+        target = k['target'][0]
+        if self.use_count:
+            Progress.progress_count += 1
+        progress = int((Progress.progress_count/Progress.count)*100)
+        progress_str = "[{0: >3.3g}%] {1}"
+        msg = target.abspath
+        progress_str = progress_str.format(progress, msg)
+        racy.print_msg(progress_str)
+        Progress.lock.release()
 
 
 LIBEXT    = ('libext', )
@@ -43,7 +75,7 @@ BINBUNDLE = ('bin_bundle', )
 BINEXEC   = ('bin_exec'  , )
 BINLIB    = BINSHARED + BINSTATIC
 
-TYPE_ALL       = LIBEXT + STATIC + LIB + EXEC
+TYPE_ALL       = LIBEXT + STATIC + LIB + EXEC + BUNDLE
 TYPE_ALLBIN    = BINLIBEXT + BINSTATIC + BINLIB + BINEXEC
 TYPE_ALLBUNDLE = BUNDLE + BINBUNDLE
 TYPE_ALLSTATIC = STATIC + BINSTATIC
@@ -118,6 +150,7 @@ class RacyProject(object):
     _platform      = None
     _project_dir   = None
 
+    prj_def_vars   = None
     prj_locals     = None
     projects_db    = None
     special_source = None
@@ -128,7 +161,7 @@ class RacyProject(object):
     def __init__(self, build_options, prj_path=None,
             platform='', cxx='', debug='',
             config = None,
-            locals=None, globals=None, projects_db = {}):
+            projects_db = {}, **kw):
 
         build_options_is_dict = isinstance(build_options, dict)
 
@@ -156,16 +189,22 @@ class RacyProject(object):
         self._opts_source = build_options
         self._project_dir = prj_path
 
-        self.prj_locals = locals = locals if locals is not None else {}
-        globals = globals if globals is not None else {}
-        
+        self.prj_def_vars = {}
+        self.prj_locals = kw.get('_locals' ,{})
+        _globals        = kw.get('_globals',{})
+        if self.prj_locals is None:
+            self.prj_locals = {}
+
+
         if build_options_is_dict:
-            locals.update(build_options)
+            self.prj_locals.update(build_options)
+            self.prj_def_vars.update(build_options)
         else:
             get_config(os.path.basename(build_options),
-                    path    = build_options_dir,
-                    locals  = locals,
-                    globals = globals,
+                    path     = build_options_dir,
+                    _locals  = self.prj_locals,
+                    _globals = _globals,
+                    defs     = self.prj_def_vars,
                     )
 
         # Check if one project config matches the global specified CONFIG
@@ -178,23 +217,24 @@ class RacyProject(object):
                 config = global_config
 
         if config:
-            locals = get_config(config,
+            config_locals = get_config(config,
                         path          = config_dir,
-                        locals        = locals,
-                        globals       = globals,
+                        _locals       = self.prj_locals,
+                        _globals      = _globals,
                         write_postfix = True,
                         read_default  = False,
+                        defs          = self.prj_def_vars,
                         )
 
         self._platform  = platform
-        self._compiler  = rutils.Version(cxx)
+        self._compiler  = cxx
         self._debug     = debug
         self._config    = config
 
         self.base_name = self.prj_locals.get('NAME')
         if not self.base_name:
             self.base_name = os.path.basename(prj_path)
- 
+
 
         self.projects_db    = projects_db
         self.special_source = []
@@ -202,7 +242,7 @@ class RacyProject(object):
 
 
     def __repr__(self):
-        return '{0.__class__.__name__} for {0.full_name}'.format(self)
+        return '{0.__class__.__name__} for {0.base_name}'.format(self)
 
     def __str__(self):
         return LibName(self.full_name)
@@ -219,19 +259,16 @@ class RacyProject(object):
         name = self.base_name
         kwargs['opt']          = opt
         kwargs['prj']          = self
-        kwargs['option_value'] = self.prj_locals.get(opt, None)
+        kwargs['option_value'] = self.prj_def_vars.get(opt, None)
         config = (self.config if self.config else "default")
         config = ''.join([name, ':', config])
         
-        class PRJError(RacyProjectError):
-            """Local exception to handle bad-value with guilty options source"""
-            def __init__(this, msg):
-                msg = [msg, ". In: {prj._opts_source}"]
-                RacyProjectError.__init__(this,
-                        self, ''.join(msg))
-
-        allowedvalues.check_value_with_msg(opt, kwargs['option_value'], config,
-                except_class=PRJError)
+        if opt in self.prj_def_vars:
+            allowedvalues.check_value_with_msg(
+                    opt,
+                    kwargs['option_value'],
+                    config + " " + str(kwargs['prj'].opts_source)
+                    )
         res = renv.options.get_option( **kwargs )
         return res
 
@@ -241,7 +278,7 @@ class RacyProject(object):
         return self.get(opt).lower()
     
 
-    def get_path (self, path = ""):
+    def get_path(self, path = ""):
         """Return base path of project."""
         path = pathjoin(self._project_dir, path)
         return abspath(normpath(path))
@@ -286,13 +323,20 @@ class RacyProject(object):
 
 
     @cached_property
-    def src_path (self):
-        return self.get_path(constants.SOURCE_PATH)
+    def src_dirs (self):
+        return self.get('SOURCE_DIRS')
 
+    @cached_property
+    def src_path (self):
+        return map(self.get_path, self.src_dirs)
+
+    @cached_property
+    def include_dirs (self):
+        return self.get('INCLUDE_DIRS')
 
     @cached_property
     def include_path (self):
-        return self.get_path(constants.INCLUDE_PATH)
+        return map(self.get_path, self.include_dirs)
 
 
     @cached_property
@@ -310,7 +354,7 @@ class RacyProject(object):
 
     @cached_property
     def cpp_path (self):
-        return [self.get_path(p) for p in [constants.INCLUDE_PATH,'interface'] 
+        return [self.get_path(p) for p in self.get('INCLUDE_DIRS')
                 if os.path.isdir(self.get_path(p))]
 
 
@@ -466,7 +510,15 @@ class RacyProject(object):
     def is_bin_lib (self):
         return self.is_bin_shared
 
-
+    @property
+    def is_bin (self):
+        return any( [ 
+            self.is_bin_shared,
+            self.is_bin_lib,
+            self.is_bin_libext,
+            self.is_bin_exec,
+            self.is_bin_bundle,
+            ])
 
     @cached_property
     def is_console (self):
@@ -510,42 +562,63 @@ class RacyProject(object):
         return libnames
 
     @cached_property
+    def requirements(self):
+        """Returns projects that 'self' project depends on"""
+        return self._get_libnames('REQUIREMENTS')
+
+
+    @cached_property
     def bundles(self):
         """Returns bundles that project depends on"""
         return self._get_libnames('BUNDLES')
 
 
     @cached_property
-    def uses (self):
+    def uses(self):
         """Returns external libs that project depends on"""
         return tuple(LibName(use.strip()) for use in self.get('USE'))
 
 
     def _get_deps(self, item, src_projects, check_versions=True):
         db = self.projects_db
+        items = getattr(self,item)
         try:
             if check_versions and src_projects:
                 def check_vers(dep):
                     try:
-                        return db[dep.register_name].version==dep.version
+                        name = dep.register_name
+                        registered = name in db
+                        return registered and not db[name].version==dep.version
                     except KeyError:
                         raise RacyProjectError(self,
                             ''.join(['Missing <' , dep.register_name , '>. '
                                         'Required by {prj.desc}'])
                                         )
 
-                bad_versions = tuple(dep for dep in getattr(self,item) 
-                            if dep.register_name in db and not check_vers(dep))
+                bad_versions = tuple(dep for dep in items if check_vers(dep))
                 if bad_versions:
                     raise LibBadVersion(bad_versions, self)
 
+
             if src_projects:
-                deps = tuple( db[dep.register_name]
-                                for dep in getattr(self,item)
-                                if dep.register_name in db )
+                def is_src_project(dep):
+                    name = dep.register_name
+                    return name in db and not db[dep.register_name].is_bin
+
+                validator = is_src_project
             else:
-                deps = tuple( dep for dep in getattr(self,item) 
-                        if dep.register_name not in db )
+                def is_bin_prj(dep):
+                    name = dep.register_name
+                    if name not in db:
+                        #this will register name to db
+                        libext = rlibext.register.get_lib_for_prj(name, self)
+                    return db[name].is_bin
+
+                validator = is_bin_prj
+
+
+            deps = tuple( db[dep.register_name]
+                            for dep in items if validator(dep) )
 
             return deps
 
@@ -560,6 +633,13 @@ class RacyProject(object):
         """
         return self._get_deps('libs', src_projects = True)
 
+
+    @cached_property
+    def requirements_deps(self):
+        """Returns bundles provided as sources that project depends on.
+        """
+        return self._get_deps('requirements', src_projects = True,
+                                check_versions=False)
 
 
     @cached_property
@@ -592,10 +672,17 @@ class RacyProject(object):
                                 check_versions=False)
 
     @cached_property
+    def bin_uses_deps(self):
+        """Returns bundles provided as binary packages that project depends on.
+        """
+        return self._get_deps('uses', src_projects = False,
+                                check_versions=False)
+
+    @cached_property
     def bin_deps(self):
         """Returns deps provided as binary packages that project depends on.
         """
-        return self.bin_libs_deps + self.bin_bundles_deps
+        return self.bin_libs_deps + self.bin_bundles_deps + self.bin_uses_deps
 
 
     def _get_rec_deps(self, callers, attribs = ['source_deps']):
@@ -616,9 +703,9 @@ class RacyProject(object):
         callers.append(self)
         if not deps:
             deps = sum([list(getattr(self,attr)) for attr in attribs],[])
-            for lib in self.source_deps:
+            for lib in self.source_deps + tuple(deps):
                 deps += lib._get_rec_deps(callers, attribs)
-            deps = tuple(set(deps))
+            deps = tuple(sorted(set(deps), key=str))
             dbdeps[self] = deps
         callers.remove(self)
         return deps
@@ -647,7 +734,6 @@ class RacyProject(object):
         return self._get_rec_deps([], attribs = ['bin_deps'])
 
 
-
     @cached_property
     def rec_deps(self):
         return self.source_rec_deps + self.bin_rec_deps
@@ -657,7 +743,11 @@ class RacyProject(object):
     @cached_property
     def deps_include_path (self):
         """Returns include paths for all dependencies using source_rec_deps."""
-        inc = tuple(lib.include_path for lib in self.source_rec_deps)
+        inc = [lib.include_path for lib in self.source_rec_deps]
+        if len(inc)>1:
+            inc = reduce( lambda a,b : a+b, inc)
+        elif len(inc) == 1:
+            inc = inc[0]
         return inc
 
 
@@ -671,21 +761,78 @@ class RacyProject(object):
         """Returns the numeric value of loglevel."""
         return constants.LOGLEVEL[self.loglevel]
 
+    @cached_property
+    def extra_sources_build_dirs(self):
+        dirs = set(map(os.path.dirname, self.get('SOURCE_FILES')))
+        builddirs = map( self.get_build_dir_for , dirs )
+        dirs      = map( self.get_path , dirs )
+        return zip(builddirs, dirs)
+
+    @cached_property
+    def extra_sources(self):
+        return map(self.get_build_dir_for, self.get('SOURCE_FILES'))
+
+    @cached_property
+    def sources_build_dirs(self):
+        dirs = set(self.src_dirs)
+        builddirs = map( self.get_build_dir_for , dirs )
+        dirs      = map( self.get_path , dirs )
+        return zip(builddirs, dirs)
+
+
+    def get_files(self, path, ext, builddir=True, invert_matches=False):
+        """Returns HXX source files of the project"""
+        kwargs = { 'invert_matches': invert_matches}
+        if builddir:
+            kwargs['replace_dir'] = map(self.get_build_dir_for, path)
+        else:
+            kwargs['replace_dir'] = path
+        sources = rutils.DeepGlob( ext, path, **kwargs)
+        return sources
+
+
+    def get_includes(self, builddir = True):
+        """Returns HXX source files of the project"""
+        return self.get_files(
+                self.include_path,
+                constants.CXX_HEADER_EXT,
+                builddir
+                )
+
+    def get_sources(self, builddir = True):
+        """Returns CXX source files of the project"""
+        return self.get_files(
+                self.src_path,
+                constants.CXX_SOURCE_EXT,
+                builddir
+                )
+
+    def get_others(self, builddir = False):
+        """Returns CXX source files of the project"""
+        return self.get_files(
+                [self.root_path],
+                constants.CXX_SOURCE_EXT + constants.CXX_HEADER_EXT,
+                builddir,
+                invert_matches = True
+                )
+
+    includes = cached_property(get_includes)
 
     @cached_property
     def sources(self):
-        """Returns CXX source files of the project"""
-        return rutils.DeepGlob(
-                constants.CXX_SOURCE_EXT, 
-                self.src_path, 
-                self.build_dir
-                ) + self.special_source
+        return self.get_sources() + self.extra_sources + self.special_source
 
 
     @cached_property
     def build_dir(self):
         return pathjoin(renv.dirs.build, self.full_name)
 
+
+    def get_build_dir_for(self, file):
+        prj_path = self.get_path()
+        if file.startswith(prj_path):
+            file = file[len(prj_path)+1:]
+        return pathjoin( self.build_dir , file )
 
     @cached_property
     def target(self):
@@ -712,7 +859,10 @@ class RacyProject(object):
         if self.type in TYPE_ALLEXEC:
             install_dir = renv.dirs.install_bin
         elif self.type in TYPE_ALLLIB + BINLIBEXT:
-            install_dir = renv.dirs.install_lib
+            if racy.renv.system() == "windows":
+                install_dir = renv.dirs.install_bin
+            else:
+                install_dir = renv.dirs.install_lib
         elif self.type in TYPE_ALLBUNDLE:
             install_dir = pathjoin(renv.dirs.install_bundle,
                     self.versioned_name)
@@ -780,22 +930,23 @@ class InstallableRacyProject(RacyProject):
     def install_bin_libext (self):
         env = self.env
         import fnmatch
-        libext = self.get('LIBEXTFACTORY')
+        from glob import glob
+        libext = self.get('LIBEXTINSTANCE')
 
-        patterns = []
+        lib_patterns = []
         if racy.renv.system() == "windows":
-            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
-            patterns.append( '{0}.pdb*' )
-            patterns.append( env.subst('{0}${WINDOWSSHLIBMANIFESTSUFFIX}*') )
+            lib_patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
+            lib_patterns.append( '{0}.pdb*' )
+            lib_patterns.append( env.subst('{0}${WINDOWSSHLIBMANIFESTSUFFIX}*'))
         elif racy.renv.system() == "darwin":
-            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
-            patterns.append( env.subst('${SHLIBPREFIX}{0}.*${SHLIBSUFFIX}'))
+            lib_patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}'))
+            lib_patterns.append( env.subst('${SHLIBPREFIX}{0}.*${SHLIBSUFFIX}'))
         else:
-            patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}*'))
+            lib_patterns.append( env.subst('${SHLIBPREFIX}{0}${SHLIBSUFFIX}*'))
 
 
         matches = []
-        for pattern in patterns:
+        for pattern in lib_patterns:
             for lib in libext.LIBS:
                 matches.append( fnmatch.translate(pattern.format(lib)) )
 
@@ -804,11 +955,44 @@ class InstallableRacyProject(RacyProject):
 
         regex = '|'.join(matches)
 
-        if regex:
-            res = self.install_files(self.lib_path, self.install_path, regex)
-        else:
-            res = []
+        def install_translate( install_item ):
+            src_base = libext.basepath
+            source, dest = install_item
+            source = pathjoin(src_base, source)
+            sources = [f.rstrip('\\/') for f in glob(source)]
+            dests = [''.join([dest, os.path.split(src)[1]]) for src in sources]
+            return zip(sources, dests)
 
+        install_matches = map(install_translate, libext.install)
+
+        res = []
+        if regex:
+            for path in libext.ABS_LIBPATH:
+                res += self.install_files(path, self.install_path, regex)
+
+        for framework in libext.frameworks:
+            for fwpath in libext.ABS_FRAMEWORKPATH:
+                fw = framework+'.framework'
+                res+=env.CopyFile(
+                        pathjoin(renv.dirs.install_lib,fw),
+                        source = pathjoin(fwpath, fw)
+                        )
+
+        for group in install_matches:
+            for src, dest in group:
+                res += env.CopyFile(
+                        pathjoin(racy.renv.dirs.install, dest),
+                        source = src,
+                        )
+
+        if not res:
+            if libext.libs_install or libext.LIBS:
+                msg = ( "Nothing to install for {prj.name}, but at least one "
+                        " of the properties <libs> or <libs_install> is not "
+                        "empty.")
+                racy.print_warning("Bin package", msg.format(prj=self))
+
+        res = self.env.Alias('install_bin_libext-' + self.full_name, res)
         return res
 
     @memoize
@@ -828,13 +1012,15 @@ class InstallableRacyProject(RacyProject):
         """
         pkg_path = self.install_pkg_path
 
-        rc  = pathjoin(pkg_path, constants.RC_PATH)
-        inc = pathjoin(pkg_path, constants.INCLUDE_PATH)
+        def get_include_path_target(path):
+            return pathjoin( pkg_path , os.path.split(path)[1] )
 
-        install_args = [
-                (self.rc_path     , rc , ['.*'])                    ,
-                (self.include_path, inc, constants.CXX_HEADER_EXT),
-                ]
+        rc  = pathjoin(pkg_path, constants.RC_PATH)
+        inc = map(get_include_path_target, self.include_path)
+
+        install_args = [ (self.rc_path     , rc , ['.*']) ]
+        for incpth, replace in zip(self.include_path, inc):
+            install_args.append((incpth, replace, constants.CXX_HEADER_EXT))
 
         res = []
         for args in install_args:
@@ -848,11 +1034,17 @@ class InstallableRacyProject(RacyProject):
         """Create the installation targets for project's ressources and return
         them.
         """
-        return self.install_files(self.rc_path, self.install_rc_path, ['.*'])
+        res = self.install_files(self.rc_path, self.install_rc_path, ['.*'])
+        if self.type in TYPE_ALL:
+            env = self.env
+            info_file = pathjoin(self.install_rc_path, 'rev.info')
+            res += env.WriteFile(info_file, vcs.get_repo_informations())
+        return res
 
 
     @memoize
     def install(self, opts = ['rc']):
+        env = self.env
         result = []
         if 'rc' in opts:
             result += self.install_rc()
@@ -864,11 +1056,24 @@ class InstallableRacyProject(RacyProject):
         if 'pkg' in opts and self.type not in TYPE_ALLBIN:
             result += self.install_pkg()
 
+        bin_deps = 'bin' in opts and 'deps' in opts
+        if bin_deps:
+            bin_results = []
+            for dep in self.bin_rec_deps:
+                bin_results.append( dep.install(opts) )
+            bin_results.sort()
+
+        result.sort(key=abspath_key)
+        result = env.Alias ('install-' + self.full_name, result)
+
+        if bin_deps:
+            env.Depends(result, bin_results)
+
         return result
 
 
 class ConstructibleRacyProject(InstallableRacyProject):
-    
+
     @memoize
     def exports(self, export=False):
         env = self.env
@@ -913,13 +1118,17 @@ class ConstructibleRacyProject(InstallableRacyProject):
         CPPDEFINES += prj.get('DEF')
 
         
-        CPPPATH = [ prj.include_path ] 
-        CPPPATH += list(prj.deps_include_path) + prj.get('INC')
+        CPPPATH  = []
+        CPPPATH += prj.include_path
+        CPPPATH += prj.deps_include_path
+        CPPPATH += prj.get('INC')
         
-        LIBPATH  = prj.get('STDLIBPATH')
+        LIBPATH  = []
+        LIBPATH += prj.get('STDLIBPATH')
 
         need_rec_deps = self.is_exec or racy.renv.system() in ['windows','darwin']
         lib_dep = prj.lib_rec_deps if need_rec_deps else prj.source_libs_deps
+
         LIBPATH += [ self.env.Dir(lib.build_dir) for lib in lib_dep]
         LIBS = [ lib.full_name for lib in lib_dep ]
 
@@ -929,9 +1138,14 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         LIBS += prj.get('STDLIB')
         
-        CXXFLAGS = prj.get('CXXFLAGS')
-
-        LINKFLAGS = prj.get('LINKFLAGS')
+        CFLAGS   = []
+        CFLAGS  += prj.get('CFLAGS')
+                   
+        CXXFLAGS   = []
+        CXXFLAGS  += prj.get('CXXFLAGS')
+                   
+        LINKFLAGS  = []
+        LINKFLAGS += prj.get('LINKFLAGS')
 
         if not prj.is_exec:
             if self.get('USEVISIBILITY') in ["no", "racy"]:
@@ -953,7 +1167,8 @@ class ConstructibleRacyProject(InstallableRacyProject):
         names = [
                 'CPPDEFINES', 'CPPPATH' ,
                 'LIBPATH'   , 'LIBS'    ,
-                'LINKFLAGS' , 'CXXFLAGS'
+                'CFLAGS'    , 'CXXFLAGS',
+                'LINKFLAGS' ,
                 ]
 
         attrs = [locals()[n] for n in names]
@@ -963,7 +1178,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
 
     def manage_options(self, opts):
-        """Delegate management of options specified in opts to ytool."""
+        """Delegate management of options specified in opts to rtool."""
         opts = rutils.iterize(opts)
 
         prj = self
@@ -973,8 +1188,9 @@ class ConstructibleRacyProject(InstallableRacyProject):
             val = prj.get(opt)
             options[opt] = val
 
-        # ManageOption has been added by the ytool
+        # ManageOption has been added by the current rtool
         self.env.ManageOption(prj = self, options = options)
+
 
     def variant_dir(self, build_dir, src_dir):
         self.env.VariantDir(build_dir, src_dir, duplicate=0)
@@ -986,21 +1202,28 @@ class ConstructibleRacyProject(InstallableRacyProject):
         prj = self
         env = self.env
 
-        self.variant_dir(prj.build_dir, prj.src_path)
+        for path, dir in zip(prj.src_path, prj.src_dirs):
+            builddir = pathjoin( prj.build_dir , dir )
+            self.variant_dir(builddir, path)
 
-        uses = prj.uses + prj.bin_deps
-        rec_uses = set(tuple(dep.uses for dep in self.source_rec_deps) +
-                self.bin_rec_deps) - set(uses)
+        builddirs  = []
+        builddirs += prj.sources_build_dirs
+        builddirs += prj.extra_sources_build_dirs
+        for builddir, path in builddirs:
+            self.variant_dir(builddir, path)
 
+        direct_bin_deps = prj.bin_deps
+        indirect_bin_deps = set(self.bin_rec_deps) - set(direct_bin_deps)
+        indirect_bin_deps = sorted(indirect_bin_deps, key=str)
+
+        link_opts = []
         if self.is_exec:
-            uses_opts = ['forcelink']
-        else:
-            uses_opts = []
+            link_opts += ['forcelink']
 
-        rlibext.register.configure(prj, rec_uses, opts=['nolink'])
-        rlibext.register.configure(prj, uses, opts=uses_opts)
+        rlibext.register.configure(prj, indirect_bin_deps, opts=['nolink'])
+        rlibext.register.configure(prj, direct_bin_deps  , opts=link_opts)
 
-        env.Prepend(**self.options)
+        env.Append(**self.options)
 
         tool_level_options = [
                 'WARNINGSASERRORS',
@@ -1012,13 +1235,88 @@ class ConstructibleRacyProject(InstallableRacyProject):
         self.manage_options(tool_level_options)
 
 
+    @cached_property
+    def main_build_targets(self):
+        prj = self
+        env = self.env
+        self.configure_env()
+        result = []
+
+        if prj.sources:
+            if prj.is_exec:
+                result = env.Program(
+                        target = prj.target,
+                        source = prj.sources,
+                        )
+            elif prj.is_shared or prj.is_bundle:
+                result = env.SharedLibrary(
+                        target = prj.target,
+                        source = prj.sources,
+                        )
+            elif prj.is_static:
+                result = env.StaticLibrary(
+                        target = prj.target,
+                        source = prj.sources,
+                        )
+            else:
+                raise RacyProjectError( prj,
+                    'Unknown project TYPE ({prj.type})')
+
+            if rutils.is_true(self.get('PROGRESS')):
+                def add_progress(use_count):
+                    def add(s):
+                        p = Progress(s, use_count)
+                        env.AddPostAction(s, p.postbuild)
+                    return add
+                map( add_progress(False), result[0].sources)
+                add_progress(True)(result[0])
+
+            if prj.get('JOBS_LIMIT'):
+                limit = prj.get('JOBS_LIMIT')
+                objsources = result[0].sources
+                prev = None
+                for i in range(0, len(objsources), limit):
+                    current = objsources[i: i+limit]
+                    if prev:
+                        env.Depends(current, prev)
+                    prev = objsources[i: i+limit]
+
+        elif not prj.is_bundle:
+            msg = ('Only bundles are allowed to be codeless. '
+                    '<{prj.name}> type is "{prj.type}"')
+            raise RacyProjectError( prj, msg)
+
+        return result
+
+    @cached_property
+    def main_install_targets(self):
+        prj = self
+        env = self.env
+        main_targets = self.main_build_targets
+        to_install = [r for r in main_targets if env.InstallFileFilter(r)]
+        result = env.Install(dir = prj.install_path, source = to_install)
+        return result
+
+
+
+    @cached_property
+    def target_path(self):
+        def get_path(x):
+            try:
+                return x.get_abspath()
+            except:
+                return x
+
+        return map( get_path, self.main_install_targets)
+
+
     # This one *must* be memoized to avoid several build in env, otherwise
     # SCons will make a big noise and probably interrupt
     @memoize
     def result(self, deps_results=True):
         """Returns the SCons targets for this project.
 
-        if deps_results is False, don't care about depencies existance
+        if deps_results is False, don't care about depencies existence
         """
         prj = self
         env = self.env
@@ -1026,33 +1324,7 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         if not deps_results:
             result = []
-            self.configure_env()
-
-            if prj.sources:
-                if prj.is_exec:
-                    result = env.Program(
-                            target = prj.target,
-                            source = prj.sources,
-                            )
-                elif prj.is_shared or prj.is_bundle:
-                    result = env.SharedLibrary(
-                            target = prj.target,
-                            source = prj.sources,
-                            )
-                elif prj.is_static:
-                    result = env.StaticLibrary(
-                            target = prj.target,
-                            source = prj.sources,
-                            )
-                else:
-                    raise RacyProjectError( prj,
-                        'Unknown project TYPE ({prj.type})')
-
-            elif not prj.is_bundle:
-                msg = ('Only bundles are allowed to be codeless. '
-                        '<{prj.name}> type is "{prj.type}"')
-                raise RacyProjectError( prj, msg)
-
+            result += self.main_build_targets
         else:
             dep_results = []
             for dep in prj.source_libs_deps + prj.source_bundles_deps:
@@ -1060,10 +1332,9 @@ class ConstructibleRacyProject(InstallableRacyProject):
             result = self.result(deps_results=False)
 
             if result:
-                for dep_result in dep_results:
-                    env.Depends(result, dep_result)
+                env.Depends(result, dep_results)
             else:
-                #case when bundle is codeless
+                # this may happends if we are in a codeless bundle
                 for bun in prj.source_bundles_deps:
                     result += bun.build()
 
@@ -1076,7 +1347,10 @@ class ConstructibleRacyProject(InstallableRacyProject):
         if build_deps is False, don't care about depencies existance
         """
 
-        return self.result(deps_results = build_deps)
+        result = self.result(deps_results = build_deps)
+        #result.sort(key=abspath_key)
+        #result = self.env.Alias ('build-' + self.full_name, result)
+        return result
 
 
 
@@ -1099,9 +1373,15 @@ class ConstructibleRacyProject(InstallableRacyProject):
         result = build_results
 
         if result and prj.sources:
-            filter = env.InstallFileFilter
-            to_install = [r for r in result if filter(r)]
-            result = env.Install(dir = prj.install_path, source = to_install)
+            main_targets = self.main_build_targets
+            def install_filter(r):
+                res = r not in main_targets
+                res = res and env.InstallFileFilter(r)
+                return res
+            to_install = [r for r in result if install_filter(r)]
+
+            result = self.main_install_targets
+            result += env.Install(dir = prj.install_path, source = to_install)
         else:
             result = []
 
@@ -1112,42 +1392,58 @@ class ConstructibleRacyProject(InstallableRacyProject):
 
         if 'deps' in opts:
             deps = prj.source_libs_deps + prj.source_bundles_deps
-            result += [dep.install(opts) for dep in deps]
+            deps += prj.requirements_deps
+            deps_results = []
+            deps_results += [dep.install(opts) for dep in deps]
+            bin_results = []
+            for dep in self.bin_deps:
+                bin_results.append( dep.install(['bin','deps','rc']) )
+            env.Depends(result, deps_results)
+            env.Depends(result, bin_results)
+
+        result.sort(key=abspath_key)
+        alias = 'install-{prj.type}-{prj.full_name}'
+        result = env.Alias (alias.format(prj=self), result)
 
         return result
         
     def generate_pkg_files(self):
-        env = self.env
+        from string import Template
+        env  = self.env
+        prj  = self
+        opts = prj.prj_locals
+
         arch = renv.options.get_option('ARCH')
         depends = list(self.uses + self.libs + self.bundles)
+        depends = map(lambda obj:getattr(obj, 'name', obj), depends)
+        CPPPATH = map(lambda x:[x], self.include_dirs)
+        LIBPATH = [ ['lib'] ] + opts.get('STDLIBPATH')
 
-        info = [
-                ('    register_names', [self.name]   )           ,
-                ('    version'       , self.version.normalized  ),
-                ('    debug'         , self.is_debug )           ,
-                ('    arch'          , arch )                    ,
-                ('    platform'      , self.platform )           ,
-                ('    compiler'      , self.compiler )           ,
-                ('    depends_on'    , depends )                 ,
-                ('    cpppath'       , [ ('include', ) ] )       ,
-                ('    libpath'       , [ ('lib'    , ) ] )       ,
-                ('    libs'          , [self.full_name])         ,
-                ('    extra_libs'    , [])                       ,
-                ('    cppdefines'    , [])                       ,
-                ('    frameworkpath' , [])                       ,
-                ('    frameworks'    , [])                       ,
-                ('    cxxflags'      , [])                       ,
-                ('    linkflags'     , [])                       ,
-                ('    parse_configs' , [])                       ,
-                ]
 
-        def get_content(source):
-            return '\n\n'.join([ '{0} = {1!r}'.format(*el) for el in source])
+        infos = {
+                'REGISTER_NAMES' : [prj.name]            ,
+                'VERSION'        : prj.version.normalized,
+                'ISDEBUG'        : prj.is_debug          ,
+                'ARCH'           : arch                  ,
+                'PLATFORM'       : prj.platform          ,
+                'COMPILER'       : prj.compiler          ,
+                'DEPENDSON'      : depends               ,
+                'CPPPATH'        : CPPPATH               ,
+                'LIBPATH'        : LIBPATH               ,
+                'LIBS'           : [prj.full_name]       ,
+                'EXTRALIBS'      : opts.get('STDLIB')    ,
+                'CPPDEFINES'     : opts.get('DEF')       ,
+                'FRAMEWORKPATH'  : []                    ,
+                'FRAMEWORK'      : []                    ,
+                'CXXFLAGS'       : []                    ,
+                'LINKFLAGS'      : []                    ,
+                #'CXXFLAGS'       : opts.get('CXXFLAGS')  ,
+                #'LINKFLAGS'      : opts.get('LINKFLAGS') ,
+                }
 
-        infocontent = '\n'.join([
-            "class Description(object):",
-            get_content(info)
-            ])
+        tpl_file = racy.ressources('binpkg.__init__.py.tpl')
+        tpl = Template(rutils.get_file_content(tpl_file))
+        infocontent = tpl.substitute(infos)
 
         pkg_path = self.install_pkg_path
         infofile = pathjoin(pkg_path, '__init__.py')
@@ -1162,11 +1458,20 @@ class ConstructibleRacyProject(InstallableRacyProject):
     def install_pkg(self):
         env = self.env
         res = super(ConstructibleRacyProject,self).install_pkg()
-        libs = self.result(deps_results=False)
+        alllibs = self.result(deps_results=False)
+
+        libs = alllibs
+        bins = alllibs
+
+        if racy.renv.system() == "windows":
+            libs = [ lib for lib in alllibs if lib.get_path().endswith('.lib')]
+        bins = [lib for lib in alllibs if lib not in libs]
 
         pkg_path = self.install_pkg_path
         lib      = pathjoin(pkg_path, constants.LIB_PATH)
+        bin      = pathjoin(pkg_path, constants.BIN_PATH)
         res     += env.Install(dir = lib, source = libs)
+        res     += env.Install(dir = bin, source = bins)
         res     += self.generate_pkg_files()
         return res
 

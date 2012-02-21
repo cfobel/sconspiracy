@@ -17,33 +17,20 @@ LOGLEVEL= {
     'trace'   : 6,
 }
 
-PRJ_OPT_DIR = 'bin'
-
 VCS_DIRS = ['CVS', '.svn', '.hg']
 
 LIBNAME_SEP = "_"
 
-
-COMMON_RELEASE = { 
-                  'CPPDEFINES' : [ 'NDEBUG' , ],
-                 }
-COMMON_DEBUG   = { 
-                  'CPPDEFINES' : [ 'DEBUG', '_DEBUG' ],
-                  'CXXFLAGS'   : [ '-UNDEBUG' ],
-                 }
-
-
 BIN_PATH     = 'bin'
-INCLUDE_PATH = 'include'
 LIB_PATH     = 'lib'
 RC_PATH      = 'rc'
-SOURCE_PATH  = 'src'
 TEST_PATH    = 'test'
 
 CXX_SOURCE_EXT = ['cpp','cxx','c','C']
 CXX_HEADER_EXT = ['hpp','hxx','h','H']
 
-OPTS_FILE = 'build.options'
+PRJ_OPT_DIR = 'bin'
+OPTS_FILE   = 'build.options'
 
 SYSTEM_DEFAULT_TOOL = {
         "linux"   : "g++" ,

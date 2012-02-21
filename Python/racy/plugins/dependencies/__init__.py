@@ -25,10 +25,11 @@ class Plugin(racy.rplugins.Plugin):
     commandline_prj_opts = [ KEYWORD ]
     descriptions_opts    = { KEYWORD : 'if "yes", Show project dependencies' }
 
+    additive = True
 
     def has_additive(self, prj):
         val = prj.get(KEYWORD)
-        return val in self.allowed_values[KEYWORD][1:]
+        return val  == 'yes'
 
     def get_additive(self, prj):
         res = DepedenciesProject( prj = prj )

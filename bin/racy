@@ -1,4 +1,7 @@
 #! /usr/bin/env python
+# 
+# This file has been imported from scons and updated to run sconspiracy
+#
 #
 # SCons - a Software Constructor
 #
@@ -24,174 +27,45 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-__revision__  = "src/script/scons.py 3842 2008/12/20 22:59:52 scons"
+__revision__  = ""
 
-__version__   = "1.2.0"
+__version__   = "0.3 SConspiracy"
 
-__build__     = "r3842"
+__build__     = ""
 
-__buildsys__  = "scons-dev"
+__buildsys__  = "linux"
 
-__date__      = "2008/12/20 22:59:52"
+__date__      = "2010"
 
-__developer__ = "scons"
+__developer__ = "ircad"
 
 import os
 import os.path
 import sys
 
-##############################################################################
-# BEGIN STANDARD SCons SCRIPT HEADER
-#
-# This is the cut-and-paste logic so that a self-contained script can
-# interoperate correctly with different SCons versions and installation
-# locations for the engine.  If you modify anything in this section, you
-# should also change other scripts that use this same header.
-##############################################################################
+# racy tricks
+racy_bin = sys.argv[0]
+racy_bin_dir = os.path.split(racy_bin)[0]
+racy_root_dir = os.path.split(racy_bin_dir)[0]
+racy_python_dir = os.path.join(racy_root_dir,'Python')
 
-# Strip the script directory from sys.path() so on case-insensitive
-# (WIN32) systems Python doesn't think that the "scons" script is the
-# "SCons" package.  Replace it with our own library directories
-# (version-specific first, in case they installed by hand there,
-# followed by generic) so we pick up the right version of the build
-# engine modules if they're in either directory.
+#insert racy dir in python path
+sys.path.insert(0, racy_python_dir)
 
-script_dir = sys.path[0]
+try:
+    import SCons
+except ImportError:
+    print >> sys.stderr, ("Currently SConspiracy need the SCons module (v1.3.1) to be "
+           "installed in SConspiracy's <Python> subdirectory ({0}). "
+           "The sources can be downloaded from "
+           "http://www.scons.org/download.php \n\n"
+           "After unpacking the sources, run 'python setup.py build' in SCons"
+           " source directory, and then copy the SCONS_DIR/build/lib/SCons"
+           " directory to SConspiracy's Python subdirectory"
+           ).format(racy_python_dir)
+    exit(1)
 
-if script_dir in sys.path:
-    sys.path.remove(script_dir)
+import racy
+import racy.__main__ as main
 
-libs = []
-
-if os.environ.has_key("SCONS_LIB_DIR"):
-    libs.append(os.environ["SCONS_LIB_DIR"])
-
-local_version = 'scons-local-' + __version__
-local = 'scons-local'
-if script_dir:
-    local_version = os.path.join(script_dir, local_version)
-    local = os.path.join(script_dir, local)
-libs.append(os.path.abspath(local_version))
-libs.append(os.path.abspath(local))
-
-scons_version = 'scons-%s' % __version__
-
-prefs = []
-
-if sys.platform == 'win32':
-    # sys.prefix is (likely) C:\Python*;
-    # check only C:\Python*.
-    prefs.append(sys.prefix)
-    prefs.append(os.path.join(sys.prefix, 'Lib', 'site-packages'))
-else:
-    # On other (POSIX) platforms, things are more complicated due to
-    # the variety of path names and library locations.  Try to be smart
-    # about it.
-    if script_dir == 'bin':
-        # script_dir is `pwd`/bin;
-        # check `pwd`/lib/scons*.
-        prefs.append(os.getcwd())
-    else:
-        if script_dir == '.' or script_dir == '':
-            script_dir = os.getcwd()
-        head, tail = os.path.split(script_dir)
-        if tail == "bin":
-            # script_dir is /foo/bin;
-            # check /foo/lib/scons*.
-            prefs.append(head)
-
-    head, tail = os.path.split(sys.prefix)
-    if tail == "usr":
-        # sys.prefix is /foo/usr;
-        # check /foo/usr/lib/scons* first,
-        # then /foo/usr/local/lib/scons*.
-        prefs.append(sys.prefix)
-        prefs.append(os.path.join(sys.prefix, "local"))
-    elif tail == "local":
-        h, t = os.path.split(head)
-        if t == "usr":
-            # sys.prefix is /foo/usr/local;
-            # check /foo/usr/local/lib/scons* first,
-            # then /foo/usr/lib/scons*.
-            prefs.append(sys.prefix)
-            prefs.append(head)
-        else:
-            # sys.prefix is /foo/local;
-            # check only /foo/local/lib/scons*.
-            prefs.append(sys.prefix)
-    else:
-        # sys.prefix is /foo (ends in neither /usr or /local);
-        # check only /foo/lib/scons*.
-        prefs.append(sys.prefix)
-
-    prefs.append("/usr/local")
-
-    temp = map(lambda x: os.path.join(x, 'lib'), prefs)
-    temp.extend(map(lambda x: os.path.join(x,
-                                           'lib',
-                                           'python' + sys.version[:3],
-                                           'site-packages'),
-                           prefs))
-    prefs = temp
-
-    # Add the parent directory of the current python's library to the
-    # preferences.  On SuSE-91/AMD64, for example, this is /usr/lib64,
-    # not /usr/lib.
-    try:
-        libpath = os.__file__
-    except AttributeError:
-        pass
-    else:
-        # Split /usr/libfoo/python*/os.py to /usr/libfoo/python*.
-        libpath, tail = os.path.split(libpath)
-        # Split /usr/libfoo/python* to /usr/libfoo
-        libpath, tail = os.path.split(libpath)
-        # Check /usr/libfoo/scons*.
-        prefs.append(libpath)
-
-# Look first for 'scons-__version__' in all of our preference libs,
-# then for 'scons'.
-libs.extend(map(lambda x: os.path.join(x, scons_version), prefs))
-libs.extend(map(lambda x: os.path.join(x, 'scons'), prefs))
-
-sys.path = libs + sys.path + ['/opt/local/lib/scons-1.2.0/']
-
-##############################################################################
-# END STANDARD SCons SCRIPT HEADER
-##############################################################################
-
-def main():
-    import SCons.Script
-
-    # racy tricks
-    racy_bin = sys.argv[0]
-    racy_bin_dir = os.path.split(racy_bin)[0]
-    racy_root_dir = os.path.split(racy_bin_dir)[0]
-    racy_config_dir = os.path.join(racy_root_dir,'Config')
-    racy_python_dir = os.path.join(racy_root_dir,'Python')
-
-    sys.path.append(racy_python_dir)
-    
-    config_dir = os.environ.get('RACY_CONFIG_DIR',
-                                os.path.expanduser('~/.Racy'))
-    os.environ['RACY_CONFIG_DIR'] = (config_dir 
-            if os.path.isdir(config_dir) else racy_config_dir)
-        
-
-
-    import racy
-    racy_module_path = os.path.dirname(racy.__file__)
-    racy_rc_path     = os.path.join(racy_module_path, 'rc')
-    os.chdir(racy_rc_path)
-    sconstruct_file  = os.path.join(racy_rc_path,'SConstruct')
-    sys.argv.insert(1,sconstruct_file)
-    sys.argv.insert(1,'-f')
-
-    # this does all the work, and calls sys.exit
-    # with the proper exit status when done.
-    SCons.Script.main()
-
-
-if __name__ == "__main__":
-    main()
-
+main.main()

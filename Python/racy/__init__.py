@@ -10,6 +10,24 @@ from __future__ import print_function
 
 import os
 
+#------------------------------------------------------------------------------
+
+def clean_args(args):
+    """Return the cleaned version of args, replacing '=' by ':' where it is
+    needed.
+    
+    >>> args = "fwData/CPPUNIT=exec/THING='a=4' BUILD=yes DBFILE=/out/file"
+    >>> ' '.join(clean_args(args.split()))
+    "fwData/CPPUNIT:exec/THING:'a=4' BUILD=yes DBFILE=/out/file"
+    """
+    def clean_arg(arg):
+        if '/' in arg.split('=',1)[0]:
+            sp = arg.split('/')
+            sp[1:] = [':'.join(e.split('=',1)) for e in sp[1:]]
+            arg = '/'.join(sp)
+        return arg
+    return map(clean_arg, args)
+
 
 #------------------------------------------------------------------------------
 class Undefined:
@@ -33,6 +51,16 @@ class RacyException(Exception):
 
     def init(self, *args, **kwargs):
         pass
+
+#------------------------------------------------------------------------------
+class ToolError(RacyException):
+    def init(self, tool, message):
+        self.tool = tool
+        self.msg = message
+    def __str__(self):
+        tool = self.tool
+        return '[{0}] : {1}'.format( tool, self.msg )
+
 
 #------------------------------------------------------------------------------
 class OptionError(RacyException):
@@ -113,7 +141,11 @@ class RacyAttributeException(RacyException):
         self.attr = attr
         self.msg = msg
     def __str__(self):
-        desc = getattr(self.obj, 'desc', None)
+        desc = None
+        #using hasattr because getattr(obj, attr, default) will raise an 
+        # exception if obj has <no_undef_attr_read>
+        if hasattr(self.obj, 'desc'):
+            desc = getattr(self.obj, 'desc', None)
         msg = ("In file {file[0]}:{file[1]}, {obj.__class__} has no attribute "
                "<{attr}>, can't {msg}.{desc}")
         
@@ -132,16 +164,17 @@ class RacyAttributeException(RacyException):
 
 #------------------------------------------------------------------------------
 def no_undef_attr_read(cls):
+    return cls
     def __getattr__(self, attr):
         if attr.startswith('__racy_internal'):
             raise AttributeError
         else:
             raise RacyAttributeException(self, attr, 'read')
-        
     cls.__getattr__ = __getattr__
     return cls
 
 def no_undef_attr_write(cls):
+    return cls
     def __setattr__(self, attr, value):
         if not hasattr(self, attr) and not attr.startswith('__racy_internal'):
             msg = 'write "{0}"'.format(str(value))
@@ -150,7 +183,7 @@ def no_undef_attr_write(cls):
             object.__setattr__(self,attr,value)
     cls.__setattr__ = __setattr__
     return cls
-    
+
 
 #------------------------------------------------------------------------------
 def load_plugins():
@@ -159,7 +192,7 @@ def load_plugins():
     plugins_path = os.path.join(os.path.dirname(racy.__file__), 'plugins')
     racy.rplugins.register.load_dir( plugins_path )
 
-    
+
 #------------------------------------------------------------------------------
 def racy_msg (level, title, msg, wrap, width=MSG_WIDTH):
     import textwrap
@@ -179,8 +212,8 @@ def racy_msg (level, title, msg, wrap, width=MSG_WIDTH):
         ]
     return msg
 
-def print_msg( msg ):
-    print (msg)
+def print_msg( *msg ):
+    print (' '.join((str(m) for m in msg)))
 
 errors = []
 def print_error(title, error, wrap=True):
@@ -204,7 +237,41 @@ def manage_exception(e, default_print = print_error):
     print_error(e.__class__.__name__, e)
 
 
+#------------------------------------------------------------------------------
+def path(dir=None):
+    root = os.path.dirname(__file__)
+    if dir:
+        root = os.path.join(root, dir)
+    return root
+
+
+#------------------------------------------------------------------------------
+def ressources(file):
+    rc = path("rc")
+    if file:
+        rc = os.path.join(rc, file)
+    return rc
+
+#------------------------------------------------------------------------------
+def exit_racy(status = 0):
+    exit(status)
+
+
+
+
+def get_racy_cmd():
+    import sys
+    path = sys.argv[0]
+    path = os.path.abspath(path)
+    return os.path.normpath(path)
+
+def get_bin_path():
+    import sys
+    path = get_racy_cmd()
+    return os.path.dirname(path)
+
 try:
     import renv
 except RacyException, e:
     manage_exception(e)
+

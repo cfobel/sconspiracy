@@ -50,14 +50,7 @@ class DoxygenProject(ConstructibleRacyProject):
     @cached_property
     def dox_sources(self):
         sources = super(DoxygenProject, self).sources
-
-#        headers = racy.rutils.DeepGlob(
-#                constants.CXX_HEADER_EXT, 
-#                self.include_path, 
-#                self.build_dir
-#                )
         headers = []
-
         return sources + headers
 
     @cached_property
@@ -113,10 +106,10 @@ class DoxygenProject(ConstructibleRacyProject):
 
         dirs = []
         if prj.dox_sources:
-            dirs = [self.src_path, self.include_path]
+            dirs = self.src_path + self.include_path
         if deps_results:
             for dep in prj.source_rec_deps:
-                dirs += [dep.src_path, dep.include_path]
+                dirs += dep.src_path + dep.include_path
 
         dot = env.WhereIs('dot', os.environ['PATH'])
 

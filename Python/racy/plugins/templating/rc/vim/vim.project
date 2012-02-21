@@ -1,0 +1,59 @@
+<% import os
+def get_file_tree(files,prefix):
+    files = [ f.replace(prefix,"") for f in files]
+    tree = {}
+
+    for f in files:
+        current_dict = tree
+        lst = f.split(os.sep)
+        for item in lst[:-1]:
+            current_dict = current_dict.setdefault(item, {})
+        current_dict[lst[-1]] = lst[-1]
+    return tree 
+def create_dirs(dir_tree,depth):
+    file_list = []
+    dir_dict  = {}
+
+    for key,value in dir_tree.iteritems():
+        if isinstance(value, dict):
+            dir_dict[key] = value
+        else:
+            file_list.append(value)
+
+    for i in file_list:
+        context.write(' '*depth + i + '\n')
+
+    sort_key = sorted(dir_dict.keys())
+    for key in sort_key:
+        value = dir_dict[key]
+        if key: 
+            context.write(' '*depth+key+'='+key+' {\n')
+            create_dirs(value, depth +1)
+            context.write(' '*depth+'}\n') 
+        else:
+            create_dirs(value,depth)
+
+def remove_first_level(dic):
+    res = {}
+    for key, value in dic.iteritems():
+        if isinstance(value, dict):
+            for i,j in value.iteritems():
+                res[i] = j
+        else:
+            dic[value] = value
+
+    return res
+
+global_dict = {}
+
+tmp = get_file_tree(HEADERS,PRJ_ROOT_DIR)
+global_dict.update(remove_first_level(tmp))
+
+tmp = get_file_tree(SOURCES,PRJ_ROOT_DIR)
+global_dict.update(remove_first_level(tmp))
+
+tmp = get_file_tree(OTHERS_FILE,PRJ_ROOT_DIR)
+global_dict.update(remove_first_level(tmp))%>
+${PRJ_USER_FORMAT}=${PRJ_ROOT_DIR} { 
+<%create_dirs(global_dict,1)%>
+}

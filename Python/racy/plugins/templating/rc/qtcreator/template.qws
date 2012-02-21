@@ -1,0 +1,51 @@
+<!DOCTYPE QtCreatorSession>
+<% QTCREATOR_PRJ_DIR = IDE_INSTALL_DIR+SEP+'qtcreator'+SEP %>
+<qtcreator>
+ <data>
+  <variable>OpenEditors</variable>
+  <value type="int">3</value>
+ </data>
+ <data>
+  <variable>ProjectDependencies</variable>
+  <valuemap type="QVariantMap"/>
+ </data>
+ <data>
+  <variable>ProjectList</variable>
+  <valuelist type="QVariantList">
+%for i in DEPS:
+    <value type="QString">${QTCREATOR_PRJ_DIR}${i['PRJ_NAME']}${SEP}${i['PRJ_NAME']}.pro</value>
+%endfor
+    <value type="QString">${QTCREATOR_PRJ_DIR}${CALLING_PROJECT}${SEP}${CALLING_PROJECT}.pro</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>StartupProject</variable>
+  <value type="QString">${QTCREATOR_PRJ_DIR}${CALLING_PROJECT}${SEP}${CALLING_PROJECT}.pro</value>
+ </data>
+ <data>
+  <variable>value-ActiveMode</variable>
+  <value type="QString">Edit</value>
+ </data>
+ <data>
+  <variable>value-Breakpoints</variable>
+  <valuelist type="QVariantList"/>
+ </data>
+ <data>
+  <variable>value-DefaultFormats</variable>
+  <valuemap type="QVariantMap"/>
+ </data>
+ <data>
+  <variable>value-Watchers</variable>
+  <valuelist type="QVariantList"/>
+ </data>
+ <data>
+  <variable>valueKeys</variable>
+  <valuelist type="QVariantList">
+   <value type="QString">ActiveMode</value>
+   <value type="QString">Breakpoints</value>
+   <value type="QString">DefaultFormats</value>
+   <value type="QString">Watchers</value>
+  </valuelist>
+ </data>
+</qtcreator>
+

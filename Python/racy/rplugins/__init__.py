@@ -31,6 +31,9 @@ class Plugin(object):
     commandline_prj_args = []
     descriptions_opts    = {}
     
+    additive    = False
+    replacement = False
+    env_addon   = False
 
     #----------------------------------------
     def init(self):
@@ -64,7 +67,30 @@ class Plugin(object):
     
     #----------------------------------------
 
-    def __load__(self):
+
+
+
+    def _apply_additive(self, prj):
+        res = self.has_additive(prj)
+        if res:
+            return self.get_additive(prj)
+        return []
+
+    def _apply_replacement(self, prj):
+        res = self.has_replacement(prj)
+        if res:
+            return self.get_replacement(prj)
+        return []
+
+    def _apply_env_addon(self, prj):
+        res = self.has_env_addon(prj)
+        if res:
+            return self.get_env_addon(prj)
+        return []
+
+
+
+    def _load(self):
         def list_extend_uniq(src,dst):
             """Extends src with dst, check for duplicates. Returns duplicates
             values
@@ -115,11 +141,17 @@ class Plugin(object):
 
 
 
+
 d = dir
 
 class PluginRegistry(object):
 
     plugins = {}
+    additive     = []
+    replacement  = []
+    env_addon    = []
+
+
 
     def load_dir(self, dir):
         """Find dirs (non recursive) and load each plugin found in the dir"""
@@ -154,6 +186,7 @@ class PluginRegistry(object):
 
     def load_plugin(self, plugin):
         import types
+        from racy.renv.options import get_option
         if isinstance(plugin, types.ModuleType):
             if not hasattr(plugin, "Plugin"):
                 msg = "<{0.__file__}> doesn't define a Racy plugin"
@@ -161,10 +194,13 @@ class PluginRegistry(object):
 
             plug = plugin.Plugin()
             plugin.Plugin = plug
-            name = plug.name
+            name = plug.name.lower()
+            allowed_plugins = get_option('PLUGINS')
+            if allowed_plugins is not None and name not in allowed_plugins:
+                return
             if not self.plugins.has_key(name):
                 self.plugins[name] = plugin
-                plug.__load__()
+                plug._load()
                 racy.rlog.info.log('Loaded Plugin', plug.name)
             else:
                 oldpl = self.plugins[name]
@@ -178,6 +214,12 @@ class PluginRegistry(object):
                         name = name
                         )
             plug.init()
+            if plug.additive:
+                self.additive.append(plug)
+            if plug.replacement:
+                self.replacement.append(plug)
+            if plug.env_addon:
+                self.env_addon.append(plug)
         else:
             msg = ("<{0}> is not a python module, "
                    "can't load as SConspiracy plugin.")
@@ -189,7 +231,7 @@ class PluginRegistry(object):
         def check(plugin,o):
             method = 'has_' + entry
             return getattr(plugin.Plugin,method)(o)
-        
+    
         plugins = [p for p in self.plugins.values() if check(p,obj)]
         return plugins
 
@@ -200,20 +242,36 @@ class PluginRegistry(object):
         res = []
         for p in self.obj_eligible_plugins(obj, entry):
             res += get_prj(p,obj)
+
         return res
 
     def get_additive_projects(self, prj):
-        return self.get_plugins_result(prj, "additive")
+        return [r for res in map(lambda p:p._apply_additive(prj), self.additive) for r in res]
+        return [ r 
+                for p in self.additive
+                for r in p._apply_additive(prj)
+                ]
 
     def get_replacement_projects(self, prj):
-        return self.get_plugins_result(prj, "replacement")
+        return [ r
+                for p in self.replacement
+                for r in p._apply_replacement(prj)
+                ]
 
     def get_env_addons(self, env):
-        return self.get_plugins_result(env, "env_addon")
+        return [ r
+                for p in self.env_addon
+                for r in p._apply_env_addon(env)
+                ]
 
-    def initialize_plugins(self):
-        for p in self.plugins.values():
-            p.Plugin.init()
+    # def get_additive_projects(self, prj):
+    #     return self.get_plugins_result(prj, "additive")
+
+    # def get_replacement_projects(self, prj):
+    #     return self.get_plugins_result(prj, "replacement")
+    # 
+    # def get_env_addons(self, env):
+    #     return self.get_plugins_result(env, "env_addon")
 
 register = PluginRegistry()
 del PluginRegistry

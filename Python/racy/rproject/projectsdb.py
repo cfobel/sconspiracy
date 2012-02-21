@@ -15,16 +15,16 @@ from racy.renv             import constants
 from racy.renv.options     import get_option
 from racy.rproject.project import ConstructibleRacyProject, \
                                   InstallableRacyProject
-from racy.rutils           import memoize, remove_vcs_dirs
+from racy.rutils           import memoize, remove_vcs_dirs, vcs, Version
 
 all = ['RacyProjectsDB']
 
 @memoize
-def find_files(root, dir, filename):
+def find_files(root, directory, filename):
     """Find recursively 'filename' in 'root' and returns a list
-    with paths of found files if these files are in a directory 'dir'.
+    with paths of found files if these files are in a directory 'directory'.
     Ignore VCS dirs.
-    The 'dir' is filtered to minimize the number of directories walked.
+    The 'directory' is filtered to minimize the number of walked directories.
     """
 
     path_list = []
@@ -32,10 +32,10 @@ def find_files(root, dir, filename):
     for root, dirs, files in walker:
         remove_vcs_dirs(dirs)
 
-        #if dir containt 'dir', don't walk others
-        if dir in dirs: dirs[:] = [dir]
+        #if dirs containt 'directory', don't walk others
+        if directory in dirs: dirs[:] = [directory]
 
-        if root.endswith(os.path.sep + dir):
+        if root.endswith(os.path.sep + directory):
             if filename in files:
                 path_list.append(os.path.join(root, filename))
                 dirs[:] = []
@@ -63,6 +63,7 @@ def find_files_in_dirs(directory_list, filename):
 
 class RacyProjectsDB(object):
     """Build a map of all build options in a directory list"""
+    current_db = None
 
     def __init__(self, directory_list=[], env={}, 
             prj_file=constants.OPTS_FILE ):
@@ -82,15 +83,20 @@ class RacyProjectsDB(object):
         self.prj_args['platform']    = get_option('PLATFORM')
         self.prj_args['debug']       = get_option('DEBUG')
         self.prj_args['env']         = env
-        self.prj_args['cxx']         = cxx
+        self.prj_args['cxx']         = Version(cxx)
         self.prj_args['projects_db'] = self
 
         if not directory_list:
             directory_list = racy.renv.dirs.code
+
+        vcs.init_repo_informations(directory_list)
+
         self.prj_path_list = find_files_in_dirs(directory_list, prj_file)
 
         for f in self.prj_path_list:
             self._register_prj_from_file(f)
+
+        RacyProjectsDB.current_db = self
 
 
     def __iter__(self):
@@ -113,20 +119,23 @@ class RacyProjectsDB(object):
 
 
     def get_additive_projects(self, prj):
-        res = []
-        for dep in (prj,) + prj.source_rec_deps:
-            res += rplug.register.get_additive_projects(dep)
-
+        get_adds = rplug.register.get_additive_projects
+        deps = (prj,) + prj.source_rec_deps
+        res = [p for dep in deps for p in get_adds(dep)]
         return res
 
-    def _register_prj(self, prj):
+    def register_prj(self, prj, raise_exception=True):
         if prj.register_name in self._prj_map:
             prev_prj = self._prj_map[prj.register_name]
             msg = """An existing project is already named <{0.register_name}>.
                   defined here   : {1.opts_source}
                   redefined here : {0.opts_source}
                   """.format(prj, prev_prj)
-            racy.print_warning( 'Project {0.full_name}'.format(prj), msg)
+            if raise_exception:
+                raise RacyProjectError(prj, msg)
+            else:
+                racy.print_warning( 'Project {0.full_name}'.format(prj), msg)
+
 
         self._prj_map[prj.register_name] = prj
 
@@ -136,21 +145,32 @@ class RacyProjectsDB(object):
 
 
     @memoize
-    def _make_prj_from(self, source, args = {},
-            factory = ConstructibleRacyProject):
+    def make_prjs_from(self, source, args = {},
+            factory = ConstructibleRacyProject ):
         kwargs = {}
         kwargs.update(self.prj_args)
         kwargs.update(args)
 
-        prj = factory(build_options=source, **kwargs)
+        prj = [factory(build_options=source, **kwargs)]
+
+        replacement = rplug.register.get_replacement_projects(*prj)
+        if replacement:
+            prj = replacement
 
         return prj
+
+    @memoize
+    def make_prj_from_libext(self, libext):
+        return self.make_prjs_from(
+                libext._project_source,
+                args = {'prj_path' : libext._src},
+                factory=InstallableRacyProject)
 
     def _register_prj_from_file(self, file):
         name = file.split(os.sep)[-3]
 
         target = racy.renv.TARGETS.get(name)
-        
+
         args = {}
         for el in target.args:
             if el.startswith("@") :
@@ -159,15 +179,15 @@ class RacyProjectsDB(object):
         if args.get('config'):
             target.name = '_'.join([target.name, config])
 
-        prj = self._make_prj_from(file, args)
+        prjs = self.make_prjs_from(file, args)
+        for prj in prjs:
+            self.register_prj(prj, raise_exception=False)
 
-        self._register_prj(prj)
 
     def target_lookup(self, name, **kw):
 
         try:
             target = racy.renv.TARGETS.get(name)
-
             db = self
             if target.name and db.has_key(target.name):
                 racy.print_msg('Target : ' + name)
@@ -185,27 +205,6 @@ class RacyProjectsDB(object):
                     opts += ['pkg'] if buildpkg else []
                     res += p.install(opts = opts) 
 
-                prj_targets = list(res)
-                for libext in racy.rlibext.register.configured.values():
-                    if hasattr(libext, '__src__'):
-                        buildoptions = {
-                                'TYPE'    : 'bin_libext',
-                                'VERSION' : libext.version,
-                                'NAME'    : libext.name,
-
-                                'LIBEXTFACTORY' : libext,
-                                }
-
-                        libextprj = self._make_prj_from(
-                                buildoptions,
-                                args = {'prj_path' : libext.__src__},
-                                factory=InstallableRacyProject)
-                        if libextprj.name not in self.installed_libext:
-                            libext_targets = libextprj.install(['bin','rc'])
-                            prj.env.Depends(prj_targets, libext_targets)
-                            res += libext_targets
-                            self.installed_libext.append(libextprj.name)
-                
                 pack = []
                 #pack = prj.env.Package(
                         ##source=res,

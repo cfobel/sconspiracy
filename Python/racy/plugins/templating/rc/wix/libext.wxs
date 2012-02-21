@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<%
+COUNT = 0%>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Module Id="libext" Language="0" Version="1.2.3">
+
+        <Package Id="${uuid(CALLING_PROJECT+'libext')}" InstallerVersion="100"
+        Languages="0" Manufacturer="Ircad" SummaryCodepage="1252" AdminImage="no" ShortNames="no" />
+
+        <Directory Id='TARGETDIR' Name='SourceDir'>
+            <Directory Id='ProgramFilesFolder' Name='PFiles'>
+                <Directory Id='IRCAD' Name='IRCAD'>
+                    <Directory Id='INSTALLDIR' Name='${CALLING_PROJECT_VERSION_NAME}'>
+                        <Directory Id='LIBEXT' Name='bin' >
+                            <Component Id="Clibext" Guid="${uuid(CALLING_PROJECT+'libext')}">
+                            %for i in [t for t in TARGETS if '_win_32_' not in t]:
+<% import os
+NAME = os.path.split(i)[1]%>
+                                    <File Id="DLL${COUNT}" Name="${NAME}"  Source="${i}"/>
+<% COUNT += 1%>
+                            %endfor
+                            </Component>
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+    </Module>
+</Wix>
